@@ -59,7 +59,7 @@ export class App {
     // call backend to revoke token (best-effort), then clear JWT
     const token = (() => { try { return localStorage.getItem('jwt'); } catch { return null; } })();
     if (token) {
-      this.http.post<any>('http://localhost:8081/api/auth/logout', {}).subscribe({
+    this.http.post<any>('https://tabletop-personal-server-production.up.railway.app/api/auth/logout', {}).subscribe({
         next: () => {
           try { localStorage.removeItem('jwt'); } catch (e) { console.warn('Failed to remove jwt', e); }
           this.loggedIn = false;

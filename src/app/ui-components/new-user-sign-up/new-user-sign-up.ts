@@ -66,7 +66,7 @@ export class NewUserSignUp {
       password: this.password
     };
 
-    this.http.post<any>('http://localhost:8081/api/users', payload).subscribe({
+    this.http.post<any>('https://tabletop-personal-server-production.up.railway.app/api/users', payload).subscribe({
       next: (res) => {
         this.loading = false;
         this.messageService.add({ severity: 'success', summary: 'User created', detail: 'User created successfully' });

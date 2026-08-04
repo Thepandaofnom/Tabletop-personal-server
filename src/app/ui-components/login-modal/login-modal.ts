@@ -54,7 +54,7 @@ export class LoginModal {
     }
     this.loading = true;
     const payload = { username: this.username, password: this.password };
-    this.http.post<any>('http://localhost:8081/api/auth/login', payload).subscribe({
+    this.http.post<any>('https://tabletop-personal-server-production.up.railway.app/api/auth/login', payload).subscribe({
       next: (res) => {
         this.loading = false;
         // Check if response contains an error
