@@ -7,17 +7,13 @@ import { CommonModule } from '@angular/common';
   selector: 'dice-bag-modal',
   standalone: true,
   imports: [DialogModule, ButtonModule, CommonModule],
-  template: `
-    <p-dialog [(visible)]="visibleLocal" [resizable]="true" [modal]="true" header="Dice Bag" [style]="{width: '40vw'}">
-      <div style="display:flex;justify-content:center;align-items:center;padding:1rem;">
-        <button pButton type="button" label="D4" (click)="rollD4()"></button>
-      </div>
-    </p-dialog>
-  `,
+  templateUrl: './dice-bag-modal.html',
 })
 export class DiceBagModal {
   @Input() visible = false;
   @Output() visibleChange = new EventEmitter<boolean>();
+
+  result: string = '';
 
   get visibleLocal() {
     return this.visible;
@@ -29,6 +25,6 @@ export class DiceBagModal {
 
   rollD4() {
     const rnd = Math.floor(Math.random() * 4) + 1;
-    alert('D4: ' + rnd);
+    this.result = String(rnd);
   }
 }

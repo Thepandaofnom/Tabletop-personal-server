@@ -51,3 +51,29 @@ a { color: var(--accent); }
 
 /* make forms, cards and other surfaces slightly lighter */
 .surface { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); border-radius: 8px; padding: 1rem; }
+
+/* Dice bag dialog custom styling */
+/* header slightly darker than body for subtle contrast */
+.dice-bag-dialog .p-dialog-titlebar {
+  background: #121212 !important; /* darker */
+  color: var(--text) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.dice-bag-dialog .p-dialog-header {
+  background: #101010 !important; /* darker */
+  color: var(--text) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.dice-bag-dialog .p-dialog-content {
+  background: #1e1e1e !important; /* body */
+  color: var(--text) !important;
+}
+.dice-bag-dialog .p-dialog .p-button {
+  background: transparent;
+  border-color: rgba(255,255,255,0.06);
+  color: var(--text);
+}
+.dice-bag-dialog .p-dialog .p-button:hover {
+  background: rgba(255,255,255,0.03);
+}
+
