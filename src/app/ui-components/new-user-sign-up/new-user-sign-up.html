@@ -1,0 +1,16 @@
+<p-toast></p-toast>
+
+<p-dialog [(visible)]="visibleLocal" header="Sign up" styleClass="dice-bag-dialog" [modal]="true" [closable]="true" [style]="{width: '420px'}">
+  <div class="p-fluid signup-content" style="display:flex;flex-direction:column;gap:0.5rem;align-items:center;">
+    <input pInputText class="signup-input" placeholder="First name" [(ngModel)]="firstName" />
+    <input pInputText class="signup-input" placeholder="Last name" [(ngModel)]="lastName" />
+    <input pInputText class="signup-input" placeholder="Email" type="email" [(ngModel)]="email" />
+    <input pInputText class="signup-input" placeholder="Username" [(ngModel)]="username" />
+    <p-password class="signup-input" [(ngModel)]="password" feedback="false" placeholder="Password"></p-password>
+
+    <div style="display:flex;justify-content:center;gap:0.5rem;margin-top:0.5rem;">
+      <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="onCancel()"></button>
+      <button pButton type="button" label="Create" (click)="createUser()" [disabled]="loading"></button>
+    </div>
+  </div>
+</p-dialog>

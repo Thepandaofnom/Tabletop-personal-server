@@ -1,29 +1,33 @@
 <p-dialog [(visible)]="visibleLocal" [resizable]="true" [modal]="true" header="Dice Bag" styleClass="dice-bag-dialog" [style]="{width: '40vw'}">
   <div class="result-container">
     <div class="result-row">
-      <label for="resultInput" class="result-label">Result</label>
+      <label for="resultInput" class="result-label pr-3">Result</label>
       <input id="resultInput" type="text" [value]="result" readonly maxlength="7" size="7" />
     </div>
-    <div style="display:flex;justify-content:center;">
-      <button pButton type="button" label="D4" (click)="rollD4()"></button>
-    </div>
-    <div style="display:flex;justify-content:center;">
-      <button pButton type="button" label="D6" (click)="rollD6()"></button>
-    </div>
-    <div style="display:flex;justify-content:center;">
-      <button pButton type="button" label="D8" (click)="rollD8()"></button>
-    </div>
-    <div style="display:flex;justify-content:center;">
-      <button pButton type="button" label="D10" (click)="rollD10()"></button>
-    </div>
-    <div style="display:flex;justify-content:center;">
-      <button pButton type="button" label="D12" (click)="rollD12()"></button>
-    </div>
-    <div style="display:flex;justify-content:center;">
-      <button pButton type="button" label="D20" (click)="rollD20()"></button>
-    </div>
-     <div style="display:flex;justify-content:center;">
-      <button pButton type="button" label="D%" (click)="rollDPer()"></button>
+    <div class="grid dice-grid pt-3">
+      <div class="flex justify-content-center">
+            <button pButton class="w-full dice-btn" type="button" label="D4" (click)="rollD4()"></button>
+      </div>
+      <div class="flex justify-content-center">
+            <button pButton class="w-full dice-btn" type="button" label="D6" (click)="rollD6()"></button>
+      </div>
+      <div class="flex justify-content-center">
+            <button pButton class="w-full dice-btn" type="button" label="D8" (click)="rollD8()"></button>
+      </div>
+
+      <div class="flex justify-content-center">
+            <button pButton class="w-full dice-btn" type="button" label="D10" (click)="rollD10()"></button>
+      </div>
+      <div class="flex justify-content-center">
+            <button pButton class="w-full dice-btn" type="button" label="D12" (click)="rollD12()"></button>
+      </div>
+      <div class="flex justify-content-center">
+            <button pButton class="w-full dice-btn" type="button" label="D20" (click)="rollD20()"></button>
+      </div>
+
+      <div class="flex justify-content-center">
+            <button pButton class="w-full dice-btn" type="button" label="D%" (click)="rollDPer()"></button>
+      </div>
     </div>
   </div>
 </p-dialog>

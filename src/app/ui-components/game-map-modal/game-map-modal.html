@@ -1,4 +1,4 @@
-<p-dialog [(visible)]="visibleLocal" [resizable]="true" [modal]="true" header="Game Map" styleClass="game-map-dialog" [style]="{width: '80vw', height: '80vh'}" (onResize)="onDialogResize($event)">
+<p-dialog [(visible)]="visibleLocal" [resizable]="true" [modal]="true" header="Game Map" styleClass="game-map-dialog" [style]="{width: '80vw', height: '80vh'}" (onShow)="onDialogShown()" (onResize)="onDialogResize($event)">
   <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;">
     <input type="file" accept="image/*" (change)="onFileChange($event)" />
     <button pButton type="button" label="Clear" class="p-button-secondary" (click)="clearMap()"></button>
