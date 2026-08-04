@@ -1,12 +1,18 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { DiceBagModal } from './ui-components/dice-bag-modal/dice-bag-modal';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterOutlet, ButtonModule, DiceBagModal],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrls: ['./app.css']
 })
 export class App {
-  protected readonly title = signal('Tabletop-Personal-Server');
+  protected readonly title = signal('Tabletop Personal Server');
+  protected diceBagVisible = false;
+
+  openDiceBag() { this.diceBagVisible = true; }
 }

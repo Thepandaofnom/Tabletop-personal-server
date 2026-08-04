@@ -1,1 +1,53 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+@import url('https://unpkg.com/primeng@20.4.0/resources/themes/saga-blue/theme.css');
+@import url('https://unpkg.com/primeng@20.4.0/resources/primeng.min.css');
+@import url('https://unpkg.com/primeicons@8.0.0/primeicons.css');
+
+/* Global dark theme styles */
+:root {
+  --bg: #0b0b0d;
+  --surface: #0f1113;
+  --muted: #9aa4b2;
+  --text: #e6eef6;
+  --accent: #7c4dff;
+}
+
+html, body, app-root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Cinzel', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.site-header {
+  background: linear-gradient(90deg, rgba(124,77,255,0.08), rgba(124,77,255,0.03));
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.site-header .container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
+.site-header h1 { margin: 0; font-size: 1.25rem; color: var(--text); font-weight: 600; }
+
+.main-menu-button-bar { display: flex; justify-content: center; gap: 0.5rem; align-items: center; padding: 0.75rem 1.25rem; background: transparent; width: 100%; }
+.main-menu-button-bar.container { max-width: 1100px; margin: 0 auto; }
+.main-menu-button-bar .pill { border-radius: 999px; padding: 0.5rem 1rem; font-weight: 600; }
+.main-menu-button-bar .pill.p-button { border-radius: 999px; }
+.main-menu-button-bar .pill.p-button:hover { background: rgba(124,77,255,0.14); color: var(--text); }
+
+.main-content { padding: 2rem; min-height: calc(100vh - 64px); }
+.landing { max-width: 900px; margin: 2rem auto; text-align: center; }
+.lead { color: var(--muted); font-size: 1.125rem; }
+
+a { color: var(--accent); }
+
+/* make forms, cards and other surfaces slightly lighter */
+.surface { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); border-radius: 8px; padding: 1rem; }
