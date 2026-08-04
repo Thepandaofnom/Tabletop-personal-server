@@ -95,10 +95,12 @@ a { color: var(--accent); }
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  flex-wrap: wrap; /* allow wrapping when dialog is narrow */
 }
 .dice-bag-dialog .result-label {
   font-weight: 600;
   color: var(--text);
+  text-align: center;
 }
 .dice-bag-dialog #resultInput {
   padding: 0.5rem;
@@ -107,6 +109,7 @@ a { color: var(--accent); }
   background: #141414;
   color: var(--text);
   text-align: center;
-  width: 7ch;
-  box-sizing: content-box;
+  width: min(7ch, 100%); /* shrink to fit when dialog is small, but cap at 7ch */
+  box-sizing: border-box;
+  min-width: 3ch;
 }
