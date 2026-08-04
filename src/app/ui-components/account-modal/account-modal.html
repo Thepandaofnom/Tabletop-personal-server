@@ -1,0 +1,20 @@
+<p-toast></p-toast>
+
+<p-dialog [(visible)]="visibleLocal" header="Account" styleClass="dice-bag-dialog" [modal]="true" [closable]="true" [style]="{width: '380px'}">
+  <div style="display:flex;flex-direction:column;gap:0.5rem;">
+    <div *ngIf="username; else anon">
+      <div><strong>Username:</strong> {{ username }}</div>
+      <div *ngIf="userId !== null"><strong>ID:</strong> {{ userId }}</div>
+      <div style="margin-top:0.5rem;display:flex;gap:0.5rem;justify-content:flex-end;">
+        <button pButton type="button" label="Logout" class="p-button-danger" (click)="doLogout()"></button>
+        <button pButton type="button" label="Close" class="p-button-secondary" (click)="visibleLocal=false"></button>
+      </div>
+    </div>
+    <ng-template #anon>
+      <div>You are not logged in.</div>
+      <div style="margin-top:0.5rem;display:flex;justify-content:flex-end;">
+        <button pButton type="button" label="Close" class="p-button-secondary" (click)="visibleLocal=false"></button>
+      </div>
+    </ng-template>
+  </div>
+</p-dialog>

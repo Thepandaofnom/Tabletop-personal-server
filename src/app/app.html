@@ -13,6 +13,10 @@
   </div>
 
   <div class="hamburger-wrapper">
+    <ng-container *ngIf="loggedIn">
+      <button pButton type="button" class="user-btn p-button-text" icon="pi pi-user" style="margin-right:0.5rem" aria-label="Account" (click)="onAccount()"></button>
+    </ng-container>
+
     <button type="button" class="hamburger p-button-text" (click)="menuOpen = !menuOpen" aria-label="Menu">&#9776;</button>
     <div class="hamburger-menu" *ngIf="menuOpen">
       <ng-container *ngIf="!loggedIn; else loggedTpl">
@@ -21,9 +25,13 @@
       </ng-container>
       <ng-template #loggedTpl>
         <button type="button" class="menu-item p-button-text" (click)="onAccount()">Account</button>
+        <button type="button" class="menu-item p-button-text" (click)="doLogout()">Logout</button>
       </ng-template>
     </div>
   </div>
+
+  <login-modal [visible]="loginVisible" (visibleChange)="loginVisible = $event" (loginSuccess)="onLoginSuccess($event)"></login-modal>
+  <account-modal [visible]="accountVisible" (visibleChange)="accountVisible = $event" (logout)="onLogout()"></account-modal>
 </div>
 
 <dice-bag-modal [visible]="diceBagVisible" (visibleChange)="diceBagVisible = $event"></dice-bag-modal>
