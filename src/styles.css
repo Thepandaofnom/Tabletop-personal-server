@@ -34,7 +34,7 @@ body {
 .site-header .container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
 .site-header h1 { margin: 0; font-size: 1.25rem; color: var(--text); font-weight: 600; }
 
-.main-menu-button-bar { display: flex; justify-content: center; gap: 0.5rem; align-items: center; padding: 0.75rem 1.25rem; background: transparent; width: 100%; }
+.main-menu-button-bar { display: flex; justify-content: center; gap: 0.5rem; align-items: center; padding: 0.75rem 1.25rem; background: linear-gradient(90deg, rgba(124,77,255,0.08), rgba(124,77,255,0.03)); width: 100%; margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.04); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 .main-menu-button-bar.container { max-width: 1100px; margin: 0 auto; }
 .main-menu-button-bar .pill { border-radius: 999px; padding: 0.5rem 1rem; font-weight: 600; }
 .main-menu-button-bar .pill.p-button { border-radius: 999px; }

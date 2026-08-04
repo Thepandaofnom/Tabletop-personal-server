@@ -1,0 +1,82 @@
+.main-menu-button-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  min-height: 56px;
+  padding: 0.75rem 1.25rem;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  z-index: 9;
+  margin-top: 0 !important;
+}
+
+.left-buttons {
+  position: relative;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.left-buttons button {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hamburger-wrapper {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  padding-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.hamburger {
+  font-size: 1.25rem;
+  color: var(--text-color);
+  background: transparent;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.hamburger-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: var(--surface-900);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.25rem;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  z-index: 1000;
+}
+
+.menu-item {
+  display: block;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  color: var(--text-color);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.main-menu-button-bar { display: flex; justify-content: center; gap: 0.5rem; align-items: center; padding: 0.75rem 1.25rem; background: transparent; width: 100%; margin-top: 0; }
+.main-menu-button-bar.container { max-width: 1100px; margin: 0 auto; }
+.main-menu-button-bar .pill { border-radius: 999px; padding: 0.5rem 1rem; font-weight: 600; }
+.main-menu-button-bar .pill.p-button { border-radius: 999px; }
+.main-menu-button-bar .pill.p-button:hover { background: rgba(124,77,255,0.14); color: var(--text); }
