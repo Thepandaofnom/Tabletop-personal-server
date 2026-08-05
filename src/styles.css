@@ -222,3 +222,52 @@ input[type="number"] {
   background: var(--surface-soft) !important;
   color: var(--text-soft) !important;
 }
+
+.p-toast {
+  bottom: 1rem !important;
+  right: 1rem !important;
+  left: auto !important;
+  top: auto !important;
+}
+
+.p-toast .p-toast-message {
+  margin: 0 0 0.5rem auto !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35) !important;
+  backdrop-filter: blur(6px);
+}
+
+.p-toast .p-toast-message .p-toast-message-content {
+  color: #1c1209 !important;
+  font-weight: 700;
+}
+
+.p-toast .p-toast-message .p-toast-message-text {
+  color: #1c1209 !important;
+}
+
+.p-toast .p-toast-message .p-toast-summary {
+  color: #1c1209 !important;
+  font-weight: 800;
+}
+
+.p-toast .p-toast-message .p-toast-detail {
+  color: #3a2414 !important;
+  font-weight: 600;
+}
+
+.p-toast .p-toast-message.p-toast-message-success {
+  background: linear-gradient(180deg, #fff7d6, #f1c94a) !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-info {
+  background: linear-gradient(180deg, #e8f4ff, #8fc6ff) !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-warn {
+  background: linear-gradient(180deg, #fff1c4, #ffcb4d) !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-error {
+  background: linear-gradient(180deg, #ffe3e3, #ff8a8a) !important;
+}

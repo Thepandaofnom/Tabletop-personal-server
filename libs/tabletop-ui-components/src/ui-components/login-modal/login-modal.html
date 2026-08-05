@@ -1,7 +1,7 @@
 <p-toast></p-toast>
 
 <p-dialog [(visible)]="visibleLocal" header="Log in" styleClass="dice-bag-dialog" [modal]="true" [closable]="true" [style]="{width: '380px'}">
-  <div class="p-fluid login-content" style="display:flex;flex-direction:column;gap:0.5rem;align-items:center;">
+  <div class="p-fluid login-content" style="display:flex;flex-direction:column;gap:0.5rem;align-items:center;" (keydown.enter)="doLogin()">
     <input pInputText class="login-input" placeholder="Username" [(ngModel)]="username" />
     <p-password class="login-input" [(ngModel)]="password" feedback="false" placeholder="Password"></p-password>
 
