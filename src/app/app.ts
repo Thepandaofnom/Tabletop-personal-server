@@ -15,6 +15,13 @@ interface LoginResponse {
 
 type MainContentView = 'landing' | 'character-sheet' | 'game-map';
 
+interface CharacterSheetTab {
+  id: string;
+  label: string;
+  value: CharacterSheetData;
+  sheetType: CharacterSheetType;
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -31,8 +38,16 @@ export class App {
   protected signupVisible = false;
   protected accountViewVisible = false;
   protected currentView: MainContentView = 'landing';
-  protected characterSheetType: CharacterSheetType = 'D&D-5.0';
-  protected characterSheet: CharacterSheetData = this.createEmptyCharacterSheet();
+  protected activeCharacterSheetTabId = 'sheet-1';
+  protected editingTabId?: string;
+  protected characterSheetTabs: CharacterSheetTab[] = [
+    {
+      id: 'sheet-1',
+      label: 'Sheet 1',
+      value: this.createEmptyCharacterSheet(),
+      sheetType: 'D&D-5.0',
+    }
+  ];
   protected currentUsername = '';
   protected currentFirstName = '';
   protected currentLastName = '';
@@ -52,16 +67,51 @@ export class App {
     this.currentView = 'character-sheet';
   }
 
-  onCharacterSheetChange(value: CharacterSheetData) {
-    this.characterSheet = value;
+  onCharacterSheetChange(tabId: string, value: CharacterSheetData) {
+    this.characterSheetTabs = this.characterSheetTabs.map(tab => tab.id === tabId ? { ...tab, value } : tab);
   }
 
-  onCharacterSheetSave(value: CharacterSheetData) {
-    this.characterSheet = value;
+  onCharacterSheetSave(tabId: string, value: CharacterSheetData) {
+    this.onCharacterSheetChange(tabId, value);
   }
 
-  onCharacterSheetTypeChange(type: CharacterSheetType) {
-    this.characterSheetType = type;
+  onCharacterSheetTypeChange(tabId: string, type: CharacterSheetType) {
+    this.characterSheetTabs = this.characterSheetTabs.map(tab => tab.id === tabId ? { ...tab, sheetType: type } : tab);
+  }
+
+  onCharacterSheetTabClick(tabId: string) {
+    this.activeCharacterSheetTabId = tabId;
+  }
+
+  startEditingTab(tabId: string) {
+    this.editingTabId = tabId;
+  }
+
+  finishEditingTab(tabId: string, label: string) {
+    const trimmed = label.trim();
+    if (trimmed) {
+      this.characterSheetTabs = this.characterSheetTabs.map(tab => tab.id === tabId ? { ...tab, label: trimmed } : tab);
+    }
+    this.editingTabId = undefined;
+  }
+
+  trackByTabId(index: number, tab: CharacterSheetTab) {
+    return tab.id;
+  }
+
+  addCharacterSheetTab() {
+    const nextIndex = this.characterSheetTabs.length + 1;
+    const id = `sheet-${nextIndex}`;
+    this.characterSheetTabs = [
+      ...this.characterSheetTabs,
+      {
+        id,
+        label: `Sheet ${nextIndex}`,
+        value: this.createEmptyCharacterSheet(),
+        sheetType: 'D&D-5.0',
+      }
+    ];
+    this.activeCharacterSheetTabId = id;
   }
 
   private createEmptyCharacterSheet(): CharacterSheetData {

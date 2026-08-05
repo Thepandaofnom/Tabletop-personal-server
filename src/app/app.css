@@ -1,1 +1,47 @@
 /* App styles */
+
+.character-sheet-tabs {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.character-sheet-tab-bar {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.character-sheet-tab {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0.5rem 1rem;
+  border: 1px solid #444;
+  border-bottom: none;
+  background: #2d2d2d;
+  color: #fff;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.character-sheet-tab input {
+  width: auto;
+  min-width: 4rem;
+  max-width: 14rem;
+  border: 1px solid #666;
+  background: #111;
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.2rem 0.35rem;
+}
+
+.character-sheet-tab.active {
+  background: #4a90e2;
+}
+
+.character-sheet-tab.add-tab {
+  font-weight: 700;
+  padding: 0.5rem 0.85rem;
+}

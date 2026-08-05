@@ -37,14 +37,40 @@
     <game-map-component></game-map-component>
   </div>
 
-  <character-sheet-editor
-    *ngIf="currentView === 'character-sheet'"
-    [value]="characterSheet"
-    [sheetType]="characterSheetType"
-    (sheetTypeChange)="onCharacterSheetTypeChange($event)"
-    (valueChange)="onCharacterSheetChange($event)"
-    (saveSheet)="onCharacterSheetSave($event)">
-  </character-sheet-editor>
+  <div *ngIf="currentView === 'character-sheet'" class="character-sheet-tabs">
+    <div class="character-sheet-tab-bar">
+      <button
+        *ngFor="let tab of characterSheetTabs"
+        type="button"
+        class="character-sheet-tab"
+        [class.active]="tab.id === activeCharacterSheetTabId"
+        (click)="onCharacterSheetTabClick(tab.id)"
+        (dblclick)="startEditingTab(tab.id)">
+        <input
+          *ngIf="editingTabId === tab.id"
+          #tabLabelInput
+          [value]="tab.label"
+          (blur)="finishEditingTab(tab.id, tabLabelInput.value)"
+          (keydown.enter)="finishEditingTab(tab.id, tabLabelInput.value)"
+          (keydown.escape)="editingTabId = undefined"
+          autofocus />
+        <span *ngIf="editingTabId !== tab.id">{{ tab.label }}</span>
+      </button>
+      <button type="button" class="character-sheet-tab add-tab" (click)="addCharacterSheetTab()">+</button>
+    </div>
+
+    <div class="character-sheet-tab-panels">
+      <div *ngFor="let tab of characterSheetTabs; trackBy: trackByTabId" [style.display]="tab.id === activeCharacterSheetTabId ? 'block' : 'none'">
+        <character-sheet-editor
+          [value]="tab.value"
+          [sheetType]="tab.sheetType"
+          (sheetTypeChange)="onCharacterSheetTypeChange(tab.id, $event)"
+          (valueChange)="onCharacterSheetChange(tab.id, $event)"
+          (saveSheet)="onCharacterSheetSave(tab.id, $event)">
+        </character-sheet-editor>
+      </div>
+    </div>
+  </div>
 
   <section class="landing" *ngIf="currentView === 'landing'">
     <h2>Welcome</h2>
