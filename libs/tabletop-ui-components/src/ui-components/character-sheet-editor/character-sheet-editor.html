@@ -1,4 +1,13 @@
 ﻿<div class="sheet">
+  <div class="sheet-menu">
+    <button type="button" (click)="onSave()" class="btn-save">Save</button>
+    <button type="button" (click)="downloadSheet()" class="btn-download">Download JSON</button>
+    <label class="import-label">
+      Import JSON
+      <input type="file" accept="application/json" (change)="onImportFile($event)" />
+    </label>
+  </div>
+
   <div class="sheet-header">
     <div><label>Character Name</label><input [(ngModel)]="value.characterName" (ngModelChange)="onFieldChange()" /></div>
     <div><label>Player Name</label><input [(ngModel)]="value.playerName" (ngModelChange)="onFieldChange()" /></div>
@@ -53,14 +62,5 @@
     <label>Allies and Organizations<textarea [(ngModel)]="value.alliesAndOrganizations" (ngModelChange)="onFieldChange()"></textarea></label>
     <label>Backstory<textarea [(ngModel)]="value.backstory" (ngModelChange)="onFieldChange()"></textarea></label>
     <label>Treasure<textarea [(ngModel)]="value.treasure" (ngModelChange)="onFieldChange()"></textarea></label>
-  </div>
-
-  <div class="actions">
-    <button type="button" (click)="onSave()">Save</button>
-    <button type="button" (click)="downloadSheet()">Download JSON</button>
-    <label class="import-label">
-      Import JSON
-      <input type="file" accept="application/json" (change)="onImportFile($event)" />
-    </label>
   </div>
 </div>

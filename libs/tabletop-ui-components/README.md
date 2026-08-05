@@ -9,7 +9,7 @@ This library exports the following Angular standalone components:
 - **LoginModal** - User login dialog
 - **AccountModal** - User account management dialog  
 - **DiceBagModal** - Dice rolling interface
-- **GameMapModal** - Game map visualization with Konva.js
+- **GameMapComponent** - Game map visualization with Konva.js
 - **NewUserSignUp** - User registration dialog
 
 ## Installation
@@ -25,15 +25,15 @@ npm install
 Import components from `@tabletop/ui-components`:
 
 ```typescript
-import { LoginModal, GameMapModal } from '@tabletop/ui-components';
+import { LoginModal, GameMapComponent } from '@tabletop/ui-components';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [LoginModal, GameMapModal],
+  imports: [LoginModal, GameMapComponent],
   template: `
     <login-modal [visible]="loginVisible" (visibleChange)="onLoginChange($event)"></login-modal>
-    <game-map-modal [visible]="mapVisible" (visibleChange)="onMapChange($event)"></game-map-modal>
+    <game-map-component></game-map-component>
   `
 })
 export class AppComponent {
@@ -72,7 +72,7 @@ libs/tabletop-ui-components/
 │   │   ├── login-modal/
 │   │   ├── account-modal/
 │   │   ├── dice-bag-modal/
-│   │   ├── game-map-modal/
+│   │   ├── game-map-component/
 │   │   └── new-user-sign-up/
 │   ├── public-api.ts           # Main barrel export
 │   └── index.ts                # Entry point
@@ -89,4 +89,4 @@ Peer dependencies:
 - `@angular/forms` ^20.0.0
 - `primeng` ^20.0.0
 - `rxjs` ^7.0.0
-- `konva` ^10.0.0 (for GameMapModal)
+- `konva` ^10.0.0 (for GameMapComponent)

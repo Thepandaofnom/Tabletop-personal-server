@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
-import { DiceBagModal, GameMapModal, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData } from '@tabletop/ui-components';
+import { DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData } from '@tabletop/ui-components';
 
 interface LoginResponse {
   username: string;
@@ -13,12 +13,12 @@ interface LoginResponse {
   email?: string;
 }
 
-type MainContentView = 'landing' | 'character-sheet';
+type MainContentView = 'landing' | 'character-sheet' | 'game-map';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, HttpClientModule, DiceBagModal, GameMapModal, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor],
+  imports: [RouterOutlet, CommonModule, HttpClientModule, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
@@ -26,7 +26,6 @@ type MainContentView = 'landing' | 'character-sheet';
 export class App {
   protected readonly title = signal('Tabletop Personal Server');
   protected diceBagVisible = false;
-  protected gameMapVisible = false;
   protected loginVisible = false;
   protected loggedIn = false;
   protected signupVisible = false;
@@ -107,7 +106,7 @@ export class App {
   onMenuLogin() { this.loginVisible = true; }
   onMenuSignup() { this.signupVisible = true; }
   onMenuLogout() { this.doLogout(); }
-  onMenuGameMapClick() { this.gameMapVisible = true; }
+  onMenuGameMapClick() { this.currentView = 'game-map'; }
   onMenuDiceBagClick() { this.diceBagVisible = true; }
   onMenuAccountClick() { this.accountViewVisible = true; }
 }

@@ -15,7 +15,7 @@ Tabletop-Personal-Server/
 │       │   ├── ui-components/         ← Components moved here
 │       │   │   ├── account-modal/
 │       │   │   ├── dice-bag-modal/
-│       │   │   ├── game-map-modal/
+│       │   │   ├── game-map-component/
 │       │   │   ├── login-modal/
 │       │   │   └── new-user-sign-up/
 │       │   ├── public-api.ts          ← Barrel exports
@@ -46,13 +46,13 @@ Tabletop-Personal-Server/
 ### Before (Old Way)
 ```typescript
 import { LoginModal } from './ui-components/login-modal/login-modal';
-import { GameMapModal } from './ui-components/game-map-modal/game-map-modal';
+import { GameMapComponent } from './ui-components/game-map-component/game-map-component';
 import { DiceBagModal } from './ui-components/dice-bag-modal/dice-bag-modal';
 ```
 
 ### After (New Way)
 ```typescript
-import { LoginModal, GameMapModal, DiceBagModal } from '@tabletop/ui-components';
+import { LoginModal, GameMapComponent, DiceBagModal } from '@tabletop/ui-components';
 ```
 
 ## Available Components
@@ -60,7 +60,7 @@ import { LoginModal, GameMapModal, DiceBagModal } from '@tabletop/ui-components'
 1. **LoginModal** - User authentication dialog
 2. **AccountModal** - User account management
 3. **DiceBagModal** - Dice rolling interface
-4. **GameMapModal** - Map visualization with Konva.js
+4. **GameMapComponent** - Map visualization with Konva.js
 5. **NewUserSignUp** - User registration dialog
 
 ## Build Commands

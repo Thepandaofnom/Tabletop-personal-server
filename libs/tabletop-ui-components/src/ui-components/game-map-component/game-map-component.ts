@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, ElementRef, ViewChild, OnDestroy, AfterViewInit } from '@angular/core';
 import Konva from 'konva';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -12,16 +12,13 @@ import { Menu } from 'primeng/menu';
 import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
-  selector: 'game-map-modal',
+  selector: 'game-map-component',
   standalone: true,
   imports: [DialogModule, ButtonModule, MenuModule, ColorPickerModule, TooltipModule, CommonModule, FormsModule, InputTextModule],
-  templateUrl: './game-map-modal.html',
-  styleUrls: ['./game-map-modal.css'],
+  templateUrl: './game-map-component.html',
+  styleUrls: ['./game-map-component.css'],
 })
-export class GameMapModal implements OnDestroy {
-  @Input() visible = false;
-  @Output() visibleChange = new EventEmitter<boolean>();
-
+export class GameMapComponent implements OnDestroy, AfterViewInit {
   @ViewChild('stageContainer', { static: false }) stageContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('menu') menu!: Menu;
 
@@ -92,20 +89,6 @@ export class GameMapModal implements OnDestroy {
   private tokenRotations: Map<string, number> = new Map(); // id -> rotation in degrees
   private draggingTokenId?: string;
   private hoveredTokenId?: string;
-
-  get visibleLocal() {
-    return this.visible;
-  }
-  set visibleLocal(v: boolean) {
-    this.visible = v;
-    this.visibleChange.emit(v);
-    if (v) {
-      // initialize stage after the dialog is visible
-      setTimeout(() => this.initStage(), 0);
-    } else {
-      this.destroyStage();
-    }
-  }
 
   private initStage() {
     try {
@@ -188,14 +171,17 @@ export class GameMapModal implements OnDestroy {
     this.stage.draw();
   };
 
-  onDialogResize(event: any) {
-    // dialog resize may happen before DOM updates, run after a short timeout
-    setTimeout(() => this.onContainerResize(), 50);
-  }
-
-  onDialogShown() {
-    // Dialog content is attached to the DOM — initialize stage afterwards
+  ngAfterViewInit() {
+    // Component content is attached to the DOM — initialize stage
     setTimeout(() => this.initStage(), 0);
+
+    // Set up a ResizeObserver to handle container resize
+    if (this.stageContainer) {
+      const resizeObserver = new ResizeObserver(() => {
+        this.onContainerResize();
+      });
+      resizeObserver.observe(this.stageContainer.nativeElement);
+    }
   }
 
   private onStageMouseDown(e: Konva.KonvaEventObject<MouseEvent>) {
