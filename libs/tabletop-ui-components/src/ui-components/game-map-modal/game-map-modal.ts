@@ -16,6 +16,7 @@ import { InputTextModule } from 'primeng/inputtext';
   standalone: true,
   imports: [DialogModule, ButtonModule, MenuModule, ColorPickerModule, TooltipModule, CommonModule, FormsModule, InputTextModule],
   templateUrl: './game-map-modal.html',
+  styleUrls: ['./game-map-modal.css'],
 })
 export class GameMapModal implements OnDestroy {
   @Input() visible = false;

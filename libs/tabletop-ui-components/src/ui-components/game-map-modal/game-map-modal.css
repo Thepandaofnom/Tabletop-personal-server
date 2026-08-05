@@ -1,0 +1,23 @@
+/* Hamburger menu styling */
+:host ::ng-deep .p-menu {
+  background-color: #1a1a1a !important;
+}
+
+:host ::ng-deep .p-menu .p-menuitem {
+  background-color: transparent;
+}
+
+:host ::ng-deep .p-menu .p-menuitem > a {
+  background-color: #2d2d2d !important;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1rem;
+}
+
+:host ::ng-deep .p-menu .p-menuitem > a:hover {
+  background-color: #404040 !important;
+}
+
+:host ::ng-deep .p-menu .p-menuitem.p-highlight > a {
+  background-color: #404040 !important;
+}
