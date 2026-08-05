@@ -797,6 +797,10 @@ export class GameMapModal implements OnDestroy {
         scaleGrid: this.scaleGrid,
         gridZoom: this.gridZoom,
       },
+      viewport: {
+        offsetX: this.layer?.x() || 0,
+        offsetY: this.layer?.y() || 0,
+      },
       mapImage: this.getMapImageAsBase64(),
       tokens: this.serializeTokens(),
     };
@@ -923,6 +927,10 @@ export class GameMapModal implements OnDestroy {
     this.scaleGrid = mapData.zoomSettings?.scaleGrid || false;
     this.gridZoom = mapData.zoomSettings?.gridZoom || 1;
 
+    // Store viewport for later application
+    const viewportOffsetX = mapData.viewport?.offsetX || 0;
+    const viewportOffsetY = mapData.viewport?.offsetY || 0;
+
     // Clear existing tokens
     this.tokens.forEach((tokenGroup) => {
       tokenGroup.destroy();
@@ -936,11 +944,11 @@ export class GameMapModal implements OnDestroy {
     // Restore map image if present (async)
     if (mapData.mapImage) {
       this.restoreMapImage(mapData.mapImage, () => {
-        this.applyZoomAndGridSettings();
+        this.applyZoomAndGridSettings(viewportOffsetX, viewportOffsetY);
       });
     } else {
       // If no map image, apply zoom/grid settings immediately and restore tokens
-      this.applyZoomAndGridSettings();
+      this.applyZoomAndGridSettings(viewportOffsetX, viewportOffsetY);
     }
 
     // Restore tokens
@@ -951,8 +959,13 @@ export class GameMapModal implements OnDestroy {
     this.tokenLayer.draw();
   }
 
-  private applyZoomAndGridSettings() {
+  private applyZoomAndGridSettings(viewportOffsetX: number = 0, viewportOffsetY: number = 0) {
     if (!this.stage || !this.layer || !this.gridLayer) return;
+
+    // Apply viewport offset (pan)
+    this.layer.position({ x: viewportOffsetX, y: viewportOffsetY });
+    this.gridLayer.position({ x: viewportOffsetX, y: viewportOffsetY });
+    this.tokenLayer?.position({ x: viewportOffsetX, y: viewportOffsetY });
 
     // Apply zoom scale to image layer
     this.layer.scale({ x: this.zoom, y: this.zoom });
