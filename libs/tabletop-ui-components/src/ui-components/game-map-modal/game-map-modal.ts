@@ -910,7 +910,7 @@ export class GameMapModal implements OnDestroy {
   }
 
   private restoreMapSettings(mapData: any) {
-    if (!this.stage || !this.tokenLayer) return;
+    if (!this.stage || !this.tokenLayer || !this.layer || !this.gridLayer) return;
 
     // Restore grid settings
     this.gridColor = mapData.gridSettings?.gridColor || '#000000';
@@ -923,16 +923,6 @@ export class GameMapModal implements OnDestroy {
     this.scaleGrid = mapData.zoomSettings?.scaleGrid || false;
     this.gridZoom = mapData.zoomSettings?.gridZoom || 1;
 
-    // Restore map image if present
-    if (mapData.mapImage) {
-      this.restoreMapImage(mapData.mapImage);
-    }
-
-    // Redraw grid if needed
-    if (this.showGrid) {
-      this.drawGrid();
-    }
-
     // Clear existing tokens
     this.tokens.forEach((tokenGroup) => {
       tokenGroup.destroy();
@@ -943,6 +933,16 @@ export class GameMapModal implements OnDestroy {
     this.tokenScales.clear();
     this.tokenRotations.clear();
 
+    // Restore map image if present (async)
+    if (mapData.mapImage) {
+      this.restoreMapImage(mapData.mapImage, () => {
+        this.applyZoomAndGridSettings();
+      });
+    } else {
+      // If no map image, apply zoom/grid settings immediately and restore tokens
+      this.applyZoomAndGridSettings();
+    }
+
     // Restore tokens
     mapData.tokens?.forEach((tokenData: any) => {
       this.restoreToken(tokenData);
@@ -951,15 +951,38 @@ export class GameMapModal implements OnDestroy {
     this.tokenLayer.draw();
   }
 
-  private restoreMapImage(base64Image: string) {
+  private applyZoomAndGridSettings() {
+    if (!this.stage || !this.layer || !this.gridLayer) return;
+
+    // Apply zoom scale to image layer
+    this.layer.scale({ x: this.zoom, y: this.zoom });
+
+    // Apply grid scale
+    if (this.scaleGrid) {
+      this.gridLayer.scale({ x: this.zoom, y: this.zoom });
+    } else {
+      this.gridLayer.scale({ x: this.gridZoom, y: this.gridZoom });
+    }
+
+    // Redraw grid if needed
+    if (this.showGrid) {
+      this.drawGrid();
+    }
+
+    this.stage.draw();
+  }
+
+  private restoreMapImage(base64Image: string, onComplete?: () => void) {
     if (!this.stage || !this.layer) return;
 
     const img = new Image();
     img.onload = () => {
       this.addImageToLayer(img);
+      onComplete?.();
     };
     img.onerror = () => {
       console.warn('Failed to restore map image');
+      onComplete?.();
     };
     img.src = base64Image;
   }
