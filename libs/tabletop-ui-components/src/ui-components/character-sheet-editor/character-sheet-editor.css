@@ -14,6 +14,11 @@
   padding-bottom: 0.75rem;
 }
 
+.sheet-template {
+  display: grid;
+  gap: 1rem;
+}
+
 .sheet-type-label {
   display: inline-flex;
   align-items: center;

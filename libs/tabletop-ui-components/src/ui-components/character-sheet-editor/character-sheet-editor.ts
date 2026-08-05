@@ -1,4 +1,4 @@
-﻿import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -50,7 +50,7 @@ export interface CharacterSheetData {
   treasure: string;
 }
 
-export type CharacterSheetType = 'D&D-5.0' | 'D&D-3.5' | 'GURPS';
+export type CharacterSheetType = 'D&D-5.0' | 'D&D-3.5' | 'GURPS' | 'pathfinder 1e' | 'Pathfinder 2e' | 'Pathfinder 2eR' | string;
 
 @Component({
   selector: 'character-sheet-editor',
@@ -65,7 +65,13 @@ export class CharacterSheetEditor {
   @Output() sheetTypeChange = new EventEmitter<CharacterSheetType>();
   @Output() valueChange = new EventEmitter<CharacterSheetData>();
   @Output() saveSheet = new EventEmitter<CharacterSheetData>();
-  isGurpsSheet = false;
+  @ViewChild('dnd50Template', { static: true }) dnd50Template!: TemplateRef<unknown>;
+  @ViewChild('dnd35Template', { static: true }) dnd35Template!: TemplateRef<unknown>;
+  @ViewChild('gurpsTemplate', { static: true }) gurpsTemplate!: TemplateRef<unknown>;
+  @ViewChild('pathfinder1eTemplate', { static: true }) pathfinder1eTemplate!: TemplateRef<unknown>;
+  @ViewChild('pathfinder2eTemplate', { static: true }) pathfinder2eTemplate!: TemplateRef<unknown>;
+  @ViewChild('pathfinder2erTemplate', { static: true }) pathfinder2erTemplate!: TemplateRef<unknown>;
+  activeTemplate!: TemplateRef<unknown>;
 
   private createEmptySheet(): CharacterSheetData {
     return {
@@ -84,7 +90,7 @@ export class CharacterSheetEditor {
     if (!this.sheetType) {
       this.sheetType = 'D&D-5.0';
     }
-    this.isGurpsSheet = this.sheetType === 'GURPS';
+    this.activeTemplate = this.getTemplateForType(this.sheetType);
   }
 
   onFieldChange(): void {
@@ -93,7 +99,7 @@ export class CharacterSheetEditor {
 
   onSheetTypeChange(type: CharacterSheetType): void {
     this.sheetType = type;
-    this.isGurpsSheet = type === 'GURPS';
+    this.activeTemplate = this.getTemplateForType(type);
     this.sheetTypeChange.emit(type);
   }
 
@@ -127,4 +133,24 @@ export class CharacterSheetEditor {
     link.click();
     URL.revokeObjectURL(url);
   }
+
+  private getTemplateForType(type: CharacterSheetType): TemplateRef<unknown> {
+    if (type === 'D&D-3.5') {
+      return this.dnd35Template;
+    }
+    if (type === 'GURPS') {
+      return this.gurpsTemplate;
+    }
+    if (type === 'pathfinder 1e') {
+      return this.pathfinder1eTemplate;
+    }
+    if (type === 'Pathfinder 2e') {
+      return this.pathfinder2eTemplate;
+    }
+    if (type === 'Pathfinder 2eR') {
+      return this.pathfinder2erTemplate;
+    }
+    return this.dnd50Template;
+  }
+
 }
