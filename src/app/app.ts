@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
-import { DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData } from '@tabletop/ui-components';
+import { DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData, CharacterSheetType } from '@tabletop/ui-components';
 
 interface LoginResponse {
   username: string;
@@ -31,6 +31,7 @@ export class App {
   protected signupVisible = false;
   protected accountViewVisible = false;
   protected currentView: MainContentView = 'landing';
+  protected characterSheetType: CharacterSheetType = 'D&D-5.0';
   protected characterSheet: CharacterSheetData = this.createEmptyCharacterSheet();
   protected currentUsername = '';
   protected currentFirstName = '';
@@ -57,6 +58,10 @@ export class App {
 
   onCharacterSheetSave(value: CharacterSheetData) {
     this.characterSheet = value;
+  }
+
+  onCharacterSheetTypeChange(type: CharacterSheetType) {
+    this.characterSheetType = type;
   }
 
   private createEmptyCharacterSheet(): CharacterSheetData {

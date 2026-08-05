@@ -40,6 +40,8 @@
   <character-sheet-editor
     *ngIf="currentView === 'character-sheet'"
     [value]="characterSheet"
+    [sheetType]="characterSheetType"
+    (sheetTypeChange)="onCharacterSheetTypeChange($event)"
     (valueChange)="onCharacterSheetChange($event)"
     (saveSheet)="onCharacterSheetSave($event)">
   </character-sheet-editor>

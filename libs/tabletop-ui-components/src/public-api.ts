@@ -6,4 +6,4 @@ export { NewUserSignUp } from './ui-components/new-user-sign-up';
 export { MainMenuButtonBar } from './ui-components/main-menu-button-bar';
 export { AccountViewPanel } from './ui-components/account-view-panel';
 export { CharacterSheetEditor } from './ui-components/character-sheet-editor';
-export type { CharacterSheetData } from './ui-components/character-sheet-editor/character-sheet-editor';
+export type { CharacterSheetData, CharacterSheetType } from './ui-components/character-sheet-editor/character-sheet-editor';

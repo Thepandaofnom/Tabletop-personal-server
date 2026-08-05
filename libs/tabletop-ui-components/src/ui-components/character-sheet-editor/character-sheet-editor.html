@@ -1,5 +1,13 @@
 ﻿<div class="sheet">
   <div class="sheet-menu">
+    <label class="sheet-type-label">
+      Character sheet type
+      <select [(ngModel)]="sheetType" (ngModelChange)="onSheetTypeChange($event)">
+        <option value="D&D-5.0">D&D-5.0</option>
+        <option value="D&D-3.5">D&D-3.5</option>
+        <option value="GURPS">GURPS</option>
+      </select>
+    </label>
     <button type="button" (click)="onSave()" class="btn-save">Save</button>
     <button type="button" (click)="downloadSheet()" class="btn-download">Download JSON</button>
     <label class="import-label">
@@ -8,7 +16,7 @@
     </label>
   </div>
 
-  <div class="sheet-header">
+  <div class="sheet-header" *ngIf="sheetType === 'D&D-5.0'">
     <div><label>Character Name</label><input [(ngModel)]="value.characterName" (ngModelChange)="onFieldChange()" /></div>
     <div><label>Player Name</label><input [(ngModel)]="value.playerName" (ngModelChange)="onFieldChange()" /></div>
     <div><label>Class & Level</label><input [(ngModel)]="value.classAndLevel" (ngModelChange)="onFieldChange()" /></div>
@@ -62,5 +70,123 @@
     <label>Allies and Organizations<textarea [(ngModel)]="value.alliesAndOrganizations" (ngModelChange)="onFieldChange()"></textarea></label>
     <label>Backstory<textarea [(ngModel)]="value.backstory" (ngModelChange)="onFieldChange()"></textarea></label>
     <label>Treasure<textarea [(ngModel)]="value.treasure" (ngModelChange)="onFieldChange()"></textarea></label>
+  </div>
+
+  <div class="sheet-35" *ngIf="sheetType === 'D&D-3.5'">
+    <div class="sheet-35-section">
+      <h3>Core</h3>
+      <div class="grid-3">
+        <label>Character Name<input [(ngModel)]="value.characterName" (ngModelChange)="onFieldChange()" /></label>
+        <label>Player Name<input [(ngModel)]="value.playerName" (ngModelChange)="onFieldChange()" /></label>
+        <label>Class & Level<input [(ngModel)]="value.classAndLevel" (ngModelChange)="onFieldChange()" /></label>
+        <label>Race<input [(ngModel)]="value.race" (ngModelChange)="onFieldChange()" /></label>
+        <label>Alignment<input [(ngModel)]="value.alignment" (ngModelChange)="onFieldChange()" /></label>
+        <label>Deity<input [(ngModel)]="value.background" (ngModelChange)="onFieldChange()" /></label>
+      </div>
+
+      <div class="sheet-gurps" *ngIf="isGurpsSheet">
+        <div class="sheet-35-section">
+          <h3>Identity</h3>
+          <div class="grid-3">
+            <label>Name<input [(ngModel)]="value.characterName" (ngModelChange)="onFieldChange()" /></label>
+            <label>Player<input [(ngModel)]="value.playerName" (ngModelChange)="onFieldChange()" /></label>
+            <label>Campaign<input [(ngModel)]="value.background" (ngModelChange)="onFieldChange()" /></label>
+            <label>Template/Profession<input [(ngModel)]="value.classAndLevel" (ngModelChange)="onFieldChange()" /></label>
+            <label>Race/Species<input [(ngModel)]="value.race" (ngModelChange)="onFieldChange()" /></label>
+            <label>Alignment/Moral Code<input [(ngModel)]="value.alignment" (ngModelChange)="onFieldChange()" /></label>
+          </div>
+        </div>
+
+        <div class="sheet-35-section">
+          <h3>Attributes</h3>
+          <div class="grid-3">
+            <label>ST<input [(ngModel)]="value.strengthScore" (ngModelChange)="onFieldChange()" /></label>
+            <label>DX<input [(ngModel)]="value.dexterityScore" (ngModelChange)="onFieldChange()" /></label>
+            <label>IQ<input [(ngModel)]="value.intelligenceScore" (ngModelChange)="onFieldChange()" /></label>
+            <label>HT<input [(ngModel)]="value.constitutionScore" (ngModelChange)="onFieldChange()" /></label>
+            <label>Will<input [(ngModel)]="value.wisdomScore" (ngModelChange)="onFieldChange()" /></label>
+            <label>Per<input [(ngModel)]="value.charismaScore" (ngModelChange)="onFieldChange()" /></label>
+          </div>
+        </div>
+
+        <div class="sheet-35-section">
+          <h3>Secondary Characteristics</h3>
+          <div class="grid-3">
+            <label>HP<input [(ngModel)]="value.hitPointMaximum" (ngModelChange)="onFieldChange()" /></label>
+            <label>FP<input [(ngModel)]="value.currentHitPoints" (ngModelChange)="onFieldChange()" /></label>
+            <label>Basic Speed<input [(ngModel)]="value.initiative" (ngModelChange)="onFieldChange()" /></label>
+            <label>Basic Move<input [(ngModel)]="value.speed" (ngModelChange)="onFieldChange()" /></label>
+            <label>Dodge<input [(ngModel)]="value.temporaryHitPoints" (ngModelChange)="onFieldChange()" /></label>
+            <label>Parry/Block<input [(ngModel)]="value.hitDice" (ngModelChange)="onFieldChange()" /></label>
+          </div>
+        </div>
+
+        <div class="sheet-35-section">
+          <h3>Skills, Advantages, Disadvantages</h3>
+          <div class="text-blocks">
+            <label>Skills<textarea [(ngModel)]="value.skills" (ngModelChange)="onFieldChange()"></textarea></label>
+            <label>Advantages<textarea [(ngModel)]="value.featuresAndTraits" (ngModelChange)="onFieldChange()"></textarea></label>
+            <label>Disadvantages<textarea [(ngModel)]="value.flaws" (ngModelChange)="onFieldChange()"></textarea></label>
+            <label>Quirks<textarea [(ngModel)]="value.personalityTraits" (ngModelChange)="onFieldChange()"></textarea></label>
+            <label>Advantages/Modifiers<textarea [(ngModel)]="value.attacksAndSpellcasting" (ngModelChange)="onFieldChange()"></textarea></label>
+          </div>
+        </div>
+
+        <div class="sheet-35-section">
+          <h3>Equipment and Notes</h3>
+          <div class="text-blocks">
+            <label>Equipment<textarea [(ngModel)]="value.equipment" (ngModelChange)="onFieldChange()"></textarea></label>
+            <label>Backstory<textarea [(ngModel)]="value.backstory" (ngModelChange)="onFieldChange()"></textarea></label>
+            <label>Notes<textarea [(ngModel)]="value.treasure" (ngModelChange)="onFieldChange()"></textarea></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-35-section">
+      <h3>Combat</h3>
+      <div class="grid-3">
+        <label>Armor Class<input [(ngModel)]="value.armorClass" (ngModelChange)="onFieldChange()" /></label>
+        <label>Initiative<input [(ngModel)]="value.initiative" (ngModelChange)="onFieldChange()" /></label>
+        <label>Speed<input [(ngModel)]="value.speed" (ngModelChange)="onFieldChange()" /></label>
+        <label>Hit Points<input [(ngModel)]="value.hitPointMaximum" (ngModelChange)="onFieldChange()" /></label>
+        <label>Current HP<input [(ngModel)]="value.currentHitPoints" (ngModelChange)="onFieldChange()" /></label>
+        <label>Damage Reduction<input [(ngModel)]="value.temporaryHitPoints" (ngModelChange)="onFieldChange()" /></label>
+      </div>
+    </div>
+
+    <div class="sheet-35-section">
+      <h3>Ability Scores</h3>
+      <div class="grid-3">
+        <label>Strength<input [(ngModel)]="value.strengthScore" (ngModelChange)="onFieldChange()" /></label>
+        <label>Dexterity<input [(ngModel)]="value.dexterityScore" (ngModelChange)="onFieldChange()" /></label>
+        <label>Constitution<input [(ngModel)]="value.constitutionScore" (ngModelChange)="onFieldChange()" /></label>
+        <label>Intelligence<input [(ngModel)]="value.intelligenceScore" (ngModelChange)="onFieldChange()" /></label>
+        <label>Wisdom<input [(ngModel)]="value.wisdomScore" (ngModelChange)="onFieldChange()" /></label>
+        <label>Charisma<input [(ngModel)]="value.charismaScore" (ngModelChange)="onFieldChange()" /></label>
+      </div>
+    </div>
+
+    <div class="sheet-35-section">
+      <h3>Saves and Skills</h3>
+      <div class="grid-2">
+        <label>Fortitude<input [(ngModel)]="value.savingThrows" (ngModelChange)="onFieldChange()" /></label>
+        <label>Reflex<input [(ngModel)]="value.skills" (ngModelChange)="onFieldChange()" /></label>
+        <label>Will<input [(ngModel)]="value.passivePerception" (ngModelChange)="onFieldChange()" /></label>
+        <label>Skills<textarea [(ngModel)]="value.otherProficienciesAndLanguages" (ngModelChange)="onFieldChange()"></textarea></label>
+      </div>
+    </div>
+
+    <div class="sheet-35-section">
+      <h3>Features</h3>
+      <div class="text-blocks">
+        <label>Feats<textarea [(ngModel)]="value.featuresAndTraits" (ngModelChange)="onFieldChange()"></textarea></label>
+        <label>Class Features<textarea [(ngModel)]="value.attacksAndSpellcasting" (ngModelChange)="onFieldChange()"></textarea></label>
+        <label>Special Abilities<textarea [(ngModel)]="value.personalityTraits" (ngModelChange)="onFieldChange()"></textarea></label>
+        <label>Equipment<textarea [(ngModel)]="value.equipment" (ngModelChange)="onFieldChange()"></textarea></label>
+        <label>Background<textarea [(ngModel)]="value.backstory" (ngModelChange)="onFieldChange()"></textarea></label>
+        <label>Possessions<textarea [(ngModel)]="value.treasure" (ngModelChange)="onFieldChange()"></textarea></label>
+      </div>
+    </div>
   </div>
 </div>

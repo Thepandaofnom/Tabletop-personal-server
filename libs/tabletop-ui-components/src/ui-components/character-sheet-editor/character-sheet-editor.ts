@@ -50,6 +50,8 @@ export interface CharacterSheetData {
   treasure: string;
 }
 
+export type CharacterSheetType = 'D&D-5.0' | 'D&D-3.5' | 'GURPS';
+
 @Component({
   selector: 'character-sheet-editor',
   standalone: true,
@@ -59,8 +61,11 @@ export interface CharacterSheetData {
 })
 export class CharacterSheetEditor {
   @Input() value: CharacterSheetData = this.createEmptySheet();
+  @Input() sheetType!: CharacterSheetType;
+  @Output() sheetTypeChange = new EventEmitter<CharacterSheetType>();
   @Output() valueChange = new EventEmitter<CharacterSheetData>();
   @Output() saveSheet = new EventEmitter<CharacterSheetData>();
+  isGurpsSheet = false;
 
   private createEmptySheet(): CharacterSheetData {
     return {
@@ -75,8 +80,21 @@ export class CharacterSheetEditor {
     };
   }
 
+  ngOnInit(): void {
+    if (!this.sheetType) {
+      this.sheetType = 'D&D-5.0';
+    }
+    this.isGurpsSheet = this.sheetType === 'GURPS';
+  }
+
   onFieldChange(): void {
     this.valueChange.emit(this.value);
+  }
+
+  onSheetTypeChange(type: CharacterSheetType): void {
+    this.sheetType = type;
+    this.isGurpsSheet = type === 'GURPS';
+    this.sheetTypeChange.emit(type);
   }
 
   onSave(): void {

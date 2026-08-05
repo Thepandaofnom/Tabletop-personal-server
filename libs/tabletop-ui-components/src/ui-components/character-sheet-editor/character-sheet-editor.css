@@ -14,6 +14,22 @@
   padding-bottom: 0.75rem;
 }
 
+.sheet-type-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.sheet-type-label select {
+  padding: 0.45rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background-color: #1f1f1f;
+  color: #fff;
+}
+
 .sheet-menu button {
   padding: 0.5rem 1rem;
   background-color: #2d2d2d;
@@ -69,6 +85,12 @@
 
 .sheet-header, .grid-2 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
 .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
 .sheet-header > div, .grid-2 > label, .text-blocks > label { display: grid; gap: 0.25rem; }
 .text-blocks { display: grid; gap: 0.75rem; }
 textarea { min-height: 4rem; }
+
+.sheet-35 { display: grid; gap: 1rem; }
+.sheet-35-section { display: grid; gap: 0.75rem; }
+.sheet-35-section h3 { margin: 0; color: #fff; }
+.sheet-gurps { display: grid; gap: 1rem; }
