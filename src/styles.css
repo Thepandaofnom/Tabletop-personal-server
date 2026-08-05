@@ -4,9 +4,41 @@
 :root {
   --bg: #21160d;
   --surface: #f3e1bf;
-  --muted: #7d6342;
-  --text: #2f2014;
-  --accent: #8a5a2b;
+--surface-strong: #e3c58e;
+--surface-soft: #fff8eb;
+--surface-alt: #ead0a0;
+--muted: #7d6342;
+--text: #2f2014;
+--text-soft: #3a2414;
+--accent: #8a5a2b;
+--border: rgba(96, 62, 30, 0.25);
+--header-bg: linear-gradient(180deg, #3a2414, #27180f);
+--bar-bg: linear-gradient(180deg, #d9be86, #b38a51);
+--button-bg: linear-gradient(180deg, #f5e3b9, #d2ad6a);
+--button-hover-bg: linear-gradient(180deg, #fff0cb, #dfb974);
+--panel-bg: #f1e0bc;
+--panel-border: rgba(122, 93, 52, 0.35);
+}
+
+body.dark-mode {
+--bg: #101317;
+--surface: #1a1f25;
+--surface-strong: #242a31;
+--surface-soft: #1a1f25;
+--surface-alt: #2b323a;
+--muted: #a4afba;
+--text: #eef2f6;
+--text-soft: #eef2f6;
+--accent: #9eb6cc;
+--border: rgba(180, 194, 208, 0.18);
+--header-bg: linear-gradient(180deg, #18202a, #101317);
+--bar-bg: linear-gradient(180deg, #2b3440, #1d242d);
+--button-bg: linear-gradient(180deg, #3a4654, #26313b);
+--button-hover-bg: linear-gradient(180deg, #475466, #303c48);
+--panel-bg: #1a1f25;
+--panel-border: rgba(180, 194, 208, 0.18);
+color: var(--text);
+background: linear-gradient(180deg, #101317 0%, #0b0d10 100%);
 }
 
 html, body, app-root {
@@ -27,7 +59,7 @@ body {
 .site-header {
   background:
     linear-gradient(90deg, rgba(255, 228, 176, 0.14), rgba(123, 83, 33, 0.06)),
-    linear-gradient(180deg, #3a2414, #27180f);
+    var(--header-bg);
   padding: 0.75rem 1.25rem;
   border-bottom: 1px solid rgba(255, 225, 170, 0.12);
   position: sticky;
@@ -38,40 +70,41 @@ body {
 .site-header .container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
 .site-header h1 { margin: 0; font-size: 1.25rem; color: #f7e4bc; font-weight: 700; letter-spacing: 0.04em; text-shadow: 0 1px 0 rgba(0,0,0,0.45); }
 
-.main-menu-button-bar { display: flex; justify-content: center; gap: 0.5rem; align-items: center; padding: 0.85rem 1.25rem; background: linear-gradient(180deg, #d9be86, #b38a51); width: 100%; margin-top: 0; border-bottom: 1px solid rgba(66, 41, 17, 0.35); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.main-menu-button-bar { display: flex; justify-content: center; gap: 0.5rem; align-items: center; padding: 0.85rem 1.25rem; background: var(--bar-bg); width: 100%; margin-top: 0; border-bottom: 1px solid rgba(66, 41, 17, 0.35); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 .main-menu-button-bar.container { max-width: 1100px; margin: 0 auto; }
 .main-menu-button-bar .pill { border-radius: 999px; padding: 0.55rem 1rem; font-weight: 700; }
-.main-menu-button-bar .pill.p-button { border-radius: 999px; background: linear-gradient(180deg, #f5e3b9, #d2ad6a); color: #3c2715; border: 1px solid rgba(74, 47, 21, 0.25); }
-.main-menu-button-bar .pill.p-button:hover { background: linear-gradient(180deg, #fff0cb, #dfb974); color: #2f1f12; }
+.main-menu-button-bar .pill.p-button { border-radius: 999px; background: var(--button-bg); color: var(--text-soft); border: 1px solid var(--border); }
+.main-menu-button-bar .pill.p-button:hover { background: var(--button-hover-bg); color: var(--text-soft); }
 
 .main-content { padding: 2rem; min-height: calc(100vh - 64px); }
+.dark-mode .main-content { background: var(--bg); color: var(--text); }
 .landing { max-width: 900px; margin: 2rem auto; text-align: center; }
 .lead { color: var(--muted); font-size: 1.125rem; }
 
 a { color: var(--accent); }
 
 /* make forms, cards and other surfaces slightly lighter */
-.surface { background: linear-gradient(180deg, #f3e0bc, #e3c58e); border-radius: 10px; padding: 1rem; border: 1px solid rgba(96, 62, 30, 0.25); box-shadow: inset 0 1px 0 rgba(255,255,255,0.45); }
+.surface { background: linear-gradient(180deg, var(--surface), var(--surface-strong)); border-radius: 10px; padding: 1rem; border: 1px solid var(--border); box-shadow: inset 0 1px 0 rgba(255,255,255,0.45); }
 
 /* Apply dice-bag dialog appearance globally to all PrimeNG dialogs */
 .p-dialog .p-dialog-titlebar,
 .p-dialog .p-dialog-header {
-  background: linear-gradient(180deg, #3a2414, #27180f) !important;
+  background: var(--header-bg) !important;
   color: #f8e7ba !important;
   border-bottom: 1px solid rgba(255,225,170,0.08) !important;
 }
 .p-dialog .p-dialog-content {
-  background: #f1e0bc !important;
-  color: #3a2a16 !important;
+  background: var(--panel-bg) !important;
+  color: var(--text-soft) !important;
   padding: 1rem !important;
 }
 .p-dialog .p-button {
-  background: linear-gradient(180deg, #f5e4bc, #d5b170) !important;
-  border-color: rgba(96, 62, 30, 0.25) !important;
-  color: #3a2414 !important;
+  background: var(--button-bg) !important;
+  border-color: var(--border) !important;
+  color: var(--text-soft) !important;
 }
 .p-dialog .p-button:hover {
-  background: linear-gradient(180deg, #fff0c9, #dfbe7c) !important;
+  background: var(--button-hover-bg) !important;
 }
 
 /* Rounded corners for dialogs */
@@ -91,26 +124,26 @@ a { color: var(--accent); }
 
 /* Game map modal hamburger menu styling */
 .p-menu {
-  background-color: #f1e0bc !important;
-  border: 1px solid rgba(96, 62, 30, 0.22) !important;
+  background-color: var(--panel-bg) !important;
+  border: 1px solid var(--panel-border) !important;
 }
 
 .p-menu .p-menu-list {
-  background-color: #f1e0bc !important;
+  background-color: var(--panel-bg) !important;
   padding: 0.5rem 0 !important;
 }
 
 .p-menu .p-menuitem {
-  background-color: #e5c88f !important;
+  background-color: var(--surface-alt) !important;
   margin: 0.25rem 0.5rem !important;
   border-radius: 6px !important;
   padding: 0 !important;
 }
 
 .p-menu .p-menuitem > a {
-  background-color: #e5c88f !important;
-  color: #3c2715 !important;
-  border: 1px solid rgba(96, 62, 30, 0.2) !important;
+  background-color: var(--surface-alt) !important;
+  color: var(--text-soft) !important;
+  border: 1px solid var(--border) !important;
   padding: 0.75rem 1rem !important;
   display: block !important;
   border-radius: 6px !important;
@@ -118,8 +151,8 @@ a { color: var(--accent); }
 
 .p-menu .p-menuitem > a:hover,
 .p-menu .p-menuitem:hover > a {
-  background-color: #f4dca8 !important;
-  color: #2f1f12 !important;
+  background-color: var(--surface) !important;
+  color: var(--text-soft) !important;
 }
 
 .p-menu .p-menuitem.p-highlight > a,
@@ -130,7 +163,7 @@ a { color: var(--accent); }
 
 .p-menu .p-menuitem a span,
 .p-menu .p-menuitem a .p-menuitem-text {
-  color: #3c2715 !important;
+  color: var(--text-soft) !important;
 }
 
 .p-inputtext,
@@ -141,39 +174,39 @@ a { color: var(--accent); }
 textarea,
 input[type="text"],
 input[type="number"] {
-  background: rgba(255, 248, 235, 0.95) !important;
-  color: #3a2a16 !important;
-  border-color: #a77c46 !important;
+  background: var(--surface-soft) !important;
+  color: var(--text-soft) !important;
+  border-color: var(--border) !important;
 }
 
 .p-inputswitch .p-inputswitch-slider {
-  background: linear-gradient(180deg, #e4c88f, #b98a4b) !important;
+  background: var(--button-bg) !important;
 }
 
 .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
-  background: linear-gradient(180deg, #7c5a35, #4f341f) !important;
+  background: var(--button-hover-bg) !important;
 }
 
 .p-checkbox .p-checkbox-box,
 .p-radiobutton .p-radiobutton-box {
-  background: #f5e4bc !important;
-  border-color: #a77c46 !important;
+  background: var(--surface-soft) !important;
+  border-color: var(--border) !important;
 }
 
 .p-checkbox .p-checkbox-box.p-highlight,
 .p-radiobutton .p-radiobutton-box.p-highlight {
-  background: #b98a4b !important;
-  border-color: #8a5a2b !important;
+  background: var(--button-bg) !important;
+  border-color: var(--border) !important;
 }
 
 .p-tabview .p-tabview-nav,
 .p-tabview .p-tabview-nav li .p-tabview-nav-link {
-  background: #ead0a0 !important;
-  color: #3a2414 !important;
-  border-color: rgba(96, 62, 30, 0.25) !important;
+  background: var(--surface-alt) !important;
+  color: var(--text-soft) !important;
+  border-color: var(--border) !important;
 }
 
 .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-  background: #f6e4bf !important;
-  color: #2f1f12 !important;
+  background: var(--surface-soft) !important;
+  color: var(--text-soft) !important;
 }

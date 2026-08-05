@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
-import { DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData, CharacterSheetType } from '@tabletop/ui-components';
+import { DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData, CharacterSheetType, GlobalSettingsComponent } from '@tabletop/ui-components';
 
 interface LoginResponse {
   username: string;
@@ -13,7 +13,7 @@ interface LoginResponse {
   email?: string;
 }
 
-type MainContentView = 'landing' | 'character-sheet' | 'game-map';
+type MainContentView = 'landing' | 'character-sheet' | 'game-map' | 'global-settings';
 
 interface CharacterSheetTab {
   id: string;
@@ -25,7 +25,7 @@ interface CharacterSheetTab {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, HttpClientModule, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor],
+  imports: [RouterOutlet, CommonModule, HttpClientModule, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, GlobalSettingsComponent],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
@@ -38,7 +38,7 @@ export class App {
   protected signupVisible = false;
   protected accountViewVisible = false;
   protected currentView: MainContentView = 'landing';
-  protected characterSheetTheme: 'light' | 'dark' = 'light';
+  protected darkMode = false;
   protected activeCharacterSheetTabId = 'sheet-1';
   protected editingTabId?: string;
   protected characterSheetTabs: CharacterSheetTab[] = [
@@ -54,7 +54,9 @@ export class App {
   protected currentLastName = '';
   protected currentEmail = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.applyBodyTheme(this.darkMode);
+  }
 
   onLoginSuccess(event: LoginResponse) {
     this.loggedIn = true;
@@ -78,10 +80,6 @@ export class App {
 
   onCharacterSheetTypeChange(tabId: string, type: CharacterSheetType) {
     this.characterSheetTabs = this.characterSheetTabs.map(tab => tab.id === tabId ? { ...tab, sheetType: type } : tab);
-  }
-
-  onCharacterSheetThemeChange(theme: 'light' | 'dark') {
-    this.characterSheetTheme = theme;
   }
 
   onCharacterSheetTabClick(tabId: string) {
@@ -169,4 +167,14 @@ export class App {
   onMenuGameMapClick() { this.currentView = 'game-map'; }
   onMenuDiceBagClick() { this.diceBagVisible = true; }
   onMenuAccountClick() { this.accountViewVisible = true; }
+  onMenuOptionsClick() { this.currentView = 'global-settings'; }
+  onAppThemeChange(darkMode: boolean) {
+    this.darkMode = darkMode;
+    this.applyBodyTheme(this.darkMode);
+  }
+
+  private applyBodyTheme(darkMode: boolean) {
+    if (typeof document === 'undefined' || !document.body) return;
+    document.body.classList.toggle('dark-mode', darkMode);
+  }
 }

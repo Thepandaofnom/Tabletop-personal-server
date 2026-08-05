@@ -7,3 +7,4 @@ export { MainMenuButtonBar } from './ui-components/main-menu-button-bar';
 export { AccountViewPanel } from './ui-components/account-view-panel';
 export { CharacterSheetEditor } from './ui-components/character-sheet-editor';
 export type { CharacterSheetData, CharacterSheetType } from './ui-components/character-sheet-editor/character-sheet-editor';
+export { GlobalSettingsComponent } from './ui-components/global-settings-component/global-settings-component';

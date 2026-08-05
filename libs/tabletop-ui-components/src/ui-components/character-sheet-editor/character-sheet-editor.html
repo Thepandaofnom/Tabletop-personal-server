@@ -1,4 +1,4 @@
-<div class="sheet" [class.theme-dark]="theme === 'dark'">
+<div class="sheet">
   <div class="sheet-menu">
     <label class="sheet-type-label">
       Character sheet type
@@ -15,11 +15,6 @@
     is updated to save character sheets-->
     <!--button type="button" (click)="onSave()" class="btn-save">Save</button-->
     <div class="sheet-menu-spacer"></div>
-    <label class="theme-toggle">
-      <span>Light</span>
-      <p-toggleSwitch [ngModel]="theme === 'dark'" (ngModelChange)="onThemeChange($event ? 'dark' : 'light')"></p-toggleSwitch>
-      <span>Dark</span>
-    </label>
     <button type="button" class="hamburger-button" (click)="openActionMenu($event)" aria-label="Editor actions">☰</button>
     <p-menu #actionMenu [model]="actionMenuItems" [popup]="true" [appendTo]="'body'"></p-menu>
   </div>

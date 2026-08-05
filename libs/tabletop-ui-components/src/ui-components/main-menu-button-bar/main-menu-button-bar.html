@@ -16,10 +16,12 @@
       <ng-container *ngIf="!loggedIn; else loggedTpl">
         <button type="button" class="menu-item p-button-text" (click)="onMenuLoginClick()">Login</button>
         <button type="button" class="menu-item p-button-text" (click)="onMenuSignupClick()">Sign up</button>
+        <button type="button" class="menu-item p-button-text" (click)="onOptionsClick()">Option</button>
       </ng-container>
       <ng-template #loggedTpl>
         <button type="button" class="menu-item p-button-text" (click)="onMenuAccountClick()">Account</button>
         <button type="button" class="menu-item p-button-text" (click)="onMenuLogoutClick()">Logout</button>
+        <button type="button" class="menu-item p-button-text" (click)="onOptionsClick()">Option</button>
       </ng-template>
     </div>
   </div>

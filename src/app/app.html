@@ -12,6 +12,7 @@
   (openGameMap)="onMenuGameMapClick()"
   (openDiceBag)="onMenuDiceBagClick()"
   (openCharacterSheets)="onMenuCharacterSheetsClick()"
+  (openOptions)="onMenuOptionsClick()"
   (onLoginClick)="onMenuLogin()"
   (onSignupClick)="onMenuSignup()"
   (onAccountClick)="onMenuAccountClick()"
@@ -30,12 +31,16 @@
   (closePanel)="accountViewVisible = false">
 </account-view-panel>
 
-<main class="main-content">
+<main class="main-content" [class.app-dark-theme]="darkMode">
   <div [style.display]="currentView === 'game-map' ? 'block' : 'none'" style="width: 100%; height: 100%;">
     <game-map-component></game-map-component>
   </div>
 
-  <div *ngIf="currentView === 'character-sheet'" class="character-sheet-tabs" [class.theme-dark]="characterSheetTheme === 'dark'">
+  <div *ngIf="currentView === 'global-settings'">
+    <global-settings-component [(darkMode)]="darkMode" (darkModeChange)="onAppThemeChange($event)"></global-settings-component>
+  </div>
+
+  <div *ngIf="currentView === 'character-sheet'" class="character-sheet-tabs">
     <div class="character-sheet-tab-bar">
       <button
         *ngFor="let tab of characterSheetTabs"
@@ -62,9 +67,7 @@
         <character-sheet-editor
           [value]="tab.value"
           [sheetType]="tab.sheetType"
-          [theme]="characterSheetTheme"
           (sheetTypeChange)="onCharacterSheetTypeChange(tab.id, $event)"
-          (themeChange)="onCharacterSheetThemeChange($event)"
           (valueChange)="onCharacterSheetChange(tab.id, $event)"
           (saveSheet)="onCharacterSheetSave(tab.id, $event)">
         </character-sheet-editor>

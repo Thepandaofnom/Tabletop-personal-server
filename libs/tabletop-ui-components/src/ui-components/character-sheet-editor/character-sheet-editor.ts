@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { MenuModule } from 'primeng/menu';
 import { Menu } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
@@ -59,16 +58,14 @@ export type CharacterSheetType = 'D&D-5.0' | 'D&D-3.5' | 'GURPS' | 'pathfinder 1
 @Component({
   selector: 'character-sheet-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToggleSwitchModule, MenuModule],
+  imports: [CommonModule, FormsModule, MenuModule],
   templateUrl: './character-sheet-editor.html',
   styleUrls: ['./character-sheet-editor.css']
 })
 export class CharacterSheetEditor {
   @Input() value: CharacterSheetData = this.createEmptySheet();
   @Input() sheetType!: CharacterSheetType;
-  @Input() theme: 'light' | 'dark' = 'light';
   @Output() sheetTypeChange = new EventEmitter<CharacterSheetType>();
-  @Output() themeChange = new EventEmitter<'light' | 'dark'>();
   @Output() valueChange = new EventEmitter<CharacterSheetData>();
   @Output() saveSheet = new EventEmitter<CharacterSheetData>();
   @ViewChild('dnd50Template', { static: true }) dnd50Template!: TemplateRef<unknown>;
@@ -112,11 +109,6 @@ export class CharacterSheetEditor {
     this.sheetType = type;
     this.activeTemplate = this.getTemplateForType(type);
     this.sheetTypeChange.emit(type);
-  }
-
-  onThemeChange(theme: 'light' | 'dark'): void {
-    this.theme = theme;
-    this.themeChange.emit(theme);
   }
 
   openActionMenu(event: Event): void {
