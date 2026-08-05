@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+﻿import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { LoginModal } from '../login-modal/login-modal';
@@ -18,12 +18,17 @@ export class MainMenuButtonBar {
   @Output() loginSuccess = new EventEmitter<{ username: string; token: string }>();
   @Output() openGameMap = new EventEmitter<void>();
   @Output() openDiceBag = new EventEmitter<void>();
+  @Output() openCharacterSheets = new EventEmitter<void>();
   @Output() onLoginClick = new EventEmitter<void>();
   @Output() onSignupClick = new EventEmitter<void>();
   @Output() onAccountClick = new EventEmitter<void>();
   @Output() onLogoutClick = new EventEmitter<void>();
 
   menuOpen = false;
+
+  onMenuCharacterSheetsClick() {
+    this.openCharacterSheets.emit();
+  }
 
   onMenuLoginClick() {
     this.onLoginClick.emit();

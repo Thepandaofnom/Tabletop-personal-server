@@ -2,12 +2,19 @@ import { Component, ElementRef, ViewChild, Input, Output, EventEmitter, OnDestro
 import Konva from 'konva';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
+import { MenuModule } from 'primeng/menu';
+import { ColorPickerModule } from 'primeng/colorpicker';
+import { TooltipModule } from 'primeng/tooltip';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MenuItem } from 'primeng/api';
+import { Menu } from 'primeng/menu';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'game-map-modal',
   standalone: true,
-  imports: [DialogModule, ButtonModule, CommonModule],
+  imports: [DialogModule, ButtonModule, MenuModule, ColorPickerModule, TooltipModule, CommonModule, FormsModule, InputTextModule],
   templateUrl: './game-map-modal.html',
 })
 export class GameMapModal implements OnDestroy {
@@ -15,11 +22,63 @@ export class GameMapModal implements OnDestroy {
   @Output() visibleChange = new EventEmitter<boolean>();
 
   @ViewChild('stageContainer', { static: false }) stageContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('menu') menu!: Menu;
+
+  showGrid = false;
+  gridColor = '#000000';
+  gridCellWidth = 50;
+  gridCellHeight = 50;
+  zoom = 1;
+  scaleGrid = false;
+  gridZoom = 1;
+
+  // Token dialog state
+  showTokenDialog = false;
+  tokenName = '';
+  
+  // Token edit dialogs
+  showRenameDialog = false;
+  showColorDialog = false;
+  showImageDialog = false;
+  showResizeDialog = false;
+  showRotateDialog = false;
+  editingTokenId?: string;
+  newTokenName = '';
+  newTokenColor = '#4a90e2';
+  tokenResizeValue = 1;
+  tokenResizeOldValue = 1;
+  tokenRotateValue = 0;
+  tokenRotateOldValue = 0;
+
+  menuItems: MenuItem[] = [
+    {
+      label: 'Show Grid',
+      icon: 'pi pi-th',
+      command: () => this.toggleGrid(),
+    },
+    {
+      label: 'Add Generic Token',
+      icon: 'pi pi-plus',
+      command: () => this.openAddTokenDialog(),
+    }
+  ];
 
   private stage?: Konva.Stage;
   private layer?: Konva.Layer;
+  private gridLayer?: Konva.Layer;
+  private tokenLayer?: Konva.Layer;
   private mapImage?: Konva.Image;
   private resizeObserver?: ResizeObserver;
+  private isDragging = false;
+  private dragStartX = 0;
+  private dragStartY = 0;
+  private tokens: Map<string, Konva.Group> = new Map(); // id -> token group
+  private tokenColors: Map<string, string> = new Map(); // id -> color
+  private tokenImages: Map<string, Konva.Image> = new Map(); // id -> image object
+  private tokenScales: Map<string, number> = new Map(); // id -> scale factor
+  private tokenRotations: Map<string, number> = new Map(); // id -> rotation in degrees
+  private draggingTokenId?: string;
+  private hoveredTokenId?: string;
 
   get visibleLocal() {
     return this.visible;
@@ -71,6 +130,19 @@ export class GameMapModal implements OnDestroy {
         this.layer = new Konva.Layer();
         this.stage.add(this.layer);
 
+        // grid layer (separate so it's always on top)
+        this.gridLayer = new Konva.Layer();
+        this.stage.add(this.gridLayer);
+
+        // token layer (on top of grid for token interactions)
+        this.tokenLayer = new Konva.Layer();
+        this.stage.add(this.tokenLayer);
+
+        // Add drag handlers for map panning
+        this.stage.on('mousedown', (e) => this.onStageMouseDown(e));
+        this.stage.on('mousemove', (e) => this.onStageMouseMove(e));
+        this.stage.on('mouseup', () => this.onStageMouseUp());
+
         // observe container resize for dynamic resizing
         this.resizeObserver = new ResizeObserver(() => this.onContainerResize());
         this.resizeObserver.observe(container);
@@ -108,6 +180,62 @@ export class GameMapModal implements OnDestroy {
   onDialogShown() {
     // Dialog content is attached to the DOM — initialize stage afterwards
     setTimeout(() => this.initStage(), 0);
+  }
+
+  private onStageMouseDown(e: Konva.KonvaEventObject<MouseEvent>) {
+    // Only drag map if not dragging a token
+    if (this.draggingTokenId) {
+      return; // Token's mousedown handler already set this
+    }
+
+    // Check if clicking on a token by checking if a token is hovered
+    if (this.hoveredTokenId) {
+      return; // Token mousedown will handle this
+    }
+
+    this.isDragging = true;
+    this.dragStartX = e.evt.clientX;
+    this.dragStartY = e.evt.clientY;
+  }
+
+  private onStageMouseMove(e: Konva.KonvaEventObject<MouseEvent>) {
+    if (!this.isDragging || !this.stage || !this.layer || !this.gridLayer) return;
+
+    const deltaX = e.evt.clientX - this.dragStartX;
+    const deltaY = e.evt.clientY - this.dragStartY;
+
+    if (this.draggingTokenId) {
+      // Move the token independently
+      const token = this.tokens.get(this.draggingTokenId);
+      if (token) {
+        token.x(token.x() + deltaX);
+        token.y(token.y() + deltaY);
+      }
+    } else {
+      // Move the map layers and token layer together
+      this.layer.x(this.layer.x() + deltaX);
+      this.layer.y(this.layer.y() + deltaY);
+
+      this.gridLayer.x(this.gridLayer.x() + deltaX);
+      this.gridLayer.y(this.gridLayer.y() + deltaY);
+
+      // Move token layer with the map
+      if (this.tokenLayer) {
+        this.tokenLayer.x(this.tokenLayer.x() + deltaX);
+        this.tokenLayer.y(this.tokenLayer.y() + deltaY);
+      }
+    }
+
+    // Update drag start position for next move
+    this.dragStartX = e.evt.clientX;
+    this.dragStartY = e.evt.clientY;
+
+    this.stage.draw();
+  }
+
+  private onStageMouseUp() {
+    this.isDragging = false;
+    this.draggingTokenId = undefined;
   }
 
   onFileChange(evt: Event) {
@@ -186,14 +314,484 @@ export class GameMapModal implements OnDestroy {
     this.layer?.draw();
   }
 
+  toggleGrid() {
+    this.showGrid = !this.showGrid;
+    if (this.showGrid) {
+      this.drawGrid();
+    } else {
+      this.clearGrid();
+    }
+  }
+
+  openGridMenu(event: Event) {
+    event.stopPropagation();
+    if (this.menu) {
+      this.menu.toggle(event);
+    }
+  }
+
+  onGridColorChange(color: string) {
+    this.gridColor = color;
+    // Redraw grid if it's currently visible
+    if (this.showGrid) {
+      this.drawGrid();
+    }
+  }
+
+  onZoomChange(newZoom: number) {
+    this.zoom = newZoom / 100; // Convert percentage to decimal
+    if (this.stage) {
+      // Scale the image layer
+      if (this.layer) {
+        this.layer.scale({ x: this.zoom, y: this.zoom });
+      }
+      
+      // Scale grid layer only if scaleGrid is true
+      if (this.gridLayer) {
+        if (this.scaleGrid) {
+          this.gridLayer.scale({ x: this.zoom, y: this.zoom });
+        } else {
+          this.gridLayer.scale({ x: this.gridZoom, y: this.gridZoom });
+        }
+      }
+      
+      this.stage.draw();
+    }
+  }
+
+  onGridZoomChange(newGridZoom: number) {
+    this.gridZoom = newGridZoom / 100; // Convert percentage to decimal
+    if (this.gridLayer && this.stage) {
+      this.gridLayer.scale({ x: this.gridZoom, y: this.gridZoom });
+      this.stage.draw();
+    }
+  }
+
+  private drawGrid() {
+    if (!this.gridLayer || !this.stage) return;
+    
+    this.gridLayer.destroyChildren();
+    
+    const cellWidth = this.gridCellWidth;
+    const cellHeight = this.gridCellHeight;
+    const stageW = this.stage.width();
+    const stageH = this.stage.height();
+    
+    // Draw vertical lines
+    for (let x = 0; x < stageW; x += cellWidth) {
+      const line = new Konva.Line({
+        points: [x, 0, x, stageH],
+        stroke: this.gridColor,
+        strokeWidth: 1,
+        opacity: 0.3,
+      });
+      this.gridLayer.add(line);
+    }
+    
+    // Draw horizontal lines
+    for (let y = 0; y < stageH; y += cellHeight) {
+      const line = new Konva.Line({
+        points: [0, y, stageW, y],
+        stroke: this.gridColor,
+        strokeWidth: 1,
+        opacity: 0.3,
+      });
+      this.gridLayer.add(line);
+    }
+    
+    this.gridLayer.draw();
+  }
+
+  private clearGrid() {
+    if (!this.gridLayer) return;
+    this.gridLayer.destroyChildren();
+    this.gridLayer.draw();
+  }
+
+  onGridSizeChange() {
+    // Enforce minimum value of 1
+    if (this.gridCellWidth < 1) {
+      this.gridCellWidth = 1;
+    }
+    if (this.gridCellHeight < 1) {
+      this.gridCellHeight = 1;
+    }
+
+    // Redraw grid if it's currently visible
+    if (this.showGrid) {
+      this.drawGrid();
+    }
+  }
+
+  openAddTokenDialog() {
+    this.tokenName = '';
+    this.showTokenDialog = true;
+  }
+
+  addToken() {
+    if (!this.tokenName.trim() || !this.stage || !this.tokenLayer) return;
+
+    const tokenId = `token-${Date.now()}`;
+    
+    // Create token group
+    const tokenGroup = new Konva.Group({
+      x: this.stage.width() / 2,
+      y: this.stage.height() / 2,
+      name: tokenId,
+      draggable: false, // We handle dragging manually
+    });
+
+    // Create circle background
+    const circle = new Konva.Circle({
+      radius: 20,
+      fill: '#4a90e2',
+      stroke: '#2c5aa0',
+      strokeWidth: 2,
+    });
+
+    // Create text label
+    const text = new Konva.Text({
+      text: this.tokenName,
+      fontSize: 12,
+      fontFamily: 'Arial',
+      fill: '#ffffff',
+      align: 'center',
+      verticalAlign: 'middle',
+      width: 40,
+      height: 40,
+      x: -20,
+      y: -20,
+    });
+
+    tokenGroup.add(circle);
+    tokenGroup.add(text);
+
+    // Add hover effects
+    tokenGroup.on('mouseover', () => {
+      circle.fill('#5ba3ff');
+      this.hoveredTokenId = tokenId;
+      document.body.style.cursor = 'grab';
+      this.stage?.draw();
+    });
+
+    tokenGroup.on('mouseout', () => {
+      circle.fill('#4a90e2');
+      this.hoveredTokenId = undefined;
+      document.body.style.cursor = 'default';
+      this.stage?.draw();
+    });
+
+    // Add mousedown handler for token dragging
+    tokenGroup.on('mousedown', (e) => {
+      e.cancelBubble = true; // Prevent event from bubbling to stage
+      this.draggingTokenId = tokenId;
+      this.isDragging = true;
+      this.dragStartX = e.evt.clientX;
+      this.dragStartY = e.evt.clientY;
+    });
+
+    // Add right-click context menu
+    tokenGroup.on('contextmenu', (e) => {
+      e.evt.preventDefault();
+      this.showTokenContextMenu(tokenId, e.evt);
+    });
+
+    this.tokenLayer.add(tokenGroup);
+    this.tokens.set(tokenId, tokenGroup);
+    this.tokenColors.set(tokenId, '#4a90e2'); // Store initial color
+    this.tokenLayer.draw();
+
+    this.showTokenDialog = false;
+    this.tokenName = '';
+  }
+
+  private showTokenContextMenu(tokenId: string, event: MouseEvent) {
+    // Create a simple context menu
+    const menu = document.createElement('div');
+    menu.style.position = 'fixed';
+    menu.style.top = event.clientY + 'px';
+    menu.style.left = event.clientX + 'px';
+    menu.style.backgroundColor = '#2a2a2a';
+    menu.style.border = '1px solid #444';
+    menu.style.borderRadius = '4px';
+    menu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+    menu.style.zIndex = '10000';
+    menu.style.minWidth = '150px';
+
+    const createButton = (label: string, onClick: () => void) => {
+      const button = document.createElement('button');
+      button.textContent = label;
+      button.style.display = 'block';
+      button.style.width = '100%';
+      button.style.padding = '8px 12px';
+      button.style.border = 'none';
+      button.style.backgroundColor = 'transparent';
+      button.style.color = '#fff';
+      button.style.cursor = 'pointer';
+      button.style.textAlign = 'left';
+      button.style.fontSize = '12px';
+      button.style.fontFamily = 'Arial';
+
+      button.addEventListener('mouseover', () => {
+        button.style.backgroundColor = '#404040';
+      });
+
+      button.addEventListener('mouseout', () => {
+        button.style.backgroundColor = 'transparent';
+      });
+
+      button.addEventListener('click', () => {
+        onClick();
+        if (document.body.contains(menu)) {
+          document.body.removeChild(menu);
+        }
+      });
+
+      return button;
+    };
+
+    menu.appendChild(createButton('Test', () => {
+      console.log('helloworld');
+    }));
+
+    menu.appendChild(createButton('Rename', () => {
+      this.openRenameDialog(tokenId);
+    }));
+
+    menu.appendChild(createButton('Change Color', () => {
+      this.openColorDialog(tokenId);
+    }));
+
+    menu.appendChild(createButton('Add Image', () => {
+      this.openImageDialog(tokenId);
+    }));
+
+    menu.appendChild(createButton('Resize Token', () => {
+      this.openResizeDialog(tokenId);
+    }));
+
+    menu.appendChild(createButton('Rotate Token', () => {
+      this.openRotateDialog(tokenId);
+    }));
+
+    document.body.appendChild(menu);
+
+    // Remove menu when clicking elsewhere
+    const closeMenu = () => {
+      if (document.body.contains(menu)) {
+        document.body.removeChild(menu);
+      }
+      document.removeEventListener('click', closeMenu);
+    };
+
+    setTimeout(() => {
+      document.addEventListener('click', closeMenu);
+    }, 0);
+  }
+
+  private openRenameDialog(tokenId: string) {
+    this.editingTokenId = tokenId;
+    const tokenGroup = this.tokens.get(tokenId);
+    if (tokenGroup) {
+      const textNode = tokenGroup.findOne('Text') as Konva.Text;
+      if (textNode) {
+        this.newTokenName = textNode.text();
+      }
+    }
+    this.showRenameDialog = true;
+  }
+
+  renameToken() {
+    if (!this.newTokenName.trim() || !this.editingTokenId) return;
+    
+    const tokenGroup = this.tokens.get(this.editingTokenId);
+    if (tokenGroup) {
+      const textNode = tokenGroup.findOne('Text') as Konva.Text;
+      if (textNode) {
+        textNode.text(this.newTokenName);
+        this.tokenLayer?.draw();
+      }
+    }
+    
+    this.showRenameDialog = false;
+    this.editingTokenId = undefined;
+    this.newTokenName = '';
+  }
+
+  private openColorDialog(tokenId: string) {
+    this.editingTokenId = tokenId;
+    this.newTokenColor = this.tokenColors.get(tokenId) || '#4a90e2';
+    this.showColorDialog = true;
+  }
+
+  changeTokenColor() {
+    if (!this.editingTokenId) return;
+    
+    const tokenGroup = this.tokens.get(this.editingTokenId);
+    if (tokenGroup) {
+      const circle = tokenGroup.findOne('Circle') as Konva.Circle;
+      if (circle) {
+        circle.fill(this.newTokenColor);
+        this.tokenColors.set(this.editingTokenId, this.newTokenColor);
+        this.tokenLayer?.draw();
+      }
+    }
+    
+    this.showColorDialog = false;
+    this.editingTokenId = undefined;
+  }
+
+  private openImageDialog(tokenId: string) {
+    this.editingTokenId = tokenId;
+    // Trigger file input click
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = (e: any) => this.onTokenImageSelected(e, tokenId);
+    fileInput.click();
+  }
+
+  private onTokenImageSelected(event: Event, tokenId: string) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      if (!e.target?.result) return;
+
+      const img = new Image();
+      img.onload = () => {
+        const tokenGroup = this.tokens.get(tokenId);
+        if (tokenGroup && this.tokenLayer) {
+          // Remove existing image if any
+          const existingImage = this.tokenImages.get(tokenId);
+          if (existingImage) {
+            existingImage.destroy();
+          }
+
+          // Create Konva image
+          const konvaImage = new Konva.Image({
+            image: img,
+            x: -20,
+            y: -20,
+            width: 40,
+            height: 40,
+          });
+
+          // Add to group (image goes behind text)
+          tokenGroup.add(konvaImage);
+          tokenGroup.moveToBottom();
+          
+          this.tokenImages.set(tokenId, konvaImage);
+          this.tokenLayer.draw();
+        }
+      };
+      img.src = e.target.result as string;
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  private openResizeDialog(tokenId: string) {
+    this.editingTokenId = tokenId;
+    const currentScale = this.tokenScales.get(tokenId) || 1;
+    this.tokenResizeOldValue = currentScale;
+    this.tokenResizeValue = currentScale;
+    this.showResizeDialog = true;
+  }
+
+  onTokenResizeChange(newSize: number) {
+    if (!this.editingTokenId) return;
+
+    const tokenGroup = this.tokens.get(this.editingTokenId);
+    if (tokenGroup) {
+     tokenGroup.scale({ x: newSize, y: newSize });
+     this.tokenScales.set(this.editingTokenId, newSize);
+     this.tokenLayer?.draw();
+    }
+  }
+
+  confirmTokenResize() {
+    // Size is already applied, just close dialog
+    this.showResizeDialog = false;
+    this.editingTokenId = undefined;
+  }
+
+  cancelTokenResize() {
+    // Revert to old size
+    if (this.editingTokenId) {
+     const tokenGroup = this.tokens.get(this.editingTokenId);
+     if (tokenGroup) {
+       tokenGroup.scale({ x: this.tokenResizeOldValue, y: this.tokenResizeOldValue });
+       this.tokenScales.set(this.editingTokenId, this.tokenResizeOldValue);
+       this.tokenLayer?.draw();
+     }
+    }
+
+    this.showResizeDialog = false;
+    this.editingTokenId = undefined;
+  }
+
+  private openRotateDialog(tokenId: string) {
+    this.editingTokenId = tokenId;
+    const currentRotation = this.tokenRotations.get(tokenId) || 0;
+    this.tokenRotateOldValue = currentRotation;
+    this.tokenRotateValue = currentRotation;
+    this.showRotateDialog = true;
+  }
+
+  onTokenRotateChange(newRotation: number) {
+    if (!this.editingTokenId) return;
+
+    const tokenGroup = this.tokens.get(this.editingTokenId);
+    if (tokenGroup) {
+      tokenGroup.rotation(newRotation);
+      this.tokenRotations.set(this.editingTokenId, newRotation);
+      this.tokenLayer?.draw();
+    }
+  }
+
+  confirmTokenRotate() {
+    // Rotation is already applied, just close dialog
+    this.showRotateDialog = false;
+    this.editingTokenId = undefined;
+  }
+
+  cancelTokenRotate() {
+    // Revert to old rotation
+    if (this.editingTokenId) {
+      const tokenGroup = this.tokens.get(this.editingTokenId);
+      if (tokenGroup) {
+        tokenGroup.rotation(this.tokenRotateOldValue);
+        this.tokenRotations.set(this.editingTokenId, this.tokenRotateOldValue);
+        this.tokenLayer?.draw();
+      }
+    }
+
+    this.showRotateDialog = false;
+    this.editingTokenId = undefined;
+  }
+
   private destroyStage() {
     try {
       window.removeEventListener('resize', this.onWindowResize);
       this.resizeObserver?.disconnect();
+      this.clearGrid();
+      this.gridLayer?.destroy();
+      this.tokenLayer?.destroy();
       this.stage?.destroy();
       this.stage = undefined;
       this.layer = undefined;
+      this.gridLayer = undefined;
+      this.tokenLayer = undefined;
       this.mapImage = undefined;
+      this.tokens.clear();
+      this.tokenColors.clear();
+      this.tokenImages.clear();
+      this.tokenScales.clear();
+      this.tokenRotations.clear();
     } catch (e) {
       console.error('Failed to destroy Konva stage', e);
     }

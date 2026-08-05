@@ -24,6 +24,11 @@
       "types": "./dist/main-menu-button-bar/index.d.ts",
       "import": "./dist/main-menu-button-bar/index.js",
       "require": "./dist/main-menu-button-bar/index.js"
+    },
+    "./account-view-panel": {
+      "types": "./dist/account-view-panel/index.d.ts",
+      "import": "./dist/account-view-panel/index.js",
+      "require": "./dist/account-view-panel/index.js"
     }
   },
   "files": [

@@ -1,14 +1,24 @@
-import { Component, signal } from '@angular/core';
+﻿import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
-import { DiceBagModal, GameMapModal, NewUserSignUp, MainMenuButtonBar } from '@tabletop/ui-components';
+import { DiceBagModal, GameMapModal, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData } from '@tabletop/ui-components';
+
+interface LoginResponse {
+  username: string;
+  token: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+type MainContentView = 'landing' | 'character-sheet';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, HttpClientModule, DiceBagModal, GameMapModal, NewUserSignUp, MainMenuButtonBar],
+  imports: [RouterOutlet, CommonModule, HttpClientModule, DiceBagModal, GameMapModal, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
@@ -20,12 +30,47 @@ export class App {
   protected loginVisible = false;
   protected loggedIn = false;
   protected signupVisible = false;
+  protected accountViewVisible = false;
+  protected currentView: MainContentView = 'landing';
+  protected characterSheet: CharacterSheetData = this.createEmptyCharacterSheet();
+  protected currentUsername = '';
+  protected currentFirstName = '';
+  protected currentLastName = '';
+  protected currentEmail = '';
 
   constructor(private http: HttpClient) {}
 
-  onLoginSuccess(event: { username: string; token: string }) {
+  onLoginSuccess(event: LoginResponse) {
     this.loggedIn = true;
-    console.log('Logged in as', event.username);
+    this.currentUsername = event.username || '';
+    this.currentFirstName = event.firstName || '';
+    this.currentLastName = event.lastName || '';
+    this.currentEmail = event.email || '';
+  }
+
+  onMenuCharacterSheetsClick() {
+    this.currentView = 'character-sheet';
+  }
+
+  onCharacterSheetChange(value: CharacterSheetData) {
+    this.characterSheet = value;
+  }
+
+  onCharacterSheetSave(value: CharacterSheetData) {
+    this.characterSheet = value;
+  }
+
+  private createEmptyCharacterSheet(): CharacterSheetData {
+    return {
+      characterName: '', playerName: '', classAndLevel: '', background: '', race: '', alignment: '', experiencePoints: '',
+      inspiration: '', proficiencyBonus: '', armorClass: '', initiative: '', speed: '', hitPointMaximum: '', currentHitPoints: '',
+      temporaryHitPoints: '', hitDice: '', deathSavesSuccesses: '', deathSavesFailures: '',
+      strengthScore: '', strengthModifier: '', dexterityScore: '', dexterityModifier: '', constitutionScore: '', constitutionModifier: '',
+      intelligenceScore: '', intelligenceModifier: '', wisdomScore: '', wisdomModifier: '', charismaScore: '', charismaModifier: '',
+      savingThrows: '', skills: '', passivePerception: '', otherProficienciesAndLanguages: '', equipment: '', featuresAndTraits: '',
+      attacksAndSpellcasting: '', personalityTraits: '', ideals: '', bonds: '', flaws: '', characterAppearance: '', alliesAndOrganizations: '',
+      backstory: '', treasure: ''
+    };
   }
 
   doLogout() {
@@ -35,38 +80,34 @@ export class App {
         next: () => {
           try { localStorage.removeItem('jwt'); } catch (e) { console.warn('Failed to remove jwt', e); }
           this.loggedIn = false;
-          console.log('Logged out (server notified)');
+          this.currentUsername = '';
+          this.currentFirstName = '';
+          this.currentLastName = '';
+          this.currentEmail = '';
         },
-        error: (err) => {
-          console.warn('Logout request failed', err);
+        error: () => {
           try { localStorage.removeItem('jwt'); } catch (e) { console.warn('Failed to remove jwt', e); }
           this.loggedIn = false;
+          this.currentUsername = '';
+          this.currentFirstName = '';
+          this.currentLastName = '';
+          this.currentEmail = '';
         }
       });
     } else {
       try { localStorage.removeItem('jwt'); } catch (e) { console.warn('Failed to remove jwt', e); }
       this.loggedIn = false;
-      console.log('Logged out (no token)');
+      this.currentUsername = '';
+      this.currentFirstName = '';
+      this.currentLastName = '';
+      this.currentEmail = '';
     }
   }
 
-  onMenuLogin() {
-    this.loginVisible = true;
-  }
-
-  onMenuSignup() {
-    this.signupVisible = true;
-  }
-
-  onMenuLogout() {
-    this.doLogout();
-  }
-
-  onMenuGameMapClick() {
-    this.gameMapVisible = true;
-  }
-
-  onMenuDiceBagClick() {
-    this.diceBagVisible = true;
-  }
+  onMenuLogin() { this.loginVisible = true; }
+  onMenuSignup() { this.signupVisible = true; }
+  onMenuLogout() { this.doLogout(); }
+  onMenuGameMapClick() { this.gameMapVisible = true; }
+  onMenuDiceBagClick() { this.diceBagVisible = true; }
+  onMenuAccountClick() { this.accountViewVisible = true; }
 }

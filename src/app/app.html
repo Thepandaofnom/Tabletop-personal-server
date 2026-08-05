@@ -1,4 +1,4 @@
-<header class="site-header">
+﻿<header class="site-header">
   <div class="container">
     <h1>{{ title() }}</h1>
   </div>
@@ -12,20 +12,36 @@
     (loginSuccess)="onLoginSuccess($event)"
     (openGameMap)="onMenuGameMapClick()"
     (openDiceBag)="onMenuDiceBagClick()"
+    (openCharacterSheets)="onMenuCharacterSheetsClick()"
     (onLoginClick)="onMenuLogin()"
     (onSignupClick)="onMenuSignup()"
+    (onAccountClick)="onMenuAccountClick()"
     (onLogoutClick)="onMenuLogout()">
   </main-menu-button-bar>
 </div>
 
 <dice-bag-modal [visible]="diceBagVisible" (visibleChange)="diceBagVisible = $event"></dice-bag-modal>
-
 <game-map-modal [visible]="gameMapVisible" (visibleChange)="gameMapVisible = $event"></game-map-modal>
-
 <new-user-sign-up [visible]="signupVisible" (visibleChange)="signupVisible = $event"></new-user-sign-up>
 
+<account-view-panel
+  *ngIf="accountViewVisible"
+  [username]="currentUsername"
+  [firstName]="currentFirstName"
+  [lastName]="currentLastName"
+  [email]="currentEmail"
+  (closePanel)="accountViewVisible = false">
+</account-view-panel>
+
 <main class="main-content">
-  <section class="landing">
+  <character-sheet-editor
+    *ngIf="currentView === 'character-sheet'"
+    [value]="characterSheet"
+    (valueChange)="onCharacterSheetChange($event)"
+    (saveSheet)="onCharacterSheetSave($event)">
+  </character-sheet-editor>
+
+  <section class="landing" *ngIf="currentView === 'landing'">
     <h2>Welcome</h2>
     <p class="lead">This is the Tabletop Personal Server landing page. Use the sidebar or navigation to get started.</p>
   </section>

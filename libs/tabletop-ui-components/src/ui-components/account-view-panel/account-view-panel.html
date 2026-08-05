@@ -1,0 +1,29 @@
+<div class="account-view-panel">
+  <div class="panel-content">
+    <h2>Account Information</h2>
+    
+    <div class="info-row">
+      <label>Username:</label>
+      <span>{{ username }}</span>
+    </div>
+    
+    <div class="info-row">
+      <label>First Name:</label>
+      <span>{{ firstName }}</span>
+    </div>
+    
+    <div class="info-row">
+      <label>Last Name:</label>
+      <span>{{ lastName }}</span>
+    </div>
+    
+    <div class="info-row">
+      <label>Email:</label>
+      <span>{{ email }}</span>
+    </div>
+
+    <div class="panel-footer">
+      <button pButton type="button" label="Close" icon="pi pi-times" class="p-button-outlined close-btn" (click)="onClose()"></button>
+    </div>
+  </div>
+</div>
