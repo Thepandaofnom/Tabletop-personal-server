@@ -245,3 +245,45 @@ a { color: var(--accent); }
   padding: 0 12px !important;
 }
 
+/* Game map modal hamburger menu styling */
+.p-menu {
+  background-color: #1a1a1a !important;
+}
+
+.p-menu .p-menu-list {
+  background-color: #1a1a1a !important;
+  padding: 0.5rem 0 !important;
+}
+
+.p-menu .p-menuitem {
+  background-color: #2d2d2d !important;
+  margin: 0.25rem 0.5rem !important;
+  border-radius: 4px !important;
+  padding: 0 !important;
+}
+
+.p-menu .p-menuitem > a {
+  background-color: #2d2d2d !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 0.75rem 1rem !important;
+  display: block !important;
+  border-radius: 4px !important;
+}
+
+.p-menu .p-menuitem > a:hover,
+.p-menu .p-menuitem:hover > a {
+  background-color: #404040 !important;
+  color: #fff !important;
+}
+
+.p-menu .p-menuitem.p-highlight > a,
+.p-menu .p-menuitem.p-focus > a {
+  background-color: #404040 !important;
+  color: #fff !important;
+}
+
+.p-menu .p-menuitem a span,
+.p-menu .p-menuitem a .p-menuitem-text {
+  color: #fff !important;
+}
