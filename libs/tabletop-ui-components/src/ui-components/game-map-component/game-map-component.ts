@@ -1405,13 +1405,21 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     if (!image) return null;
 
     try {
+      const MAX_DIM = 2048;
+      let w = image.width;
+      let h = image.height;
+      if (w > MAX_DIM || h > MAX_DIM) {
+        const scale = Math.min(MAX_DIM / w, MAX_DIM / h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
       const canvas = document.createElement('canvas');
-      canvas.width = image.width;
-      canvas.height = image.height;
+      canvas.width = w;
+      canvas.height = h;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(image, 0, 0);
-        return canvas.toDataURL('image/png');
+        ctx.drawImage(image, 0, 0, w, h);
+        return canvas.toDataURL('image/jpeg', 0.6);
       }
     } catch (e) {
       console.warn('Failed to serialize map image:', e);
@@ -1450,13 +1458,21 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     if (!image) return null;
 
     try {
+      const MAX_DIM = 256;
+      let w = image.width;
+      let h = image.height;
+      if (w > MAX_DIM || h > MAX_DIM) {
+        const scale = Math.min(MAX_DIM / w, MAX_DIM / h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
       const canvas = document.createElement('canvas');
-      canvas.width = image.width;
-      canvas.height = image.height;
+      canvas.width = w;
+      canvas.height = h;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(image, 0, 0);
-        return canvas.toDataURL('image/png');
+        ctx.drawImage(image, 0, 0, w, h);
+        return canvas.toDataURL('image/jpeg', 0.7);
       }
     } catch (e) {
       console.warn('Failed to serialize image:', e);
