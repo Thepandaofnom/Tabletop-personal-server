@@ -12,6 +12,7 @@
   (openGameMap)="onMenuGameMapClick()"
   (openDiceBag)="onMenuDiceBagClick()"
   (openCharacterSheets)="onMenuCharacterSheetsClick()"
+  (openNPCMaker)="onMenuNPCMakerClick()"
   (openOptions)="onMenuOptionsClick()"
   (onLoginClick)="onMenuLogin()"
   (onSignupClick)="onMenuSignup()"
@@ -38,6 +39,10 @@
 
   <div *ngIf="currentView === 'global-settings'">
     <global-settings-component [(darkMode)]="darkMode" (darkModeChange)="onAppThemeChange($event)"></global-settings-component>
+  </div>
+
+  <div *ngIf="currentView === 'npc-maker'">
+    <npc-maker-component></npc-maker-component>
   </div>
 
   <div *ngIf="currentView === 'character-sheet'" class="character-sheet-tabs">

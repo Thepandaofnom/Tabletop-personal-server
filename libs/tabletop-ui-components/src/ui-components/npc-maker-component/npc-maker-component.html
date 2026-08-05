@@ -1,0 +1,233 @@
+<div class="npc-maker-shell">
+  <div class="npc-maker-header">
+    <h2>NPC Maker</h2>
+    <div class="header-buttons">
+      <button type="button" class="header-btn" (click)="generateNPC()">Generate NPC</button>
+      <button type="button" class="header-btn" (click)="keepNPC()" [disabled]="!generatedNPC">Keep NPC</button>
+      <button type="button" class="header-btn" (click)="saveAllNPCs()" [disabled]="keptNPCs.length === 0">Save all NPC</button>
+      <button type="button" class="header-btn" (click)="importNPCs()">Import NPC</button>
+    </div>
+  </div>
+
+  <div class="npc-maker-content">
+    <div class="generated-npc" *ngIf="generatedNPC">
+      <h3>Generated NPC</h3>
+      <div class="npc-card">
+        <div class="npc-basic-info">
+          <div class="npc-row">
+            <label>Name:</label>
+            <span>{{ generatedNPC.name }}</span>
+          </div>
+          <div class="npc-row">
+            <label>Race:</label>
+            <span>{{ generatedNPC.race }}</span>
+          </div>
+          <div class="npc-row">
+            <label>Class:</label>
+            <span>{{ generatedNPC.class }}</span>
+          </div>
+          <div class="npc-row">
+            <label>Level:</label>
+            <span>{{ generatedNPC.level }}</span>
+          </div>
+          <div class="npc-row">
+            <label>Alignment:</label>
+            <span>{{ generatedNPC.alignment }}</span>
+          </div>
+          <div class="npc-row">
+            <label>Background:</label>
+            <span>{{ generatedNPC.background }}</span>
+          </div>
+          <div class="npc-stats-row">
+            <div class="stat">
+              <span class="stat-label">STR</span>
+              <span class="stat-value">{{ generatedNPC.strength }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">DEX</span>
+              <span class="stat-value">{{ generatedNPC.dexterity }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">CON</span>
+              <span class="stat-value">{{ generatedNPC.constitution }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">INT</span>
+              <span class="stat-value">{{ generatedNPC.intelligence }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">WIS</span>
+              <span class="stat-value">{{ generatedNPC.wisdom }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">CHA</span>
+              <span class="stat-value">{{ generatedNPC.charisma }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="npc-personality">
+          <h4>Personality</h4>
+          <div class="npc-row">
+            <label>Traits:</label>
+            <span>{{ generatedNPC.traits }}</span>
+          </div>
+          <div class="npc-row">
+            <label>Ideals:</label>
+            <span>{{ generatedNPC.ideals }}</span>
+          </div>
+          <div class="npc-row">
+            <label>Bonds:</label>
+            <span>{{ generatedNPC.bonds }}</span>
+          </div>
+          <div class="npc-row">
+            <label>Flaws:</label>
+            <span>{{ generatedNPC.flaws }}</span>
+          </div>
+        </div>
+
+        <div class="npc-details">
+          <h4>Details</h4>
+          <div class="npc-row">
+            <label>Appearance:</label>
+            <span>{{ generatedNPC.appearance }}</span>
+          </div>
+          <div class="npc-row">
+            <label>Skills:</label>
+            <span>{{ generatedNPC.skills }}</span>
+          </div>
+          <div class="npc-row">
+            <label>Equipment:</label>
+            <span>{{ generatedNPC.equipment }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kept-npc" *ngIf="keptNPCs.length > 0">
+      <h3>Kept NPCs</h3>
+      <div class="kept-npc-tabs">
+        <div class="tabs-bar">
+          <button 
+            *ngFor="let npc of keptNPCs"
+            type="button"
+            class="kept-npc-tab"
+            [class.active]="npc.id === activeKeptNPCId"
+            (click)="selectKeptNPC(npc.id)"
+            (dblclick)="startEditingKeptNPCLabel(npc.id)">
+            <input
+              *ngIf="editingKeptNPCId === npc.id"
+              [value]="npc.label"
+              (blur)="finishEditingKeptNPCLabel(npc.id, $any($event.target).value)"
+              (keydown.enter)="finishEditingKeptNPCLabel(npc.id, $any($event.target).value)"
+              (keydown.escape)="editingKeptNPCId = null"
+              autofocus />
+            <span *ngIf="editingKeptNPCId !== npc.id">{{ npc.label }}</span>
+            <button 
+              type="button" 
+              class="delete-npc-btn"
+              (click)="deleteKeptNPC(npc.id); $event.stopPropagation()"
+              title="Delete NPC">×</button>
+          </button>
+        </div>
+
+        <div class="kept-npc-content" *ngIf="activeKeptNPC">
+          <div class="npc-card">
+            <div class="npc-basic-info">
+              <div class="npc-row">
+                <label>Name:</label>
+                <span>{{ activeKeptNPC.data.name }}</span>
+              </div>
+              <div class="npc-row">
+                <label>Race:</label>
+                <span>{{ activeKeptNPC.data.race }}</span>
+              </div>
+              <div class="npc-row">
+                <label>Class:</label>
+                <span>{{ activeKeptNPC.data.class }}</span>
+              </div>
+              <div class="npc-row">
+                <label>Level:</label>
+                <span>{{ activeKeptNPC.data.level }}</span>
+              </div>
+              <div class="npc-row">
+                <label>Alignment:</label>
+                <span>{{ activeKeptNPC.data.alignment }}</span>
+              </div>
+              <div class="npc-row">
+                <label>Background:</label>
+                <span>{{ activeKeptNPC.data.background }}</span>
+              </div>
+              <div class="npc-stats-row">
+                <div class="stat">
+                  <span class="stat-label">STR</span>
+                  <span class="stat-value">{{ activeKeptNPC.data.strength }}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">DEX</span>
+                  <span class="stat-value">{{ activeKeptNPC.data.dexterity }}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">CON</span>
+                  <span class="stat-value">{{ activeKeptNPC.data.constitution }}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">INT</span>
+                  <span class="stat-value">{{ activeKeptNPC.data.intelligence }}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">WIS</span>
+                  <span class="stat-value">{{ activeKeptNPC.data.wisdom }}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">CHA</span>
+                  <span class="stat-value">{{ activeKeptNPC.data.charisma }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="npc-personality">
+              <h4>Personality</h4>
+              <div class="npc-row">
+                <label>Traits:</label>
+                <span>{{ activeKeptNPC.data.traits }}</span>
+              </div>
+              <div class="npc-row">
+                <label>Ideals:</label>
+                <span>{{ activeKeptNPC.data.ideals }}</span>
+              </div>
+              <div class="npc-row">
+                <label>Bonds:</label>
+                <span>{{ activeKeptNPC.data.bonds }}</span>
+              </div>
+              <div class="npc-row">
+                <label>Flaws:</label>
+                <span>{{ activeKeptNPC.data.flaws }}</span>
+              </div>
+            </div>
+
+            <div class="npc-details">
+              <h4>Details</h4>
+              <div class="npc-row">
+                <label>Appearance:</label>
+                <span>{{ activeKeptNPC.data.appearance }}</span>
+              </div>
+              <div class="npc-row">
+                <label>Skills:</label>
+                <span>{{ activeKeptNPC.data.skills }}</span>
+              </div>
+              <div class="npc-row">
+                <label>Equipment:</label>
+                <span>{{ activeKeptNPC.data.equipment }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="npc-empty" *ngIf="!generatedNPC && keptNPCs.length === 0">
+      <p>Click "Generate NPC" to create your first NPC</p>
+    </div>
+  </div>
+</div>

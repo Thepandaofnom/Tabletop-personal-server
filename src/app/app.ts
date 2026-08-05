@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
-import { DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData, CharacterSheetType, GlobalSettingsComponent } from '@tabletop/ui-components';
+import { DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData, CharacterSheetType, GlobalSettingsComponent, NPCMakerComponent } from '@tabletop/ui-components';
 
 interface LoginResponse {
   username: string;
@@ -13,7 +13,7 @@ interface LoginResponse {
   email?: string;
 }
 
-type MainContentView = 'landing' | 'character-sheet' | 'game-map' | 'global-settings';
+type MainContentView = 'landing' | 'character-sheet' | 'game-map' | 'global-settings' | 'npc-maker';
 
 interface CharacterSheetTab {
   id: string;
@@ -25,7 +25,7 @@ interface CharacterSheetTab {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, HttpClientModule, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, GlobalSettingsComponent],
+  imports: [RouterOutlet, CommonModule, HttpClientModule, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, GlobalSettingsComponent, NPCMakerComponent],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
@@ -167,6 +167,7 @@ export class App {
   onMenuGameMapClick() { this.currentView = 'game-map'; }
   onMenuDiceBagClick() { this.diceBagVisible = true; }
   onMenuAccountClick() { this.accountViewVisible = true; }
+  onMenuNPCMakerClick() { this.currentView = 'npc-maker'; }
   onMenuOptionsClick() { this.currentView = 'global-settings'; }
   onAppThemeChange(darkMode: boolean) {
     this.darkMode = darkMode;
