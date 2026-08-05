@@ -85,7 +85,8 @@ export class GameMapModal implements OnDestroy {
   private tokens: Map<string, Konva.Group> = new Map(); // id -> token group
   private tokenColors: Map<string, string> = new Map(); // id -> color
   private tokenImages: Map<string, Konva.Image> = new Map(); // id -> image object
-  private tokenScales: Map<string, number> = new Map(); // id -> scale factor
+  private tokenScales: Map<string, number> = new Map(); // id -> scale factor (from user resize)
+  private tokenBaseScales: Map<string, number> = new Map(); // id -> base scale (without zoom applied)
   private tokenRotations: Map<string, number> = new Map(); // id -> rotation in degrees
   private draggingTokenId?: string;
   private hoveredTokenId?: string;
@@ -387,12 +388,11 @@ export class GameMapModal implements OnDestroy {
         this.gridLayer.scale({ x: this.zoom, y: this.zoom });
       }
 
-      // Scale individual tokens instead of the layer to maintain their positions
-      // Scaling the layer would move tokens from origin, pushing them off-screen
+      // Scale individual tokens: zoom * baseScale (not accumulated zoom)
       this.tokens.forEach((tokenGroup, tokenId) => {
-        const tokenScale = this.tokenScales.get(tokenId) || 1;
-        // Apply both map zoom and individual token scale
-        tokenGroup.scale({ x: this.zoom * tokenScale, y: this.zoom * tokenScale });
+        const baseScale = this.tokenBaseScales.get(tokenId) || 1;
+        // Apply map zoom combined with the base token scale
+        tokenGroup.scale({ x: this.zoom * baseScale, y: this.zoom * baseScale });
       });
       
       this.stage.draw();
@@ -539,6 +539,8 @@ export class GameMapModal implements OnDestroy {
     this.tokenLayer.add(tokenGroup);
     this.tokens.set(tokenId, tokenGroup);
     this.tokenColors.set(tokenId, '#4a90e2'); // Store initial color
+    this.tokenScales.set(tokenId, 1); // Store scale (1 = default size)
+    this.tokenBaseScales.set(tokenId, 1); // Store base scale without zoom
     this.tokenLayer.draw();
 
     this.showTokenDialog = false;
@@ -747,9 +749,10 @@ export class GameMapModal implements OnDestroy {
 
     const tokenGroup = this.tokens.get(this.editingTokenId);
     if (tokenGroup) {
-     tokenGroup.scale({ x: newSize, y: newSize });
-     this.tokenScales.set(this.editingTokenId, newSize);
-     this.tokenLayer?.draw();
+      tokenGroup.scale({ x: newSize, y: newSize });
+      this.tokenScales.set(this.editingTokenId, newSize);
+      this.tokenBaseScales.set(this.editingTokenId, newSize); // Update base scale when user resizes
+      this.tokenLayer?.draw();
     }
   }
 
@@ -762,12 +765,13 @@ export class GameMapModal implements OnDestroy {
   cancelTokenResize() {
     // Revert to old size
     if (this.editingTokenId) {
-     const tokenGroup = this.tokens.get(this.editingTokenId);
-     if (tokenGroup) {
-       tokenGroup.scale({ x: this.tokenResizeOldValue, y: this.tokenResizeOldValue });
-       this.tokenScales.set(this.editingTokenId, this.tokenResizeOldValue);
-       this.tokenLayer?.draw();
-     }
+      const tokenGroup = this.tokens.get(this.editingTokenId);
+      if (tokenGroup) {
+        tokenGroup.scale({ x: this.tokenResizeOldValue, y: this.tokenResizeOldValue });
+        this.tokenScales.set(this.editingTokenId, this.tokenResizeOldValue);
+        this.tokenBaseScales.set(this.editingTokenId, this.tokenResizeOldValue); // Revert base scale too
+        this.tokenLayer?.draw();
+      }
     }
 
     this.showResizeDialog = false;
@@ -961,7 +965,7 @@ export class GameMapModal implements OnDestroy {
     const viewportOffsetX = mapData.viewport?.offsetX || 0;
     const viewportOffsetY = mapData.viewport?.offsetY || 0;
 
-    // Clear existing tokens
+     // Clear existing tokens
     this.tokens.forEach((tokenGroup) => {
       tokenGroup.destroy();
     });
@@ -969,6 +973,7 @@ export class GameMapModal implements OnDestroy {
     this.tokenColors.clear();
     this.tokenImages.clear();
     this.tokenScales.clear();
+    this.tokenBaseScales.clear();
     this.tokenRotations.clear();
 
     // Restore map image if present (async)
@@ -1101,6 +1106,7 @@ export class GameMapModal implements OnDestroy {
     this.tokens.set(tokenId, tokenGroup);
     this.tokenColors.set(tokenId, circleColor);
     this.tokenScales.set(tokenId, tokenData.scale || 1);
+    this.tokenBaseScales.set(tokenId, tokenData.scale || 1); // Initialize base scale
     this.tokenRotations.set(tokenId, tokenData.rotation || 0);
 
     // Apply scale and rotation
@@ -1155,6 +1161,7 @@ export class GameMapModal implements OnDestroy {
       this.tokenColors.clear();
       this.tokenImages.clear();
       this.tokenScales.clear();
+      this.tokenBaseScales.clear();
       this.tokenRotations.clear();
     } catch (e) {
       console.error('Failed to destroy Konva stage', e);
