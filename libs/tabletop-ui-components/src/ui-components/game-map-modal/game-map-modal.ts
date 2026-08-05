@@ -60,6 +60,16 @@ export class GameMapModal implements OnDestroy {
       label: 'Add Generic Token',
       icon: 'pi pi-plus',
       command: () => this.openAddTokenDialog(),
+    },
+    {
+      label: 'Export Map Settings',
+      icon: 'pi pi-download',
+      command: () => this.exportMapSettings(),
+    },
+    {
+      label: 'Import Map Settings',
+      icon: 'pi pi-upload',
+      command: () => this.importMapSettings(),
     }
   ];
 
@@ -774,6 +784,254 @@ export class GameMapModal implements OnDestroy {
     this.editingTokenId = undefined;
   }
 
+  private exportMapSettings() {
+    const mapData = {
+      gridSettings: {
+        showGrid: this.showGrid,
+        gridColor: this.gridColor,
+        gridCellWidth: this.gridCellWidth,
+        gridCellHeight: this.gridCellHeight,
+      },
+      zoomSettings: {
+        zoom: this.zoom,
+        scaleGrid: this.scaleGrid,
+        gridZoom: this.gridZoom,
+      },
+      tokens: this.serializeTokens(),
+    };
+
+    const dataStr = JSON.stringify(mapData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `map-settings-${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  private serializeTokens() {
+    const tokensList: any[] = [];
+    this.tokens.forEach((tokenGroup, tokenId) => {
+      const textNode = tokenGroup.findOne('Text') as Konva.Text;
+      const tokenName = textNode?.text() || 'Unnamed Token';
+      
+      const token = {
+        id: tokenId,
+        name: tokenName,
+        x: tokenGroup.x(),
+        y: tokenGroup.y(),
+        scale: this.tokenScales.get(tokenId) || 1,
+        rotation: this.tokenRotations.get(tokenId) || 0,
+        color: this.tokenColors.get(tokenId) || '#4a90e2',
+        image: this.getTokenImageAsBase64(tokenId),
+      };
+
+      tokensList.push(token);
+    });
+
+    return tokensList;
+  }
+
+  private getTokenImageAsBase64(tokenId: string): string | null {
+    const konvaImage = this.tokenImages.get(tokenId);
+    if (!konvaImage) return null;
+
+    const image = konvaImage.image() as HTMLImageElement;
+    if (!image) return null;
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(image, 0, 0);
+        return canvas.toDataURL('image/png');
+      }
+    } catch (e) {
+      console.warn('Failed to serialize image:', e);
+    }
+    return null;
+  }
+
+  private importMapSettings() {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'application/json';
+    fileInput.onchange = (e: any) => this.onMapSettingsFileSelected(e);
+    fileInput.click();
+  }
+
+  private onMapSettingsFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      if (!e.target?.result) return;
+
+      try {
+        const mapData = JSON.parse(e.target.result as string);
+        this.restoreMapSettings(mapData);
+      } catch (error) {
+        console.error('Failed to parse map settings file:', error);
+        alert('Failed to import map settings. Invalid file format.');
+      }
+    };
+
+    reader.readAsText(file);
+  }
+
+  private restoreMapSettings(mapData: any) {
+    if (!this.stage || !this.tokenLayer) return;
+
+    // Restore grid settings
+    this.gridColor = mapData.gridSettings?.gridColor || '#000000';
+    this.gridCellWidth = mapData.gridSettings?.gridCellWidth || 50;
+    this.gridCellHeight = mapData.gridSettings?.gridCellHeight || 50;
+    this.showGrid = mapData.gridSettings?.showGrid || false;
+
+    // Restore zoom settings
+    this.zoom = mapData.zoomSettings?.zoom || 1;
+    this.scaleGrid = mapData.zoomSettings?.scaleGrid || false;
+    this.gridZoom = mapData.zoomSettings?.gridZoom || 1;
+
+    // Redraw grid if needed
+    if (this.showGrid) {
+      this.drawGrid();
+    }
+
+    // Clear existing tokens
+    this.tokens.forEach((tokenGroup) => {
+      tokenGroup.destroy();
+    });
+    this.tokens.clear();
+    this.tokenColors.clear();
+    this.tokenImages.clear();
+    this.tokenScales.clear();
+    this.tokenRotations.clear();
+
+    // Restore tokens
+    mapData.tokens?.forEach((tokenData: any) => {
+      this.restoreToken(tokenData);
+    });
+
+    this.tokenLayer.draw();
+  }
+
+  private restoreToken(tokenData: any) {
+    if (!this.stage || !this.tokenLayer) return;
+
+    const tokenId = tokenData.id || `token-${Date.now()}`;
+
+    // Create token group
+    const tokenGroup = new Konva.Group({
+      x: tokenData.x || this.stage.width() / 2,
+      y: tokenData.y || this.stage.height() / 2,
+      name: tokenId,
+      draggable: false,
+    });
+
+    // Create circle background
+    const circleColor = tokenData.color || '#4a90e2';
+    const circle = new Konva.Circle({
+      radius: 20,
+      fill: circleColor,
+      stroke: '#2c5aa0',
+      strokeWidth: 2,
+    });
+
+    // Create text label
+    const text = new Konva.Text({
+      text: tokenData.name || 'Token',
+      fontSize: 12,
+      fontFamily: 'Arial',
+      fill: '#ffffff',
+      align: 'center',
+      verticalAlign: 'middle',
+      width: 40,
+      height: 40,
+      x: -20,
+      y: -20,
+    });
+
+    tokenGroup.add(circle);
+    tokenGroup.add(text);
+
+    // Add hover effects
+    tokenGroup.on('mouseover', () => {
+      circle.fill('#5ba3ff');
+      document.body.style.cursor = 'grab';
+      this.stage?.draw();
+    });
+
+    tokenGroup.on('mouseout', () => {
+      circle.fill(circleColor);
+      document.body.style.cursor = 'default';
+      this.stage?.draw();
+    });
+
+    // Add mousedown handler for token dragging
+    tokenGroup.on('mousedown', (e) => {
+      e.cancelBubble = true;
+      this.draggingTokenId = tokenId;
+      this.isDragging = true;
+      this.dragStartX = e.evt.clientX;
+      this.dragStartY = e.evt.clientY;
+    });
+
+    // Add right-click context menu
+    tokenGroup.on('contextmenu', (e) => {
+      e.evt.preventDefault();
+      this.showTokenContextMenu(tokenId, e.evt);
+    });
+
+    this.tokenLayer.add(tokenGroup);
+    this.tokens.set(tokenId, tokenGroup);
+    this.tokenColors.set(tokenId, circleColor);
+    this.tokenScales.set(tokenId, tokenData.scale || 1);
+    this.tokenRotations.set(tokenId, tokenData.rotation || 0);
+
+    // Apply scale and rotation
+    tokenGroup.scale({ x: tokenData.scale || 1, y: tokenData.scale || 1 });
+    tokenGroup.rotation(tokenData.rotation || 0);
+
+    // Restore image if present
+    if (tokenData.image) {
+      this.restoreTokenImage(tokenId, tokenData.image);
+    }
+  }
+
+  private restoreTokenImage(tokenId: string, base64Image: string) {
+    const tokenGroup = this.tokens.get(tokenId);
+    if (!tokenGroup || !this.tokenLayer) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const konvaImage = new Konva.Image({
+        image: img,
+        x: -20,
+        y: -20,
+        width: 40,
+        height: 40,
+      });
+
+      tokenGroup.add(konvaImage);
+      tokenGroup.moveToBottom();
+      this.tokenImages.set(tokenId, konvaImage);
+      this.tokenLayer?.draw();
+    };
+    img.onerror = () => {
+      console.warn('Failed to restore token image');
+    };
+    img.src = base64Image;
+  }
+
   private destroyStage() {
     try {
       window.removeEventListener('resize', this.onWindowResize);
@@ -801,3 +1059,4 @@ export class GameMapModal implements OnDestroy {
     this.destroyStage();
   }
 }
+
