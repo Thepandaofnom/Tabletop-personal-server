@@ -387,8 +387,10 @@ export class GameMapModal implements OnDestroy {
         this.gridLayer.scale({ x: this.zoom, y: this.zoom });
       }
 
-      // Don't scale tokenLayer - tokens maintain their own scale independent of map zoom
-      // This prevents them from disappearing when scaling from origin (0,0)
+      // Scale token layer with the map image and grid
+      if (this.tokenLayer) {
+        this.tokenLayer.scale({ x: this.zoom, y: this.zoom });
+      }
       
       this.stage.draw();
     }
