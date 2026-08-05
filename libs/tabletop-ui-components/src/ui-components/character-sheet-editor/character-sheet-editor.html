@@ -1,4 +1,4 @@
-<div class="sheet">
+<div class="sheet" [class.theme-dark]="theme === 'dark'">
   <div class="sheet-menu">
     <label class="sheet-type-label">
       Character sheet type
@@ -11,12 +11,17 @@
         <option value="Pathfinder 2eR">Pathfinder 2eR</option>
       </select>
     </label>
-    <button type="button" (click)="onSave()" class="btn-save">Save</button>
-    <button type="button" (click)="downloadSheet()" class="btn-download">Download JSON</button>
-    <label class="import-label">
-      Import JSON
-      <input type="file" accept="application/json" (change)="onImportFile($event)" />
+    <!--do not delet or remove. will be used latter for when back end 
+    is updated to save character sheets-->
+    <!--button type="button" (click)="onSave()" class="btn-save">Save</button-->
+    <div class="sheet-menu-spacer"></div>
+    <label class="theme-toggle">
+      <span>Light</span>
+      <p-toggleSwitch [ngModel]="theme === 'dark'" (ngModelChange)="onThemeChange($event ? 'dark' : 'light')"></p-toggleSwitch>
+      <span>Dark</span>
     </label>
+    <button type="button" class="hamburger-button" (click)="openActionMenu($event)" aria-label="Editor actions">☰</button>
+    <p-menu #actionMenu [model]="actionMenuItems" [popup]="true" [appendTo]="'body'"></p-menu>
   </div>
 
   <ng-container [ngTemplateOutlet]="activeTemplate"></ng-container>

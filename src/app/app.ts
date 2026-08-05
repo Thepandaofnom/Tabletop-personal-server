@@ -38,6 +38,7 @@ export class App {
   protected signupVisible = false;
   protected accountViewVisible = false;
   protected currentView: MainContentView = 'landing';
+  protected characterSheetTheme: 'light' | 'dark' = 'light';
   protected activeCharacterSheetTabId = 'sheet-1';
   protected editingTabId?: string;
   protected characterSheetTabs: CharacterSheetTab[] = [
@@ -77,6 +78,10 @@ export class App {
 
   onCharacterSheetTypeChange(tabId: string, type: CharacterSheetType) {
     this.characterSheetTabs = this.characterSheetTabs.map(tab => tab.id === tabId ? { ...tab, sheetType: type } : tab);
+  }
+
+  onCharacterSheetThemeChange(theme: 'light' | 'dark') {
+    this.characterSheetTheme = theme;
   }
 
   onCharacterSheetTabClick(tabId: string) {

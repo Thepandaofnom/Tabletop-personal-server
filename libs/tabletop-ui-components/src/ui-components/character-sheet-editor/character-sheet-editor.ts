@@ -1,6 +1,10 @@
 import { Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { MenuModule } from 'primeng/menu';
+import { Menu } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 
 export interface CharacterSheetData {
   characterName: string;
@@ -55,14 +59,16 @@ export type CharacterSheetType = 'D&D-5.0' | 'D&D-3.5' | 'GURPS' | 'pathfinder 1
 @Component({
   selector: 'character-sheet-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ToggleSwitchModule, MenuModule],
   templateUrl: './character-sheet-editor.html',
   styleUrls: ['./character-sheet-editor.css']
 })
 export class CharacterSheetEditor {
   @Input() value: CharacterSheetData = this.createEmptySheet();
   @Input() sheetType!: CharacterSheetType;
+  @Input() theme: 'light' | 'dark' = 'light';
   @Output() sheetTypeChange = new EventEmitter<CharacterSheetType>();
+  @Output() themeChange = new EventEmitter<'light' | 'dark'>();
   @Output() valueChange = new EventEmitter<CharacterSheetData>();
   @Output() saveSheet = new EventEmitter<CharacterSheetData>();
   @ViewChild('dnd50Template', { static: true }) dnd50Template!: TemplateRef<unknown>;
@@ -71,7 +77,12 @@ export class CharacterSheetEditor {
   @ViewChild('pathfinder1eTemplate', { static: true }) pathfinder1eTemplate!: TemplateRef<unknown>;
   @ViewChild('pathfinder2eTemplate', { static: true }) pathfinder2eTemplate!: TemplateRef<unknown>;
   @ViewChild('pathfinder2erTemplate', { static: true }) pathfinder2erTemplate!: TemplateRef<unknown>;
+  @ViewChild('actionMenu') actionMenu!: Menu;
   activeTemplate!: TemplateRef<unknown>;
+  actionMenuItems: MenuItem[] = [
+    { label: 'Download JSON', icon: 'pi pi-download', command: () => this.downloadSheet() },
+    { label: 'Import JSON', icon: 'pi pi-upload', command: () => this.triggerImport() }
+  ];
 
   private createEmptySheet(): CharacterSheetData {
     return {
@@ -101,6 +112,23 @@ export class CharacterSheetEditor {
     this.sheetType = type;
     this.activeTemplate = this.getTemplateForType(type);
     this.sheetTypeChange.emit(type);
+  }
+
+  onThemeChange(theme: 'light' | 'dark'): void {
+    this.theme = theme;
+    this.themeChange.emit(theme);
+  }
+
+  openActionMenu(event: Event): void {
+    this.actionMenu.toggle(event);
+  }
+
+  private triggerImport(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = (event) => this.onImportFile(event as unknown as Event);
+    input.click();
   }
 
   onSave(): void {
