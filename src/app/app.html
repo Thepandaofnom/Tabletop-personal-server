@@ -21,7 +21,6 @@
 </div>
 
 <dice-bag-modal [visible]="diceBagVisible" (visibleChange)="diceBagVisible = $event"></dice-bag-modal>
-<game-map-modal [visible]="gameMapVisible" (visibleChange)="gameMapVisible = $event"></game-map-modal>
 <new-user-sign-up [visible]="signupVisible" (visibleChange)="signupVisible = $event"></new-user-sign-up>
 
 <account-view-panel
@@ -34,6 +33,10 @@
 </account-view-panel>
 
 <main class="main-content">
+  <div [style.display]="currentView === 'game-map' ? 'block' : 'none'" style="width: 100%; height: 100%;">
+    <game-map-component></game-map-component>
+  </div>
+
   <character-sheet-editor
     *ngIf="currentView === 'character-sheet'"
     [value]="characterSheet"

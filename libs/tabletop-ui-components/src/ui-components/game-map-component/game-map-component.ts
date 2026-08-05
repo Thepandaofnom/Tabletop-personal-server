@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, ElementRef, ViewChild, OnDestroy, AfterViewInit } from '@angular/core';
 import Konva from 'konva';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -12,15 +12,13 @@ import { Menu } from 'primeng/menu';
 import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
-  selector: 'game-map-modal',
+  selector: 'game-map-component',
   standalone: true,
   imports: [DialogModule, ButtonModule, MenuModule, ColorPickerModule, TooltipModule, CommonModule, FormsModule, InputTextModule],
-  templateUrl: './game-map-modal.html',
+  templateUrl: './game-map-component.html',
+  styleUrls: ['./game-map-component.css'],
 })
-export class GameMapModal implements OnDestroy {
-  @Input() visible = false;
-  @Output() visibleChange = new EventEmitter<boolean>();
-
+export class GameMapComponent implements OnDestroy, AfterViewInit {
   @ViewChild('stageContainer', { static: false }) stageContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('menu') menu!: Menu;
 
@@ -60,6 +58,16 @@ export class GameMapModal implements OnDestroy {
       label: 'Add Generic Token',
       icon: 'pi pi-plus',
       command: () => this.openAddTokenDialog(),
+    },
+    {
+      label: 'Export Map Settings',
+      icon: 'pi pi-download',
+      command: () => this.exportMapSettings(),
+    },
+    {
+      label: 'Import Map Settings',
+      icon: 'pi pi-upload',
+      command: () => this.importMapSettings(),
     }
   ];
 
@@ -75,24 +83,12 @@ export class GameMapModal implements OnDestroy {
   private tokens: Map<string, Konva.Group> = new Map(); // id -> token group
   private tokenColors: Map<string, string> = new Map(); // id -> color
   private tokenImages: Map<string, Konva.Image> = new Map(); // id -> image object
-  private tokenScales: Map<string, number> = new Map(); // id -> scale factor
+  private tokenBasePositions: Map<string, { x: number; y: number }> = new Map(); // id -> base position at 100% zoom
+  private tokenBaseSizes: Map<string, number> = new Map(); // id -> base size at 100% zoom
+  private tokenUserScales: Map<string, number> = new Map(); // id -> user resize scale multiplier
   private tokenRotations: Map<string, number> = new Map(); // id -> rotation in degrees
   private draggingTokenId?: string;
   private hoveredTokenId?: string;
-
-  get visibleLocal() {
-    return this.visible;
-  }
-  set visibleLocal(v: boolean) {
-    this.visible = v;
-    this.visibleChange.emit(v);
-    if (v) {
-      // initialize stage after the dialog is visible
-      setTimeout(() => this.initStage(), 0);
-    } else {
-      this.destroyStage();
-    }
-  }
 
   private initStage() {
     try {
@@ -143,6 +139,9 @@ export class GameMapModal implements OnDestroy {
         this.stage.on('mousemove', (e) => this.onStageMouseMove(e));
         this.stage.on('mouseup', () => this.onStageMouseUp());
 
+        // Add wheel zoom handler
+        container.addEventListener('wheel', (e) => this.onStageWheel(e));
+
         // observe container resize for dynamic resizing
         this.resizeObserver = new ResizeObserver(() => this.onContainerResize());
         this.resizeObserver.observe(container);
@@ -172,14 +171,17 @@ export class GameMapModal implements OnDestroy {
     this.stage.draw();
   };
 
-  onDialogResize(event: any) {
-    // dialog resize may happen before DOM updates, run after a short timeout
-    setTimeout(() => this.onContainerResize(), 50);
-  }
-
-  onDialogShown() {
-    // Dialog content is attached to the DOM — initialize stage afterwards
+  ngAfterViewInit() {
+    // Component content is attached to the DOM — initialize stage
     setTimeout(() => this.initStage(), 0);
+
+    // Set up a ResizeObserver to handle container resize
+    if (this.stageContainer) {
+      const resizeObserver = new ResizeObserver(() => {
+        this.onContainerResize();
+      });
+      resizeObserver.observe(this.stageContainer.nativeElement);
+    }
   }
 
   private onStageMouseDown(e: Konva.KonvaEventObject<MouseEvent>) {
@@ -208,8 +210,16 @@ export class GameMapModal implements OnDestroy {
       // Move the token independently
       const token = this.tokens.get(this.draggingTokenId);
       if (token) {
-        token.x(token.x() + deltaX);
-        token.y(token.y() + deltaY);
+        const newX = token.x() + deltaX;
+        const newY = token.y() + deltaY;
+        token.x(newX);
+        token.y(newY);
+        
+        // Update base position (divide by zoom to store unzoomed position)
+        this.tokenBasePositions.set(this.draggingTokenId, {
+          x: newX / this.zoom,
+          y: newY / this.zoom
+        });
       }
     } else {
       // Move the map layers and token layer together
@@ -236,6 +246,28 @@ export class GameMapModal implements OnDestroy {
   private onStageMouseUp() {
     this.isDragging = false;
     this.draggingTokenId = undefined;
+  }
+
+  private onStageWheel(e: WheelEvent) {
+    if (!this.stage) return;
+
+    e.preventDefault();
+
+    // Get the current zoom level (convert from percentage to decimal if needed)
+    let newZoom = this.zoom;
+
+    // Adjust zoom based on scroll direction
+    // Negative deltaY means scroll up (zoom in), positive means scroll down (zoom out)
+    const zoomSpeed = 0.1; // 10% per scroll tick
+    if (e.deltaY < 0) {
+      newZoom = Math.min(3, newZoom + zoomSpeed); // Max 300%
+    } else {
+      newZoom = Math.max(0.1, newZoom - zoomSpeed); // Min 10%
+    }
+
+    // Apply the new zoom
+    this.zoom = newZoom;
+    this.onZoomChange(newZoom * 100);
   }
 
   onFileChange(evt: Event) {
@@ -346,14 +378,36 @@ export class GameMapModal implements OnDestroy {
         this.layer.scale({ x: this.zoom, y: this.zoom });
       }
       
-      // Scale grid layer only if scaleGrid is true
+      // Always scale grid layer when zooming (regardless of scaleGrid setting)
+      // scaleGrid only affects independent grid zoom slider behavior
       if (this.gridLayer) {
-        if (this.scaleGrid) {
-          this.gridLayer.scale({ x: this.zoom, y: this.zoom });
-        } else {
-          this.gridLayer.scale({ x: this.gridZoom, y: this.gridZoom });
-        }
+        this.gridLayer.scale({ x: this.zoom, y: this.zoom });
       }
+
+      // Scale tokens proportionally with zoom: apply zoom to both position and size
+      this.tokens.forEach((tokenGroup, tokenId) => {
+        const basePos = this.tokenBasePositions.get(tokenId);
+        const baseSize = this.tokenBaseSizes.get(tokenId) || 20;
+        const userScale = this.tokenUserScales.get(tokenId) || 1;
+        
+        if (basePos) {
+          // Apply zoom to position
+          tokenGroup.position({
+            x: basePos.x * this.zoom,
+            y: basePos.y * this.zoom
+          });
+        }
+        
+        // Apply zoom to size: scaledSize = baseSize * userScale * zoom
+        const scaledSize = baseSize * userScale * this.zoom;
+        const circle = tokenGroup.findOne('Circle') as Konva.Circle;
+        if (circle) {
+          circle.radius(scaledSize);
+        }
+        
+        // Update token image to match the new size
+        this.updateTokenImageSize(tokenId);
+      });
       
       this.stage.draw();
     }
@@ -499,6 +553,12 @@ export class GameMapModal implements OnDestroy {
     this.tokenLayer.add(tokenGroup);
     this.tokens.set(tokenId, tokenGroup);
     this.tokenColors.set(tokenId, '#4a90e2'); // Store initial color
+    this.tokenBasePositions.set(tokenId, { 
+      x: this.stage.width() / 2, 
+      y: this.stage.height() / 2 
+    }); // Store base position (at 100% zoom)
+    this.tokenBaseSizes.set(tokenId, 20); // Store base size (radius = 20)
+    this.tokenUserScales.set(tokenId, 1); // Store user resize multiplier
     this.tokenLayer.draw();
 
     this.showTokenDialog = false;
@@ -685,6 +745,8 @@ export class GameMapModal implements OnDestroy {
           tokenGroup.moveToBottom();
           
           this.tokenImages.set(tokenId, konvaImage);
+          // Update image size to match the current token size (applies zoom)
+          this.updateTokenImageSize(tokenId);
           this.tokenLayer.draw();
         }
       };
@@ -694,9 +756,28 @@ export class GameMapModal implements OnDestroy {
     reader.readAsDataURL(file);
   }
 
+  private updateTokenImageSize(tokenId: string) {
+    const tokenGroup = this.tokens.get(tokenId);
+    const konvaImage = this.tokenImages.get(tokenId);
+    if (!tokenGroup || !konvaImage) return;
+
+    // Calculate current size: baseSize * userScale * zoom
+    const baseSize = this.tokenBaseSizes.get(tokenId) || 20;
+    const userScale = this.tokenUserScales.get(tokenId) || 1;
+    const scaledRadius = baseSize * userScale * this.zoom;
+    const diameter = scaledRadius * 2;
+
+    // Update image dimensions to match circle diameter
+    konvaImage.width(diameter);
+    konvaImage.height(diameter);
+    // Re-center the image (offset from center)
+    konvaImage.x(-scaledRadius);
+    konvaImage.y(-scaledRadius);
+  }
+
   private openResizeDialog(tokenId: string) {
     this.editingTokenId = tokenId;
-    const currentScale = this.tokenScales.get(tokenId) || 1;
+    const currentScale = this.tokenUserScales.get(tokenId) || 1;
     this.tokenResizeOldValue = currentScale;
     this.tokenResizeValue = currentScale;
     this.showResizeDialog = true;
@@ -707,9 +788,20 @@ export class GameMapModal implements OnDestroy {
 
     const tokenGroup = this.tokens.get(this.editingTokenId);
     if (tokenGroup) {
-     tokenGroup.scale({ x: newSize, y: newSize });
-     this.tokenScales.set(this.editingTokenId, newSize);
-     this.tokenLayer?.draw();
+      this.tokenUserScales.set(this.editingTokenId, newSize);
+      
+      // Recalculate token size: baseSize * userScale * zoom
+      const baseSize = this.tokenBaseSizes.get(this.editingTokenId) || 20;
+      const scaledSize = baseSize * newSize * this.zoom;
+      const circle = tokenGroup.findOne('Circle') as Konva.Circle;
+      if (circle) {
+        circle.radius(scaledSize);
+      }
+      
+      // Update token image to match the new size
+      this.updateTokenImageSize(this.editingTokenId);
+      
+      this.tokenLayer?.draw();
     }
   }
 
@@ -722,12 +814,23 @@ export class GameMapModal implements OnDestroy {
   cancelTokenResize() {
     // Revert to old size
     if (this.editingTokenId) {
-     const tokenGroup = this.tokens.get(this.editingTokenId);
-     if (tokenGroup) {
-       tokenGroup.scale({ x: this.tokenResizeOldValue, y: this.tokenResizeOldValue });
-       this.tokenScales.set(this.editingTokenId, this.tokenResizeOldValue);
-       this.tokenLayer?.draw();
-     }
+      const tokenGroup = this.tokens.get(this.editingTokenId);
+      if (tokenGroup) {
+        this.tokenUserScales.set(this.editingTokenId, this.tokenResizeOldValue);
+        
+        // Recalculate token size: baseSize * userScale * zoom
+        const baseSize = this.tokenBaseSizes.get(this.editingTokenId) || 20;
+        const scaledSize = baseSize * this.tokenResizeOldValue * this.zoom;
+        const circle = tokenGroup.findOne('Circle') as Konva.Circle;
+        if (circle) {
+          circle.radius(scaledSize);
+        }
+        
+        // Update token image to match the new size
+        this.updateTokenImageSize(this.editingTokenId);
+        
+        this.tokenLayer?.draw();
+      }
     }
 
     this.showResizeDialog = false;
@@ -774,6 +877,348 @@ export class GameMapModal implements OnDestroy {
     this.editingTokenId = undefined;
   }
 
+  private exportMapSettings() {
+    const mapData = {
+      gridSettings: {
+        showGrid: this.showGrid,
+        gridColor: this.gridColor,
+        gridCellWidth: this.gridCellWidth,
+        gridCellHeight: this.gridCellHeight,
+      },
+      zoomSettings: {
+        zoom: this.zoom,
+        scaleGrid: this.scaleGrid,
+        gridZoom: this.gridZoom,
+      },
+      viewport: {
+        offsetX: this.layer?.x() || 0,
+        offsetY: this.layer?.y() || 0,
+      },
+      mapImage: this.getMapImageAsBase64(),
+      tokens: this.serializeTokens(),
+    };
+
+    const dataStr = JSON.stringify(mapData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `map-settings-${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  private getMapImageAsBase64(): string | null {
+    if (!this.mapImage) return null;
+
+    const image = this.mapImage.image() as HTMLImageElement;
+    if (!image) return null;
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(image, 0, 0);
+        return canvas.toDataURL('image/png');
+      }
+    } catch (e) {
+      console.warn('Failed to serialize map image:', e);
+    }
+    return null;
+  }
+
+  private serializeTokens() {
+    const tokensList: any[] = [];
+    this.tokens.forEach((tokenGroup, tokenId) => {
+      const textNode = tokenGroup.findOne('Text') as Konva.Text;
+      const tokenName = textNode?.text() || 'Unnamed Token';
+      
+      const token = {
+        id: tokenId,
+        name: tokenName,
+        x: this.tokenBasePositions.get(tokenId)?.x || tokenGroup.x(),
+        y: this.tokenBasePositions.get(tokenId)?.y || tokenGroup.y(),
+        scale: this.tokenUserScales.get(tokenId) || 1,
+        rotation: this.tokenRotations.get(tokenId) || 0,
+        color: this.tokenColors.get(tokenId) || '#4a90e2',
+        image: this.getTokenImageAsBase64(tokenId),
+      };
+
+      tokensList.push(token);
+    });
+
+    return tokensList;
+  }
+
+  private getTokenImageAsBase64(tokenId: string): string | null {
+    const konvaImage = this.tokenImages.get(tokenId);
+    if (!konvaImage) return null;
+
+    const image = konvaImage.image() as HTMLImageElement;
+    if (!image) return null;
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(image, 0, 0);
+        return canvas.toDataURL('image/png');
+      }
+    } catch (e) {
+      console.warn('Failed to serialize image:', e);
+    }
+    return null;
+  }
+
+  private importMapSettings() {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'application/json';
+    fileInput.onchange = (e: any) => this.onMapSettingsFileSelected(e);
+    fileInput.click();
+  }
+
+  private onMapSettingsFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      if (!e.target?.result) return;
+
+      try {
+        const mapData = JSON.parse(e.target.result as string);
+        this.restoreMapSettings(mapData);
+      } catch (error) {
+        console.error('Failed to parse map settings file:', error);
+        alert('Failed to import map settings. Invalid file format.');
+      }
+    };
+
+    reader.readAsText(file);
+  }
+
+  private restoreMapSettings(mapData: any) {
+    if (!this.stage || !this.tokenLayer || !this.layer || !this.gridLayer) return;
+
+    // Restore grid settings
+    this.gridColor = mapData.gridSettings?.gridColor || '#000000';
+    this.gridCellWidth = mapData.gridSettings?.gridCellWidth || 50;
+    this.gridCellHeight = mapData.gridSettings?.gridCellHeight || 50;
+    this.showGrid = mapData.gridSettings?.showGrid || false;
+
+    // Restore zoom settings
+    this.zoom = mapData.zoomSettings?.zoom || 1;
+    this.scaleGrid = mapData.zoomSettings?.scaleGrid || false;
+    this.gridZoom = mapData.zoomSettings?.gridZoom || 1;
+
+    // Store viewport for later application
+    const viewportOffsetX = mapData.viewport?.offsetX || 0;
+    const viewportOffsetY = mapData.viewport?.offsetY || 0;
+
+     // Clear existing tokens
+    this.tokens.forEach((tokenGroup) => {
+      tokenGroup.destroy();
+    });
+    this.tokens.clear();
+    this.tokenColors.clear();
+    this.tokenImages.clear();
+    this.tokenBasePositions.clear();
+    this.tokenBaseSizes.clear();
+    this.tokenUserScales.clear();
+    this.tokenRotations.clear();
+
+    // Restore map image if present (async)
+    if (mapData.mapImage) {
+      this.restoreMapImage(mapData.mapImage, () => {
+        this.applyZoomAndGridSettings(viewportOffsetX, viewportOffsetY);
+      });
+    } else {
+      // If no map image, apply zoom/grid settings immediately and restore tokens
+      this.applyZoomAndGridSettings(viewportOffsetX, viewportOffsetY);
+    }
+
+    // Restore tokens
+    mapData.tokens?.forEach((tokenData: any) => {
+      this.restoreToken(tokenData);
+    });
+
+    this.tokenLayer.draw();
+  }
+
+  private applyZoomAndGridSettings(viewportOffsetX: number = 0, viewportOffsetY: number = 0) {
+    if (!this.stage || !this.layer || !this.gridLayer) return;
+
+    // Apply viewport offset (pan)
+    this.layer.position({ x: viewportOffsetX, y: viewportOffsetY });
+    this.gridLayer.position({ x: viewportOffsetX, y: viewportOffsetY });
+    this.tokenLayer?.position({ x: viewportOffsetX, y: viewportOffsetY });
+
+    // Apply zoom scale to image layer
+    this.layer.scale({ x: this.zoom, y: this.zoom });
+
+    // Apply grid scale
+    if (this.scaleGrid) {
+      this.gridLayer.scale({ x: this.zoom, y: this.zoom });
+    } else {
+      this.gridLayer.scale({ x: this.gridZoom, y: this.gridZoom });
+    }
+
+    // Redraw grid if needed
+    if (this.showGrid) {
+      this.drawGrid();
+    }
+
+    this.stage.draw();
+  }
+
+  private restoreMapImage(base64Image: string, onComplete?: () => void) {
+    if (!this.stage || !this.layer) return;
+
+    const img = new Image();
+    img.onload = () => {
+      this.addImageToLayer(img);
+      onComplete?.();
+    };
+    img.onerror = () => {
+      console.warn('Failed to restore map image');
+      onComplete?.();
+    };
+    img.src = base64Image;
+  }
+
+  private restoreToken(tokenData: any) {
+    if (!this.stage || !this.tokenLayer) return;
+
+    const tokenId = tokenData.id || `token-${Date.now()}`;
+
+    // Create token group
+    const tokenGroup = new Konva.Group({
+      x: tokenData.x || this.stage.width() / 2,
+      y: tokenData.y || this.stage.height() / 2,
+      name: tokenId,
+      draggable: false,
+    });
+
+    // Create circle background
+    const circleColor = tokenData.color || '#4a90e2';
+    const circle = new Konva.Circle({
+      radius: 20,
+      fill: circleColor,
+      stroke: '#2c5aa0',
+      strokeWidth: 2,
+    });
+
+    // Create text label
+    const text = new Konva.Text({
+      text: tokenData.name || 'Token',
+      fontSize: 12,
+      fontFamily: 'Arial',
+      fill: '#ffffff',
+      align: 'center',
+      verticalAlign: 'middle',
+      width: 40,
+      height: 40,
+      x: -20,
+      y: -20,
+    });
+
+    tokenGroup.add(circle);
+    tokenGroup.add(text);
+
+    // Add hover effects
+    tokenGroup.on('mouseover', () => {
+      circle.fill('#5ba3ff');
+      document.body.style.cursor = 'grab';
+      this.stage?.draw();
+    });
+
+    tokenGroup.on('mouseout', () => {
+      circle.fill(circleColor);
+      document.body.style.cursor = 'default';
+      this.stage?.draw();
+    });
+
+    // Add mousedown handler for token dragging
+    tokenGroup.on('mousedown', (e) => {
+      e.cancelBubble = true;
+      this.draggingTokenId = tokenId;
+      this.isDragging = true;
+      this.dragStartX = e.evt.clientX;
+      this.dragStartY = e.evt.clientY;
+    });
+
+    // Add right-click context menu
+    tokenGroup.on('contextmenu', (e) => {
+      e.evt.preventDefault();
+      this.showTokenContextMenu(tokenId, e.evt);
+    });
+
+    this.tokenLayer.add(tokenGroup);
+    this.tokens.set(tokenId, tokenGroup);
+    this.tokenColors.set(tokenId, circleColor);
+    this.tokenBasePositions.set(tokenId, { 
+      x: tokenData.x || this.stage.width() / 2, 
+      y: tokenData.y || this.stage.height() / 2 
+    }); // Store base position from imported data
+    this.tokenBaseSizes.set(tokenId, 20); // Base size is always 20 (radius)
+    this.tokenUserScales.set(tokenId, tokenData.scale || 1); // Store user resize scale
+    this.tokenRotations.set(tokenId, tokenData.rotation || 0);
+
+    // Apply current zoom to position and size
+    const scaledSize = 20 * (tokenData.scale || 1) * this.zoom;
+    const circle2 = tokenGroup.findOne('Circle') as Konva.Circle;
+    if (circle2) {
+      circle2.radius(scaledSize);
+    }
+    
+    tokenGroup.position({
+      x: (tokenData.x || this.stage.width() / 2) * this.zoom,
+      y: (tokenData.y || this.stage.height() / 2) * this.zoom
+    });
+    tokenGroup.rotation(tokenData.rotation || 0);
+
+    // Restore image if present
+    if (tokenData.image) {
+      this.restoreTokenImage(tokenId, tokenData.image);
+    }
+  }
+
+  private restoreTokenImage(tokenId: string, base64Image: string) {
+    const tokenGroup = this.tokens.get(tokenId);
+    if (!tokenGroup || !this.tokenLayer) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const konvaImage = new Konva.Image({
+        image: img,
+        x: -20,
+        y: -20,
+        width: 40,
+        height: 40,
+      });
+
+      tokenGroup.add(konvaImage);
+      tokenGroup.moveToBottom();
+      this.tokenImages.set(tokenId, konvaImage);
+      // Update image size to match the current token size (applies zoom)
+      this.updateTokenImageSize(tokenId);
+      this.tokenLayer?.draw();
+    };
+    img.onerror = () => {
+      console.warn('Failed to restore token image');
+    };
+    img.src = base64Image;
+  }
+
   private destroyStage() {
     try {
       window.removeEventListener('resize', this.onWindowResize);
@@ -790,7 +1235,9 @@ export class GameMapModal implements OnDestroy {
       this.tokens.clear();
       this.tokenColors.clear();
       this.tokenImages.clear();
-      this.tokenScales.clear();
+      this.tokenBasePositions.clear();
+      this.tokenBaseSizes.clear();
+      this.tokenUserScales.clear();
       this.tokenRotations.clear();
     } catch (e) {
       console.error('Failed to destroy Konva stage', e);
@@ -801,3 +1248,4 @@ export class GameMapModal implements OnDestroy {
     this.destroyStage();
   }
 }
+

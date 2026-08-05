@@ -1,0 +1,38 @@
+/* Hamburger menu styling - target menu container */
+::ng-deep .p-menu {
+  background-color: #1a1a1a !important;
+}
+
+::ng-deep .p-menu .p-menu-list {
+  background-color: #1a1a1a !important;
+}
+
+/* Style all menu items */
+::ng-deep .p-menu .p-menuitem {
+  background-color: #2d2d2d !important;
+  margin: 2px 0;
+}
+
+::ng-deep .p-menu .p-menuitem > a {
+  background-color: #2d2d2d !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 0.75rem 1rem !important;
+}
+
+::ng-deep .p-menu .p-menuitem > a:hover,
+::ng-deep .p-menu .p-menuitem:hover > a {
+  background-color: #404040 !important;
+  color: #fff !important;
+}
+
+::ng-deep .p-menu .p-menuitem.p-highlight > a,
+::ng-deep .p-menu .p-menuitem.p-focus > a {
+  background-color: #404040 !important;
+  color: #fff !important;
+}
+
+/* Ensure text is visible */
+::ng-deep .p-menu .p-menuitem a span {
+  color: #fff !important;
+}
