@@ -85,8 +85,9 @@ export class GameMapModal implements OnDestroy {
   private tokens: Map<string, Konva.Group> = new Map(); // id -> token group
   private tokenColors: Map<string, string> = new Map(); // id -> color
   private tokenImages: Map<string, Konva.Image> = new Map(); // id -> image object
-  private tokenScales: Map<string, number> = new Map(); // id -> scale factor (from user resize)
-  private tokenBaseScales: Map<string, number> = new Map(); // id -> base scale (without zoom applied)
+  private tokenBasePositions: Map<string, { x: number; y: number }> = new Map(); // id -> base position at 100% zoom
+  private tokenBaseSizes: Map<string, number> = new Map(); // id -> base size at 100% zoom
+  private tokenUserScales: Map<string, number> = new Map(); // id -> user resize scale multiplier
   private tokenRotations: Map<string, number> = new Map(); // id -> rotation in degrees
   private draggingTokenId?: string;
   private hoveredTokenId?: string;
@@ -222,8 +223,16 @@ export class GameMapModal implements OnDestroy {
       // Move the token independently
       const token = this.tokens.get(this.draggingTokenId);
       if (token) {
-        token.x(token.x() + deltaX);
-        token.y(token.y() + deltaY);
+        const newX = token.x() + deltaX;
+        const newY = token.y() + deltaY;
+        token.x(newX);
+        token.y(newY);
+        
+        // Update base position (divide by zoom to store unzoomed position)
+        this.tokenBasePositions.set(this.draggingTokenId, {
+          x: newX / this.zoom,
+          y: newY / this.zoom
+        });
       }
     } else {
       // Move the map layers and token layer together
@@ -388,11 +397,26 @@ export class GameMapModal implements OnDestroy {
         this.gridLayer.scale({ x: this.zoom, y: this.zoom });
       }
 
-      // Scale individual tokens: zoom * baseScale (not accumulated zoom)
+      // Scale tokens proportionally with zoom: apply zoom to both position and size
       this.tokens.forEach((tokenGroup, tokenId) => {
-        const baseScale = this.tokenBaseScales.get(tokenId) || 1;
-        // Apply map zoom combined with the base token scale
-        tokenGroup.scale({ x: this.zoom * baseScale, y: this.zoom * baseScale });
+        const basePos = this.tokenBasePositions.get(tokenId);
+        const baseSize = this.tokenBaseSizes.get(tokenId) || 20;
+        const userScale = this.tokenUserScales.get(tokenId) || 1;
+        
+        if (basePos) {
+          // Apply zoom to position
+          tokenGroup.position({
+            x: basePos.x * this.zoom,
+            y: basePos.y * this.zoom
+          });
+        }
+        
+        // Apply zoom to size: scaledSize = baseSize * userScale * zoom
+        const scaledSize = baseSize * userScale * this.zoom;
+        const circle = tokenGroup.findOne('Circle') as Konva.Circle;
+        if (circle) {
+          circle.radius(scaledSize);
+        }
       });
       
       this.stage.draw();
@@ -539,8 +563,12 @@ export class GameMapModal implements OnDestroy {
     this.tokenLayer.add(tokenGroup);
     this.tokens.set(tokenId, tokenGroup);
     this.tokenColors.set(tokenId, '#4a90e2'); // Store initial color
-    this.tokenScales.set(tokenId, 1); // Store scale (1 = default size)
-    this.tokenBaseScales.set(tokenId, 1); // Store base scale without zoom
+    this.tokenBasePositions.set(tokenId, { 
+      x: this.stage.width() / 2, 
+      y: this.stage.height() / 2 
+    }); // Store base position (at 100% zoom)
+    this.tokenBaseSizes.set(tokenId, 20); // Store base size (radius = 20)
+    this.tokenUserScales.set(tokenId, 1); // Store user resize multiplier
     this.tokenLayer.draw();
 
     this.showTokenDialog = false;
@@ -738,7 +766,7 @@ export class GameMapModal implements OnDestroy {
 
   private openResizeDialog(tokenId: string) {
     this.editingTokenId = tokenId;
-    const currentScale = this.tokenScales.get(tokenId) || 1;
+    const currentScale = this.tokenUserScales.get(tokenId) || 1;
     this.tokenResizeOldValue = currentScale;
     this.tokenResizeValue = currentScale;
     this.showResizeDialog = true;
@@ -749,9 +777,16 @@ export class GameMapModal implements OnDestroy {
 
     const tokenGroup = this.tokens.get(this.editingTokenId);
     if (tokenGroup) {
-      tokenGroup.scale({ x: newSize, y: newSize });
-      this.tokenScales.set(this.editingTokenId, newSize);
-      this.tokenBaseScales.set(this.editingTokenId, newSize); // Update base scale when user resizes
+      this.tokenUserScales.set(this.editingTokenId, newSize);
+      
+      // Recalculate token size: baseSize * userScale * zoom
+      const baseSize = this.tokenBaseSizes.get(this.editingTokenId) || 20;
+      const scaledSize = baseSize * newSize * this.zoom;
+      const circle = tokenGroup.findOne('Circle') as Konva.Circle;
+      if (circle) {
+        circle.radius(scaledSize);
+      }
+      
       this.tokenLayer?.draw();
     }
   }
@@ -767,9 +802,16 @@ export class GameMapModal implements OnDestroy {
     if (this.editingTokenId) {
       const tokenGroup = this.tokens.get(this.editingTokenId);
       if (tokenGroup) {
-        tokenGroup.scale({ x: this.tokenResizeOldValue, y: this.tokenResizeOldValue });
-        this.tokenScales.set(this.editingTokenId, this.tokenResizeOldValue);
-        this.tokenBaseScales.set(this.editingTokenId, this.tokenResizeOldValue); // Revert base scale too
+        this.tokenUserScales.set(this.editingTokenId, this.tokenResizeOldValue);
+        
+        // Recalculate token size: baseSize * userScale * zoom
+        const baseSize = this.tokenBaseSizes.get(this.editingTokenId) || 20;
+        const scaledSize = baseSize * this.tokenResizeOldValue * this.zoom;
+        const circle = tokenGroup.findOne('Circle') as Konva.Circle;
+        if (circle) {
+          circle.radius(scaledSize);
+        }
+        
         this.tokenLayer?.draw();
       }
     }
@@ -881,9 +923,9 @@ export class GameMapModal implements OnDestroy {
       const token = {
         id: tokenId,
         name: tokenName,
-        x: tokenGroup.x(),
-        y: tokenGroup.y(),
-        scale: this.tokenScales.get(tokenId) || 1,
+        x: this.tokenBasePositions.get(tokenId)?.x || tokenGroup.x(),
+        y: this.tokenBasePositions.get(tokenId)?.y || tokenGroup.y(),
+        scale: this.tokenUserScales.get(tokenId) || 1,
         rotation: this.tokenRotations.get(tokenId) || 0,
         color: this.tokenColors.get(tokenId) || '#4a90e2',
         image: this.getTokenImageAsBase64(tokenId),
@@ -972,8 +1014,9 @@ export class GameMapModal implements OnDestroy {
     this.tokens.clear();
     this.tokenColors.clear();
     this.tokenImages.clear();
-    this.tokenScales.clear();
-    this.tokenBaseScales.clear();
+    this.tokenBasePositions.clear();
+    this.tokenBaseSizes.clear();
+    this.tokenUserScales.clear();
     this.tokenRotations.clear();
 
     // Restore map image if present (async)
@@ -1105,12 +1148,25 @@ export class GameMapModal implements OnDestroy {
     this.tokenLayer.add(tokenGroup);
     this.tokens.set(tokenId, tokenGroup);
     this.tokenColors.set(tokenId, circleColor);
-    this.tokenScales.set(tokenId, tokenData.scale || 1);
-    this.tokenBaseScales.set(tokenId, tokenData.scale || 1); // Initialize base scale
+    this.tokenBasePositions.set(tokenId, { 
+      x: tokenData.x || this.stage.width() / 2, 
+      y: tokenData.y || this.stage.height() / 2 
+    }); // Store base position from imported data
+    this.tokenBaseSizes.set(tokenId, 20); // Base size is always 20 (radius)
+    this.tokenUserScales.set(tokenId, tokenData.scale || 1); // Store user resize scale
     this.tokenRotations.set(tokenId, tokenData.rotation || 0);
 
-    // Apply scale and rotation
-    tokenGroup.scale({ x: tokenData.scale || 1, y: tokenData.scale || 1 });
+    // Apply current zoom to position and size
+    const scaledSize = 20 * (tokenData.scale || 1) * this.zoom;
+    const circle2 = tokenGroup.findOne('Circle') as Konva.Circle;
+    if (circle2) {
+      circle2.radius(scaledSize);
+    }
+    
+    tokenGroup.position({
+      x: (tokenData.x || this.stage.width() / 2) * this.zoom,
+      y: (tokenData.y || this.stage.height() / 2) * this.zoom
+    });
     tokenGroup.rotation(tokenData.rotation || 0);
 
     // Restore image if present
@@ -1160,8 +1216,9 @@ export class GameMapModal implements OnDestroy {
       this.tokens.clear();
       this.tokenColors.clear();
       this.tokenImages.clear();
-      this.tokenScales.clear();
-      this.tokenBaseScales.clear();
+      this.tokenBasePositions.clear();
+      this.tokenBaseSizes.clear();
+      this.tokenUserScales.clear();
       this.tokenRotations.clear();
     } catch (e) {
       console.error('Failed to destroy Konva stage', e);
