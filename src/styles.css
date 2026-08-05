@@ -2,11 +2,11 @@
 
 /* Global dark theme styles */
 :root {
-  --bg: #0b0b0d;
-  --surface: #0f1113;
-  --muted: #9aa4b2;
-  --text: #e6eef6;
-  --accent: #7c4dff;
+  --bg: #21160d;
+  --surface: #f3e1bf;
+  --muted: #7d6342;
+  --text: #2f2014;
+  --accent: #8a5a2b;
 }
 
 html, body, app-root {
@@ -15,7 +15,9 @@ html, body, app-root {
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at top, rgba(255, 224, 168, 0.18), transparent 34%),
+    linear-gradient(180deg, #24170e 0%, #17100a 100%);
   color: var(--text);
   font-family: 'Cinzel', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   -webkit-font-smoothing: antialiased;
@@ -23,22 +25,24 @@ body {
 }
 
 .site-header {
-  background: linear-gradient(90deg, rgba(124,77,255,0.08), rgba(124,77,255,0.03));
+  background:
+    linear-gradient(90deg, rgba(255, 228, 176, 0.14), rgba(123, 83, 33, 0.06)),
+    linear-gradient(180deg, #3a2414, #27180f);
   padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255, 225, 170, 0.12);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .site-header .container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
-.site-header h1 { margin: 0; font-size: 1.25rem; color: var(--text); font-weight: 600; }
+.site-header h1 { margin: 0; font-size: 1.25rem; color: #f7e4bc; font-weight: 700; letter-spacing: 0.04em; text-shadow: 0 1px 0 rgba(0,0,0,0.45); }
 
-.main-menu-button-bar { display: flex; justify-content: center; gap: 0.5rem; align-items: center; padding: 0.75rem 1.25rem; background: linear-gradient(90deg, rgba(124,77,255,0.08), rgba(124,77,255,0.03)); width: 100%; margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.04); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.main-menu-button-bar { display: flex; justify-content: center; gap: 0.5rem; align-items: center; padding: 0.85rem 1.25rem; background: linear-gradient(180deg, #d9be86, #b38a51); width: 100%; margin-top: 0; border-bottom: 1px solid rgba(66, 41, 17, 0.35); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 .main-menu-button-bar.container { max-width: 1100px; margin: 0 auto; }
-.main-menu-button-bar .pill { border-radius: 999px; padding: 0.5rem 1rem; font-weight: 600; }
-.main-menu-button-bar .pill.p-button { border-radius: 999px; }
-.main-menu-button-bar .pill.p-button:hover { background: rgba(124,77,255,0.14); color: var(--text); }
+.main-menu-button-bar .pill { border-radius: 999px; padding: 0.55rem 1rem; font-weight: 700; }
+.main-menu-button-bar .pill.p-button { border-radius: 999px; background: linear-gradient(180deg, #f5e3b9, #d2ad6a); color: #3c2715; border: 1px solid rgba(74, 47, 21, 0.25); }
+.main-menu-button-bar .pill.p-button:hover { background: linear-gradient(180deg, #fff0cb, #dfb974); color: #2f1f12; }
 
 .main-content { padding: 2rem; min-height: calc(100vh - 64px); }
 .landing { max-width: 900px; margin: 2rem auto; text-align: center; }
@@ -47,83 +51,129 @@ body {
 a { color: var(--accent); }
 
 /* make forms, cards and other surfaces slightly lighter */
-.surface { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); border-radius: 8px; padding: 1rem; }
+.surface { background: linear-gradient(180deg, #f3e0bc, #e3c58e); border-radius: 10px; padding: 1rem; border: 1px solid rgba(96, 62, 30, 0.25); box-shadow: inset 0 1px 0 rgba(255,255,255,0.45); }
 
 /* Apply dice-bag dialog appearance globally to all PrimeNG dialogs */
 .p-dialog .p-dialog-titlebar,
 .p-dialog .p-dialog-header {
-  background: #101010 !important;
-  color: var(--text) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.03) !important;
+  background: linear-gradient(180deg, #3a2414, #27180f) !important;
+  color: #f8e7ba !important;
+  border-bottom: 1px solid rgba(255,225,170,0.08) !important;
 }
 .p-dialog .p-dialog-content {
-  background: #1e1e1e !important;
-  color: var(--text) !important;
+  background: #f1e0bc !important;
+  color: #3a2a16 !important;
   padding: 1rem !important;
 }
-.p-dialog .p-dialog .p-button {
-  background: transparent !important;
-  border-color: rgba(255,255,255,0.06) !important;
-  color: var(--text) !important;
+.p-dialog .p-button {
+  background: linear-gradient(180deg, #f5e4bc, #d5b170) !important;
+  border-color: rgba(96, 62, 30, 0.25) !important;
+  color: #3a2414 !important;
 }
-.p-dialog .p-dialog .p-button:hover {
-  background: rgba(255,255,255,0.03) !important;
+.p-dialog .p-button:hover {
+  background: linear-gradient(180deg, #fff0c9, #dfbe7c) !important;
 }
 
 /* Rounded corners for dialogs */
 .p-dialog {
-  border-radius: 12px !important;
+  border-radius: 16px !important;
   overflow: hidden !important;
 }
 .p-dialog .p-dialog-titlebar, .p-dialog .p-dialog-header {
-  border-top-left-radius: 12px !important;
-  border-top-right-radius: 12px !important;
+  border-top-left-radius: 16px !important;
+  border-top-right-radius: 16px !important;
 }
 .p-dialog .p-dialog-content {
-  border-bottom-left-radius: 12px !important;
-  border-bottom-right-radius: 12px !important;
+  border-bottom-left-radius: 16px !important;
+  border-bottom-right-radius: 16px !important;
 }
 
 
 /* Game map modal hamburger menu styling */
 .p-menu {
-  background-color: #1a1a1a !important;
+  background-color: #f1e0bc !important;
+  border: 1px solid rgba(96, 62, 30, 0.22) !important;
 }
 
 .p-menu .p-menu-list {
-  background-color: #1a1a1a !important;
+  background-color: #f1e0bc !important;
   padding: 0.5rem 0 !important;
 }
 
 .p-menu .p-menuitem {
-  background-color: #2d2d2d !important;
+  background-color: #e5c88f !important;
   margin: 0.25rem 0.5rem !important;
-  border-radius: 4px !important;
+  border-radius: 6px !important;
   padding: 0 !important;
 }
 
 .p-menu .p-menuitem > a {
-  background-color: #2d2d2d !important;
-  color: #fff !important;
-  border: 2px solid #000000 !important;
+  background-color: #e5c88f !important;
+  color: #3c2715 !important;
+  border: 1px solid rgba(96, 62, 30, 0.2) !important;
   padding: 0.75rem 1rem !important;
   display: block !important;
-  border-radius: 4px !important;
+  border-radius: 6px !important;
 }
 
 .p-menu .p-menuitem > a:hover,
 .p-menu .p-menuitem:hover > a {
-  background-color: #404040 !important;
-  color: #fff !important;
+  background-color: #f4dca8 !important;
+  color: #2f1f12 !important;
 }
 
 .p-menu .p-menuitem.p-highlight > a,
 .p-menu .p-menuitem.p-focus > a {
-  background-color: #404040 !important;
-  color: #fff !important;
+  background-color: #f4dca8 !important;
+  color: #2f1f12 !important;
 }
 
 .p-menu .p-menuitem a span,
 .p-menu .p-menuitem a .p-menuitem-text {
-  color: #fff !important;
+  color: #3c2715 !important;
+}
+
+.p-inputtext,
+.p-inputnumber input,
+.p-dropdown,
+.p-dropdown .p-dropdown-label,
+.p-inputtextarea,
+textarea,
+input[type="text"],
+input[type="number"] {
+  background: rgba(255, 248, 235, 0.95) !important;
+  color: #3a2a16 !important;
+  border-color: #a77c46 !important;
+}
+
+.p-inputswitch .p-inputswitch-slider {
+  background: linear-gradient(180deg, #e4c88f, #b98a4b) !important;
+}
+
+.p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
+  background: linear-gradient(180deg, #7c5a35, #4f341f) !important;
+}
+
+.p-checkbox .p-checkbox-box,
+.p-radiobutton .p-radiobutton-box {
+  background: #f5e4bc !important;
+  border-color: #a77c46 !important;
+}
+
+.p-checkbox .p-checkbox-box.p-highlight,
+.p-radiobutton .p-radiobutton-box.p-highlight {
+  background: #b98a4b !important;
+  border-color: #8a5a2b !important;
+}
+
+.p-tabview .p-tabview-nav,
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background: #ead0a0 !important;
+  color: #3a2414 !important;
+  border-color: rgba(96, 62, 30, 0.25) !important;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background: #f6e4bf !important;
+  color: #2f1f12 !important;
 }

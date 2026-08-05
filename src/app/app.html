@@ -1,24 +1,22 @@
-﻿<header class="site-header">
+<header class="site-header">
   <div class="container">
     <h1>{{ title() }}</h1>
   </div>
 </header>
 
-<div style="margin-top: 0;">
-  <main-menu-button-bar 
-    [loggedIn]="loggedIn"
-    [loginVisible]="loginVisible"
-    (loginVisibleChange)="loginVisible = $event"
-    (loginSuccess)="onLoginSuccess($event)"
-    (openGameMap)="onMenuGameMapClick()"
-    (openDiceBag)="onMenuDiceBagClick()"
-    (openCharacterSheets)="onMenuCharacterSheetsClick()"
-    (onLoginClick)="onMenuLogin()"
-    (onSignupClick)="onMenuSignup()"
-    (onAccountClick)="onMenuAccountClick()"
-    (onLogoutClick)="onMenuLogout()">
-  </main-menu-button-bar>
-</div>
+<main-menu-button-bar 
+  [loggedIn]="loggedIn"
+  [loginVisible]="loginVisible"
+  (loginVisibleChange)="loginVisible = $event"
+  (loginSuccess)="onLoginSuccess($event)"
+  (openGameMap)="onMenuGameMapClick()"
+  (openDiceBag)="onMenuDiceBagClick()"
+  (openCharacterSheets)="onMenuCharacterSheetsClick()"
+  (onLoginClick)="onMenuLogin()"
+  (onSignupClick)="onMenuSignup()"
+  (onAccountClick)="onMenuAccountClick()"
+  (onLogoutClick)="onMenuLogout()">
+</main-menu-button-bar>
 
 <dice-bag-modal [visible]="diceBagVisible" (visibleChange)="diceBagVisible = $event"></dice-bag-modal>
 <new-user-sign-up [visible]="signupVisible" (visibleChange)="signupVisible = $event"></new-user-sign-up>

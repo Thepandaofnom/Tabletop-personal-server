@@ -34,6 +34,24 @@
   padding-bottom: 0.75rem;
 }
 
+:host ::ng-deep .p-menu {
+  background: #f1e0bc;
+  border: 1px solid rgba(96, 62, 30, 0.22);
+}
+
+:host ::ng-deep .p-menu .p-menu-list {
+  background: #f1e0bc;
+}
+
+:host ::ng-deep .p-menu .p-menuitem > a {
+  color: #3c2715;
+  background: #e5c88f;
+}
+
+:host ::ng-deep .p-menu .p-menuitem > a:hover {
+  background: #f4dca8;
+}
+
 .sheet-menu-spacer {
   flex: 1 1 auto;
 }
