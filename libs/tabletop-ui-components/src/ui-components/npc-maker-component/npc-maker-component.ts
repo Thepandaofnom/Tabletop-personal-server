@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { DialogModule } from 'primeng/dialog';
 
 export interface NPCData {
   name: string;
@@ -34,6 +36,16 @@ interface NPCMakerState {
   generatedNPC: NPCData | null;
   keptNPCs: KeptNPC[];
   activeKeptNPCId: string | null;
+}
+
+interface NPCSaveSummary {
+  id: number;
+  saveName: string;
+}
+
+interface NPCSaveRecord {
+  saveName: string;
+  npcJson: string;
 }
 
 const RACES = ['Human', 'Elf', 'Dwarf', 'Halfling', 'Dragonborn', 'Gnome', 'Half-Elf', 'Half-Orc', 'Tiefling'];
@@ -86,7 +98,7 @@ const STORAGE_KEY = 'npc-maker-state';
 @Component({
   selector: 'npc-maker-component',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DialogModule],
   templateUrl: './npc-maker-component.html',
   styleUrls: ['./npc-maker-component.css']
 })
@@ -97,6 +109,25 @@ export class NPCMakerComponent implements OnInit {
   keptNPCs: KeptNPC[] = [];
   activeKeptNPCId: string | null = null;
   editingKeptNPCId: string | null = null;
+  saveDialogVisible = false;
+  loadDialogVisible = false;
+  deleteDialogVisible = false;
+  saveName = '';
+  selectedSaveName = '';
+  savedNPCSets: NPCSaveSummary[] = [];
+  private readonly apiBaseUrl = 'https://tabletop-personal-server-production.up.railway.app/api';
+  private readonly currentUserId = (() => {
+    try {
+      const token = localStorage.getItem('jwt');
+      if (!token) return null;
+      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return typeof payload.id === 'number' ? payload.id : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.loadState();
@@ -127,6 +158,89 @@ export class NPCMakerComponent implements OnInit {
     } catch (error) {
       console.warn('Failed to save NPC Maker state to localStorage:', error);
     }
+  }
+
+  openSaveDialog(): void { this.saveDialogVisible = true; }
+  openLoadDialog(): void { this.loadDialogVisible = true; this.refreshSavedNPCSets(); }
+  openDeleteDialog(): void { this.deleteDialogVisible = true; this.refreshSavedNPCSets(); }
+
+  confirmSaveNPCs(): void {
+    if (this.currentUserId === null || !this.saveName.trim()) return;
+    const payload = JSON.stringify({ generatedNPC: this.generatedNPC, keptNPCs: this.keptNPCs, activeKeptNPCId: this.activeKeptNPCId });
+    this.http.post(`${this.apiBaseUrl}/saved-npcs/user/${this.currentUserId}`, { saveName: this.saveName.trim(), npcJson: payload }).subscribe({
+      next: () => { this.saveDialogVisible = false; this.saveName = ''; },
+      error: () => { this.saveLocalNPCSet(this.saveName.trim(), payload); this.saveDialogVisible = false; this.saveName = ''; }
+    });
+  }
+
+  confirmLoadNPCs(): void {
+    if (this.currentUserId === null || !this.selectedSaveName) return;
+    this.http.get<NPCSaveRecord>(`${this.apiBaseUrl}/saved-npcs/user/${this.currentUserId}/${encodeURIComponent(this.selectedSaveName)}`).subscribe({
+      next: record => { this.applyNPCSet(record.npcJson); this.loadDialogVisible = false; },
+      error: () => {
+        const local = this.getLocalNPCSet(this.selectedSaveName);
+        if (local) { this.applyNPCSet(local.npcJson); this.loadDialogVisible = false; }
+      }
+    });
+  }
+
+  confirmDeleteNPCs(): void {
+    if (this.currentUserId === null || !this.selectedSaveName) return;
+    this.http.delete(`${this.apiBaseUrl}/saved-npcs/user/${this.currentUserId}/${encodeURIComponent(this.selectedSaveName)}`).subscribe({
+      next: () => { this.deleteLocalNPCSet(this.selectedSaveName); this.refreshSavedNPCSets(); this.deleteDialogVisible = false; this.selectedSaveName = ''; },
+      error: () => { this.deleteLocalNPCSet(this.selectedSaveName); this.refreshSavedNPCSets(); this.deleteDialogVisible = false; this.selectedSaveName = ''; }
+    });
+  }
+
+  private refreshSavedNPCSets(): void {
+    if (this.currentUserId === null) return;
+    this.http.get<NPCSaveSummary[]>(`${this.apiBaseUrl}/saved-npcs/user/${this.currentUserId}`).subscribe({
+      next: saves => this.savedNPCSets = saves || [],
+      error: () => this.savedNPCSets = this.getLocalNPCSetList()
+    });
+  }
+
+  private applyNPCSet(npcJson: string): void {
+    const state = JSON.parse(npcJson) as NPCMakerState;
+    this.generatedNPC = state.generatedNPC;
+    this.keptNPCs = state.keptNPCs || [];
+    this.activeKeptNPCId = state.activeKeptNPCId || (this.keptNPCs[0]?.id ?? null);
+    this.saveState();
+  }
+
+  private getLocalNPCSetList(): NPCSaveSummary[] {
+    try {
+      const raw = localStorage.getItem('local-npc-sets');
+      return raw ? JSON.parse(raw) as NPCSaveSummary[] : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private getLocalNPCSet(saveName: string): NPCSaveRecord | null {
+    try {
+      const raw = localStorage.getItem(`local-npc-sets:${saveName}`);
+      return raw ? JSON.parse(raw) as NPCSaveRecord : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private saveLocalNPCSet(saveName: string, npcJson: string): void {
+    try {
+      localStorage.setItem(`local-npc-sets:${saveName}`, JSON.stringify({ saveName, npcJson }));
+      const list = this.getLocalNPCSetList().filter(item => item.saveName !== saveName);
+      list.unshift({ id: Date.now(), saveName });
+      localStorage.setItem('local-npc-sets', JSON.stringify(list));
+    } catch {}
+  }
+
+  private deleteLocalNPCSet(saveName: string): void {
+    try {
+      localStorage.removeItem(`local-npc-sets:${saveName}`);
+      const list = this.getLocalNPCSetList().filter(item => item.saveName !== saveName);
+      localStorage.setItem('local-npc-sets', JSON.stringify(list));
+    } catch {}
   }
 
   generateNPC(): void {

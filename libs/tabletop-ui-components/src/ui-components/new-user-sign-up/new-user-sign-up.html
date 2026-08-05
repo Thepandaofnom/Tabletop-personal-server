@@ -1,7 +1,7 @@
 <p-toast></p-toast>
 
-<p-dialog [(visible)]="visibleLocal" header="Sign up" styleClass="dice-bag-dialog" [modal]="true" [closable]="true" [style]="{width: '420px'}">
-  <div class="p-fluid signup-content" style="display:flex;flex-direction:column;gap:0.75rem;align-items:stretch;" (keydown.enter)="createUser()">
+<p-dialog [(visible)]="visibleLocal" header="Sign up" styleClass="dice-bag-dialog" [modal]="true" [closable]="true" [style]="{width: 'min(92vw, 720px)'}">
+  <div class="p-fluid signup-content" style="display:flex;flex-direction:column;gap:0.75rem;align-items:stretch;max-width:100%;padding:1rem;" (keydown.enter)="createUser()">
     
     <!-- First Name -->
     <div class="form-field">
@@ -80,7 +80,9 @@
       </div>
     </div>
 
-    <div style="display:flex;justify-content:center;gap:0.5rem;margin-top:1rem;">
+  </div>
+  <ng-template pTemplate="footer">
+    <div style="display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap;max-width:100%;padding:0 1rem 1rem;">
       <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="onCancel()"></button>
       <button 
         pButton 
@@ -89,5 +91,5 @@
         (click)="createUser()" 
         [disabled]="!isFormValid || loading"></button>
     </div>
-  </div>
+  </ng-template>
 </p-dialog>

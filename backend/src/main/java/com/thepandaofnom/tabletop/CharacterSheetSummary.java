@@ -1,4 +1,4 @@
-﻿package com.thepandaofnom.tabletop;
+package com.thepandaofnom.tabletop;
 
 public class CharacterSheetSummary {
     private Long id;

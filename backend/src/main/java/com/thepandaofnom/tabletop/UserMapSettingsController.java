@@ -8,35 +8,33 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/character-sheets")
-public class CharacterSheetController {
-    private final CharacterSheetRecordRepository repo;
+@RequestMapping("/api/map-settings")
+public class UserMapSettingsController {
+    private final UserMapSettingsRepository repo;
     private final UserRepository userRepo;
 
-    public CharacterSheetController(CharacterSheetRecordRepository repo, UserRepository userRepo) {
+    public UserMapSettingsController(UserMapSettingsRepository repo, UserRepository userRepo) {
         this.repo = repo;
         this.userRepo = userRepo;
     }
 
     @GetMapping("/user/{userId}")
-    public List<CharacterSheetRecord> list(@PathVariable Long userId) {
+    public List<UserMapSettings> list(@PathVariable Long userId) {
         return repo.findByUserIdOrderByUpdatedAtDesc(userId);
     }
 
     @GetMapping("/user/{userId}/{saveName}")
-    public CharacterSheetRecord get(@PathVariable Long userId, @PathVariable String saveName) {
-        return repo.findByUserIdAndSaveName(userId, saveName)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public UserMapSettings get(@PathVariable Long userId, @PathVariable String saveName) {
+        return repo.findByUserIdAndSaveName(userId, saveName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/user/{userId}")
-    public CharacterSheetRecord save(@PathVariable Long userId, @RequestBody CharacterSheetSaveRequest req) {
+    public UserMapSettings save(@PathVariable Long userId, @RequestBody UserMapSettingsRequest req) {
         userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
-        CharacterSheetRecord record = repo.findByUserIdAndSaveName(userId, req.getSaveName()).orElseGet(CharacterSheetRecord::new);
+        UserMapSettings record = repo.findByUserIdAndSaveName(userId, req.getSaveName()).orElseGet(UserMapSettings::new);
         record.setUserId(userId);
         record.setSaveName(req.getSaveName());
-        record.setSheetType(req.getSheetType());
-        record.setSheetJson(req.getSheetJson());
+        record.setSettingsJson(req.getSettingsJson());
         if (record.getId() == null) {
             record.setCreatedAt(LocalDateTime.now());
         }
@@ -49,4 +47,5 @@ public class CharacterSheetController {
         userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
         repo.deleteByUserIdAndSaveName(userId, saveName);
     }
+
 }

@@ -104,11 +104,24 @@ a { color: var(--accent); }
   background: var(--header-bg) !important;
   color: #f8e7ba !important;
   border-bottom: 1px solid rgba(255,225,170,0.08) !important;
+  padding: 1rem 1.25rem 0.75rem !important;
 }
 .p-dialog .p-dialog-content {
   background: var(--panel-bg) !important;
   color: var(--text-soft) !important;
-  padding: 1rem !important;
+  padding: 1rem 1.25rem !important;
+}
+.p-dialog .p-dialog-footer {
+  background: var(--panel-bg) !important;
+  padding: 0 1.25rem 1rem !important;
+}
+.p-dialog .p-dialog-title,
+.p-dialog .p-dialog-header span {
+  display: block !important;
+  padding-right: 0.5rem !important;
+}
+.p-dialog .p-dialog-footer .p-button {
+  margin: 0 !important;
 }
 .p-dialog .p-button {
   background: var(--button-bg) !important;

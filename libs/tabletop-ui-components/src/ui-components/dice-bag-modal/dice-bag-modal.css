@@ -181,7 +181,7 @@
   );
 }
 
-.dice-d% {
+.dice-d10 {
   border-radius: 0;
   background:
     radial-gradient(circle at 30% 28%, rgba(255, 247, 222, 0.28), transparent 22%),

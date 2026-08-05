@@ -1,4 +1,4 @@
-﻿package com.thepandaofnom.tabletop;
+package com.thepandaofnom.tabletop;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,7 +13,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserRepository repo;

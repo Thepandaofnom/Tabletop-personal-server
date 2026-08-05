@@ -1,4 +1,4 @@
-﻿package com.thepandaofnom.tabletop;
+package com.thepandaofnom.tabletop;
 
 import java.util.List;
 

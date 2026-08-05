@@ -1,4 +1,4 @@
-﻿package com.thepandaofnom.tabletop;
+package com.thepandaofnom.tabletop;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

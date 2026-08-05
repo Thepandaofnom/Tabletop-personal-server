@@ -48,6 +48,7 @@ interface LocalCharacterSheetSave {
   styleUrls: ['./app.css']
 })
 export class App {
+  protected readonly apiBaseUrl = 'https://tabletop-personal-server-production.up.railway.app/api';
   protected readonly title = signal('Tabletop Personal Server');
   protected diceBagVisible = false;
   protected loginVisible = false;

@@ -8,35 +8,33 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/character-sheets")
-public class CharacterSheetController {
-    private final CharacterSheetRecordRepository repo;
+@RequestMapping("/api/saved-npcs")
+public class UsersSavedNpcController {
+    private final UsersSavedNpcRepository repo;
     private final UserRepository userRepo;
 
-    public CharacterSheetController(CharacterSheetRecordRepository repo, UserRepository userRepo) {
+    public UsersSavedNpcController(UsersSavedNpcRepository repo, UserRepository userRepo) {
         this.repo = repo;
         this.userRepo = userRepo;
     }
 
     @GetMapping("/user/{userId}")
-    public List<CharacterSheetRecord> list(@PathVariable Long userId) {
+    public List<UsersSavedNpc> list(@PathVariable Long userId) {
         return repo.findByUserIdOrderByUpdatedAtDesc(userId);
     }
 
     @GetMapping("/user/{userId}/{saveName}")
-    public CharacterSheetRecord get(@PathVariable Long userId, @PathVariable String saveName) {
-        return repo.findByUserIdAndSaveName(userId, saveName)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public UsersSavedNpc get(@PathVariable Long userId, @PathVariable String saveName) {
+        return repo.findByUserIdAndSaveName(userId, saveName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/user/{userId}")
-    public CharacterSheetRecord save(@PathVariable Long userId, @RequestBody CharacterSheetSaveRequest req) {
+    public UsersSavedNpc save(@PathVariable Long userId, @RequestBody UsersSavedNpcRequest req) {
         userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
-        CharacterSheetRecord record = repo.findByUserIdAndSaveName(userId, req.getSaveName()).orElseGet(CharacterSheetRecord::new);
+        UsersSavedNpc record = repo.findByUserIdAndSaveName(userId, req.getSaveName()).orElseGet(UsersSavedNpc::new);
         record.setUserId(userId);
         record.setSaveName(req.getSaveName());
-        record.setSheetType(req.getSheetType());
-        record.setSheetJson(req.getSheetJson());
+        record.setNpcJson(req.getNpcJson());
         if (record.getId() == null) {
             record.setCreatedAt(LocalDateTime.now());
         }

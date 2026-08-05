@@ -87,9 +87,22 @@
 
 .game-map-dialog-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: flex-end;
-  margin-left: auto;
+  width: 100%;
+  margin-left: 0;
+}
+
+.game-map-shell ::ng-deep .p-dialog-header .p-dialog-title,
+.game-map-shell ::ng-deep .p-dialog-header span {
+  display: block;
+  padding-right: 0.5rem;
+}
+
+.game-map-dialog-actions button,
+.game-map-shell ::ng-deep .p-dialog-footer button {
+  max-width: 100%;
 }
 
 .game-map-shell ::ng-deep .p-button,
@@ -121,11 +134,22 @@
 .game-map-shell ::ng-deep .p-dialog-header {
   background: var(--header-bg);
   color: #f8e7ba;
+  padding: 1rem 1rem 0.75rem;
 }
 
 .game-map-shell ::ng-deep .p-dialog-content {
   background: var(--panel-bg);
   color: var(--text-soft);
+  padding: 1rem;
+}
+
+.game-map-shell ::ng-deep .p-dialog-footer {
+  background: var(--panel-bg);
+  padding: 0 1rem 1rem;
+}
+
+.game-map-shell ::ng-deep .p-dialog .p-dialog-content {
+  overflow: auto;
 }
 
 .game-map-shell ::ng-deep canvas {

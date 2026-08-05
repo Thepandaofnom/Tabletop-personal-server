@@ -1,4 +1,4 @@
-﻿package com.thepandaofnom.tabletop;
+package com.thepandaofnom.tabletop;
 
 public class CharacterSheetSaveRequest {
     private String saveName;

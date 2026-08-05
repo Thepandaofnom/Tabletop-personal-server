@@ -11,8 +11,8 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "character_sheets")
-public class CharacterSheetRecord {
+@Table(name = "user_map_settings")
+public class UserMapSettings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,17 +23,14 @@ public class CharacterSheetRecord {
     @Column(nullable = false)
     private String saveName;
 
-    @Column(nullable = false)
-    private String sheetType;
-
     @Lob
     @Column(nullable = false)
-    private String sheetJson;
+    private String settingsJson;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public CharacterSheetRecord() {}
+    public UserMapSettings() {}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -41,10 +38,8 @@ public class CharacterSheetRecord {
     public void setUserId(Long userId) { this.userId = userId; }
     public String getSaveName() { return saveName; }
     public void setSaveName(String saveName) { this.saveName = saveName; }
-    public String getSheetType() { return sheetType; }
-    public void setSheetType(String sheetType) { this.sheetType = sheetType; }
-    public String getSheetJson() { return sheetJson; }
-    public void setSheetJson(String sheetJson) { this.sheetJson = sheetJson; }
+    public String getSettingsJson() { return settingsJson; }
+    public void setSettingsJson(String settingsJson) { this.settingsJson = settingsJson; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
