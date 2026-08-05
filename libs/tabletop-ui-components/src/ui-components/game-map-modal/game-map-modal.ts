@@ -153,6 +153,9 @@ export class GameMapModal implements OnDestroy {
         this.stage.on('mousemove', (e) => this.onStageMouseMove(e));
         this.stage.on('mouseup', () => this.onStageMouseUp());
 
+        // Add wheel zoom handler
+        container.addEventListener('wheel', (e) => this.onStageWheel(e));
+
         // observe container resize for dynamic resizing
         this.resizeObserver = new ResizeObserver(() => this.onContainerResize());
         this.resizeObserver.observe(container);
@@ -246,6 +249,28 @@ export class GameMapModal implements OnDestroy {
   private onStageMouseUp() {
     this.isDragging = false;
     this.draggingTokenId = undefined;
+  }
+
+  private onStageWheel(e: WheelEvent) {
+    if (!this.stage) return;
+
+    e.preventDefault();
+
+    // Get the current zoom level (convert from percentage to decimal if needed)
+    let newZoom = this.zoom;
+
+    // Adjust zoom based on scroll direction
+    // Negative deltaY means scroll up (zoom in), positive means scroll down (zoom out)
+    const zoomSpeed = 0.1; // 10% per scroll tick
+    if (e.deltaY < 0) {
+      newZoom = Math.min(3, newZoom + zoomSpeed); // Max 300%
+    } else {
+      newZoom = Math.max(0.1, newZoom - zoomSpeed); // Min 10%
+    }
+
+    // Apply the new zoom
+    this.zoom = newZoom;
+    this.onZoomChange(newZoom * 100);
   }
 
   onFileChange(evt: Event) {
