@@ -797,6 +797,7 @@ export class GameMapModal implements OnDestroy {
         scaleGrid: this.scaleGrid,
         gridZoom: this.gridZoom,
       },
+      mapImage: this.getMapImageAsBase64(),
       tokens: this.serializeTokens(),
     };
 
@@ -810,6 +811,27 @@ export class GameMapModal implements OnDestroy {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+
+  private getMapImageAsBase64(): string | null {
+    if (!this.mapImage) return null;
+
+    const image = this.mapImage.image() as HTMLImageElement;
+    if (!image) return null;
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(image, 0, 0);
+        return canvas.toDataURL('image/png');
+      }
+    } catch (e) {
+      console.warn('Failed to serialize map image:', e);
+    }
+    return null;
   }
 
   private serializeTokens() {
@@ -901,6 +923,11 @@ export class GameMapModal implements OnDestroy {
     this.scaleGrid = mapData.zoomSettings?.scaleGrid || false;
     this.gridZoom = mapData.zoomSettings?.gridZoom || 1;
 
+    // Restore map image if present
+    if (mapData.mapImage) {
+      this.restoreMapImage(mapData.mapImage);
+    }
+
     // Redraw grid if needed
     if (this.showGrid) {
       this.drawGrid();
@@ -922,6 +949,19 @@ export class GameMapModal implements OnDestroy {
     });
 
     this.tokenLayer.draw();
+  }
+
+  private restoreMapImage(base64Image: string) {
+    if (!this.stage || !this.layer) return;
+
+    const img = new Image();
+    img.onload = () => {
+      this.addImageToLayer(img);
+    };
+    img.onerror = () => {
+      console.warn('Failed to restore map image');
+    };
+    img.src = base64Image;
   }
 
   private restoreToken(tokenData: any) {
