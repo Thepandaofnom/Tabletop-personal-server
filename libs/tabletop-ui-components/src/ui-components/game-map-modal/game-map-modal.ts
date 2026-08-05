@@ -387,10 +387,13 @@ export class GameMapModal implements OnDestroy {
         this.gridLayer.scale({ x: this.zoom, y: this.zoom });
       }
 
-      // Scale token layer with the map image and grid
-      if (this.tokenLayer) {
-        this.tokenLayer.scale({ x: this.zoom, y: this.zoom });
-      }
+      // Scale individual tokens instead of the layer to maintain their positions
+      // Scaling the layer would move tokens from origin, pushing them off-screen
+      this.tokens.forEach((tokenGroup, tokenId) => {
+        const tokenScale = this.tokenScales.get(tokenId) || 1;
+        // Apply both map zoom and individual token scale
+        tokenGroup.scale({ x: this.zoom * tokenScale, y: this.zoom * tokenScale });
+      });
       
       this.stage.draw();
     }
