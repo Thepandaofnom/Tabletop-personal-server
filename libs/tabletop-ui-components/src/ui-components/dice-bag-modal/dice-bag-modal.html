@@ -2,7 +2,17 @@
   <div class="result-container">
     <div class="result-row">
       <label for="resultInput" class="result-label pr-3">Result</label>
-      <input id="resultInput" type="text" [value]="result" readonly maxlength="7" size="7" />
+      <span id="resultInput" class="result-input">{{ result }}</span>
+    </div>
+    <div class="dice-options">
+      <div class="dice-count">
+        <label for="rollCount" class="result-label"># of rolls</label>
+        <input id="rollCount" type="number" [(ngModel)]="rollCount" min="0" max="999" step="1" />
+      </div>
+      <label class="reset-label">
+        <input type="checkbox" [(ngModel)]="resetAfterRoll" />
+        <span>Reset after roll?</span>
+      </label>
     </div>
     <div class="grid dice-grid pt-3">
       <div class="flex justify-content-center">

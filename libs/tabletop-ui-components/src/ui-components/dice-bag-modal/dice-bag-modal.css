@@ -1,0 +1,92 @@
+.result-container {
+  display: grid;
+  gap: 1rem;
+}
+
+:host ::ng-deep .dice-bag-dialog .p-dialog-content {
+  background: #f5e7c8;
+  color: #3b2a18;
+}
+
+:host ::ng-deep .dice-bag-dialog .p-dialog-header {
+  background: #e9d3a4;
+  color: #3b2a18;
+  border-bottom: 1px solid rgba(122, 93, 52, 0.35);
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.result-label {
+  min-width: 6rem;
+  font-weight: 600;
+}
+
+.dice-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(122, 93, 52, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 248, 235, 0.62);
+}
+
+.dice-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dice-count input[type="number"] {
+  width: 5rem;
+}
+
+.reset-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dice-grid {
+  gap: 0.75rem;
+}
+
+.dice-btn {
+  width: 100%;
+}
+
+.result-input {
+  display: inline-block;
+  width: fit-content;
+  min-width: 7ch;
+  max-width: 100%;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  background: rgba(255, 251, 241, 0.95);
+  border: 1px solid #b08b58;
+  color: #3a2a16;
+  border-radius: 4px;
+  padding: 0.45rem 0.55rem;
+  box-sizing: content-box;
+  flex: 0 0 auto;
+  line-height: 1.2;
+  height: 1.2em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.dice-count input[type="number"] {
+  background: rgba(255, 251, 241, 0.95);
+  border: 1px solid #b08b58;
+  color: #3a2a16;
+  border-radius: 4px;
+  padding: 0.35rem 0.45rem;
+}
