@@ -11,17 +11,19 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { HttpClientModule } from '@angular/common/http';
 
 @Component({
-  selector: 'login-modal',
+  selector: 'new-user-sign-up',
   standalone: true,
   imports: [DialogModule, ButtonModule, InputTextModule, PasswordModule, ToastModule, CommonModule, FormsModule, HttpClientModule],
   providers: [MessageService],
-  templateUrl: './login-modal.html',
+  templateUrl: './new-user-sign-up.html',
 })
-export class LoginModal {
+export class NewUserSignUp {
   @Input() visible = false;
   @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() loginSuccess = new EventEmitter<{ username: string; token: string }>();
 
+  firstName = '';
+  lastName = '';
+  email = '';
   username = '';
   password = '';
   loading = false;
@@ -38,6 +40,9 @@ export class LoginModal {
   }
 
   clearForm() {
+    this.firstName = '';
+    this.lastName = '';
+    this.email = '';
     this.username = '';
     this.password = '';
     this.loading = false;
@@ -47,40 +52,35 @@ export class LoginModal {
     this.visibleLocal = false;
   }
 
-  doLogin() {
+  createUser() {
     if (!this.username || !this.password) {
       this.messageService.add({ severity: 'error', summary: 'Validation', detail: 'Username and password required' });
       return;
     }
     this.loading = true;
-    const payload = { username: this.username, password: this.password };
-    this.http.post<any>('http://localhost:8081/api/auth/login', payload).subscribe({
+    const payload = {
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      username: this.username,
+      password: this.password
+    };
+
+    this.http.post<any>('https://tabletop-personal-server-production.up.railway.app/api/users', payload).subscribe({
       next: (res) => {
         this.loading = false;
-        // Check if response contains an error
-        if (res?.error) {
-          this.messageService.add({ severity: 'error', summary: 'Login failed', detail: res.error });
-          return;
-        }
-        const token = res?.token;
-        if (token) {
-          localStorage.setItem('jwt', token);
-          this.messageService.add({ severity: 'success', summary: 'Login', detail: 'Login successful' });
-          this.loginSuccess.emit({ username: this.username, token });
-          this.visibleLocal = false;
-        } else {
-          this.messageService.add({ severity: 'error', summary: 'Login', detail: 'No token received' });
-        }
+        this.messageService.add({ severity: 'success', summary: 'User created', detail: 'User created successfully' });
+        this.visibleLocal = false;
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;
-        let detail = 'Invalid credentials';
+        let detail = 'Failed to create user';
         if (err.error) {
-          try { detail = err.error.error || err.error.message || JSON.stringify(err.error); } catch { detail = String(err.error); }
+          try { detail = err.error.message || err.error.error || JSON.stringify(err.error); } catch { detail = String(err.error); }
         } else {
           detail = err.statusText || detail;
         }
-        this.messageService.add({ severity: 'error', summary: 'Login failed', detail });
+        this.messageService.add({ severity: 'error', summary: 'Error', detail });
       }
     });
   }

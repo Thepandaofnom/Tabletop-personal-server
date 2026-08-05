@@ -1,0 +1,66 @@
+﻿<div class="sheet">
+  <div class="sheet-header">
+    <div><label>Character Name</label><input [(ngModel)]="value.characterName" (ngModelChange)="onFieldChange()" /></div>
+    <div><label>Player Name</label><input [(ngModel)]="value.playerName" (ngModelChange)="onFieldChange()" /></div>
+    <div><label>Class & Level</label><input [(ngModel)]="value.classAndLevel" (ngModelChange)="onFieldChange()" /></div>
+    <div><label>Background</label><input [(ngModel)]="value.background" (ngModelChange)="onFieldChange()" /></div>
+    <div><label>Race</label><input [(ngModel)]="value.race" (ngModelChange)="onFieldChange()" /></div>
+    <div><label>Alignment</label><input [(ngModel)]="value.alignment" (ngModelChange)="onFieldChange()" /></div>
+  </div>
+
+  <div class="grid-2">
+    <label>Experience Points<input [(ngModel)]="value.experiencePoints" (ngModelChange)="onFieldChange()" /></label>
+    <label>Proficiency Bonus<input [(ngModel)]="value.proficiencyBonus" (ngModelChange)="onFieldChange()" /></label>
+    <label>Armor Class<input [(ngModel)]="value.armorClass" (ngModelChange)="onFieldChange()" /></label>
+    <label>Initiative<input [(ngModel)]="value.initiative" (ngModelChange)="onFieldChange()" /></label>
+    <label>Speed<input [(ngModel)]="value.speed" (ngModelChange)="onFieldChange()" /></label>
+    <label>Hit Point Maximum<input [(ngModel)]="value.hitPointMaximum" (ngModelChange)="onFieldChange()" /></label>
+    <label>Current Hit Points<input [(ngModel)]="value.currentHitPoints" (ngModelChange)="onFieldChange()" /></label>
+    <label>Temporary Hit Points<input [(ngModel)]="value.temporaryHitPoints" (ngModelChange)="onFieldChange()" /></label>
+    <label>Hit Dice<input [(ngModel)]="value.hitDice" (ngModelChange)="onFieldChange()" /></label>
+    <label>Death Saves Successes<input [(ngModel)]="value.deathSavesSuccesses" (ngModelChange)="onFieldChange()" /></label>
+    <label>Death Saves Failures<input [(ngModel)]="value.deathSavesFailures" (ngModelChange)="onFieldChange()" /></label>
+  </div>
+
+  <div class="grid-2">
+    <label>Strength Score<input [(ngModel)]="value.strengthScore" (ngModelChange)="onFieldChange()" /></label>
+    <label>Strength Modifier<input [(ngModel)]="value.strengthModifier" (ngModelChange)="onFieldChange()" /></label>
+    <label>Dexterity Score<input [(ngModel)]="value.dexterityScore" (ngModelChange)="onFieldChange()" /></label>
+    <label>Dexterity Modifier<input [(ngModel)]="value.dexterityModifier" (ngModelChange)="onFieldChange()" /></label>
+    <label>Constitution Score<input [(ngModel)]="value.constitutionScore" (ngModelChange)="onFieldChange()" /></label>
+    <label>Constitution Modifier<input [(ngModel)]="value.constitutionModifier" (ngModelChange)="onFieldChange()" /></label>
+    <label>Intelligence Score<input [(ngModel)]="value.intelligenceScore" (ngModelChange)="onFieldChange()" /></label>
+    <label>Intelligence Modifier<input [(ngModel)]="value.intelligenceModifier" (ngModelChange)="onFieldChange()" /></label>
+    <label>Wisdom Score<input [(ngModel)]="value.wisdomScore" (ngModelChange)="onFieldChange()" /></label>
+    <label>Wisdom Modifier<input [(ngModel)]="value.wisdomModifier" (ngModelChange)="onFieldChange()" /></label>
+    <label>Charisma Score<input [(ngModel)]="value.charismaScore" (ngModelChange)="onFieldChange()" /></label>
+    <label>Charisma Modifier<input [(ngModel)]="value.charismaModifier" (ngModelChange)="onFieldChange()" /></label>
+  </div>
+
+  <div class="text-blocks">
+    <label>Saving Throws<textarea [(ngModel)]="value.savingThrows" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Skills<textarea [(ngModel)]="value.skills" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Passive Perception<input [(ngModel)]="value.passivePerception" (ngModelChange)="onFieldChange()" /></label>
+    <label>Other Proficiencies and Languages<textarea [(ngModel)]="value.otherProficienciesAndLanguages" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Equipment<textarea [(ngModel)]="value.equipment" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Features and Traits<textarea [(ngModel)]="value.featuresAndTraits" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Attacks and Spellcasting<textarea [(ngModel)]="value.attacksAndSpellcasting" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Personality Traits<textarea [(ngModel)]="value.personalityTraits" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Ideals<textarea [(ngModel)]="value.ideals" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Bonds<textarea [(ngModel)]="value.bonds" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Flaws<textarea [(ngModel)]="value.flaws" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Character Appearance<textarea [(ngModel)]="value.characterAppearance" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Allies and Organizations<textarea [(ngModel)]="value.alliesAndOrganizations" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Backstory<textarea [(ngModel)]="value.backstory" (ngModelChange)="onFieldChange()"></textarea></label>
+    <label>Treasure<textarea [(ngModel)]="value.treasure" (ngModelChange)="onFieldChange()"></textarea></label>
+  </div>
+
+  <div class="actions">
+    <button type="button" (click)="onSave()">Save</button>
+    <button type="button" (click)="downloadSheet()">Download JSON</button>
+    <label class="import-label">
+      Import JSON
+      <input type="file" accept="application/json" (change)="onImportFile($event)" />
+    </label>
+  </div>
+</div>

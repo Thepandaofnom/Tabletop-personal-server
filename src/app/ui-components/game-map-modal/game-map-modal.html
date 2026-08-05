@@ -1,7 +1,0 @@
-<p-dialog [(visible)]="visibleLocal" [resizable]="true" [modal]="true" header="Game Map" styleClass="game-map-dialog" [style]="{width: '80vw', height: '80vh'}" (onShow)="onDialogShown()" (onResize)="onDialogResize($event)">
-  <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;">
-    <input type="file" accept="image/*" (change)="onFileChange($event)" />
-    <button pButton type="button" label="Clear" class="p-button-secondary" (click)="clearMap()"></button>
-  </div>
-  <div #stageContainer style="width:100%;height:calc(100% - 48px);border:1px solid rgba(255,255,255,0.06);"></div>
-</p-dialog>

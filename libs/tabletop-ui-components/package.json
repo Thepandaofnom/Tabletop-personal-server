@@ -1,0 +1,58 @@
+{
+  "name": "@tabletop/ui-components",
+  "version": "0.1.0",
+  "description": "Reusable UI components for Tabletop Personal Server",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./login-modal": {
+      "types": "./dist/login-modal/index.d.ts",
+      "import": "./dist/login-modal/index.js",
+      "require": "./dist/login-modal/index.js"
+    },
+    "./new-user-sign-up": {
+      "types": "./dist/new-user-sign-up/index.d.ts",
+      "import": "./dist/new-user-sign-up/index.js",
+      "require": "./dist/new-user-sign-up/index.js"
+    },
+    "./main-menu-button-bar": {
+      "types": "./dist/main-menu-button-bar/index.d.ts",
+      "import": "./dist/main-menu-button-bar/index.js",
+      "require": "./dist/main-menu-button-bar/index.js"
+    },
+    "./account-view-panel": {
+      "types": "./dist/account-view-panel/index.d.ts",
+      "import": "./dist/account-view-panel/index.js",
+      "require": "./dist/account-view-panel/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "peerDependencies": {
+    "@angular/animations": "^20.0.0",
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0",
+    "@angular/forms": "^20.0.0",
+    "@angular/platform-browser": "^20.0.0",
+    "primeng": "^20.0.0",
+    "rxjs": "^7.0.0"
+  },
+  "keywords": [
+    "angular",
+    "components",
+    "ui",
+    "tabletop"
+  ],
+  "author": "",
+  "license": "ISC"
+}

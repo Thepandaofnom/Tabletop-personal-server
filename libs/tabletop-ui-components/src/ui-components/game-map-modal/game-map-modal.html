@@ -1,0 +1,100 @@
+<p-dialog [(visible)]="visibleLocal" [resizable]="true" [modal]="true" header="Game Map" styleClass="game-map-dialog" [style]="{width: '80vw', height: '80vh'}" (onShow)="onDialogShown()" (onResize)="onDialogResize($event)">
+  <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;justify-content:space-between;">
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <input type="file" accept="image/*" (change)="onFileChange($event)" />
+      <button pButton type="button" label="Clear" class="p-button-secondary" (click)="clearMap()"></button>
+    </div>
+    <div style="position:relative;z-index:1000;display:flex;align-items:center;gap:0.5rem;">
+      <p-colorPicker [(ngModel)]="gridColor" (ngModelChange)="onGridColorChange(gridColor)" [inline]="false" format="hex" [appendTo]="'body'"></p-colorPicker>
+      <button pButton type="button" icon="pi pi-bars" class="p-button-text p-button-plain" [style.backgroundColor]="showGrid ? 'dimgrey' : 'transparent'" (click)="openGridMenu($event)"></button>
+      <p-menu #menu [model]="menuItems" [popup]="true" [appendTo]="'body'"></p-menu>
+    </div>
+  </div>
+  <div #stageContainer style="width:100%;height:calc(100% - 144px);border:1px solid rgba(255,255,255,0.06);"></div>
+  <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;padding:0.5rem;background:rgba(0,0,0,0.2);border-radius:4px;width:100%;">
+    <span style="min-width:80px;color:#fff;white-space:nowrap;">Map zoom: {{(zoom * 100).toFixed(0)}}%</span>
+    <input type="range" min="0.1" max="3" step="0.1" [(ngModel)]="zoom" (ngModelChange)="onZoomChange($event * 100)" style="flex:1;width:100%;cursor:pointer;">
+    <label style="display:flex;align-items:center;gap:0.3rem;color:#fff;white-space:nowrap;cursor:pointer;margin-left:0.5rem;" pTooltip="Scales grid with map image when checked" tooltipPosition="top">
+      <input type="checkbox" [(ngModel)]="scaleGrid" style="cursor:pointer;">
+      <span>Scale Grid</span>
+    </label>
+  </div>
+  <div *ngIf="!scaleGrid" style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;padding:0.5rem;background:rgba(0,0,0,0.2);border-radius:4px;width:100%;">
+    <span style="min-width:80px;color:#fff;white-space:nowrap;">Grid zoom: {{(gridZoom * 100).toFixed(0)}}%</span>
+    <input type="range" min="0.1" max="3" step="0.1" [(ngModel)]="gridZoom" (ngModelChange)="onGridZoomChange($event * 100)" style="flex:1;width:100%;cursor:pointer;">
+  </div>
+
+  <!-- Grid Line Size Settings -->
+  <div style="display:flex;align-items:center;gap:1rem;margin-top:0.5rem;padding:0.5rem;background:rgba(0,0,0,0.2);border-radius:4px;width:100%;">
+    <span style="color:#fff;white-space:nowrap;">Grid Size:</span>
+    <div style="display:flex;align-items:center;gap:0.3rem;">
+      <label style="color:#fff;white-space:nowrap;">Width:</label>
+      <input type="number" [(ngModel)]="gridCellWidth" (ngModelChange)="onGridSizeChange()" min="1" max="200" style="width:60px;padding:0.3rem;border-radius:4px;border:1px solid #ccc;"/>
+      <span style="color:#fff;">px</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.3rem;">
+      <label style="color:#fff;white-space:nowrap;">Height:</label>
+      <input type="number" [(ngModel)]="gridCellHeight" (ngModelChange)="onGridSizeChange()" min="1" max="200" style="width:60px;padding:0.3rem;border-radius:4px;border:1px solid #ccc;"/>
+      <span style="color:#fff;">px</span>
+    </div>
+  </div>
+
+  <!-- Token Dialog -->
+  <p-dialog [(visible)]="showTokenDialog" header="Add Token" [modal]="true" [closable]="true" [style]="{width: '400px'}" [appendTo]="'body'">
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <label style="color:#fff;">Please input token name</label>
+      <input pInputText [(ngModel)]="tokenName" placeholder="Enter token name" style="padding:0.5rem;border-radius:4px;border:1px solid #ccc;"/>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="showTokenDialog = false"></button>
+        <button pButton type="button" label="OK" class="p-button-primary" [disabled]="!tokenName.trim()" (click)="addToken()"></button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- Rename Token Dialog -->
+  <p-dialog [(visible)]="showRenameDialog" header="Rename Token" [modal]="true" [closable]="true" [style]="{width: '400px'}" [appendTo]="'body'">
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <label style="color:#fff;">New name</label>
+      <input pInputText [(ngModel)]="newTokenName" placeholder="Enter new token name" style="padding:0.5rem;border-radius:4px;border:1px solid #ccc;"/>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="showRenameDialog = false"></button>
+        <button pButton type="button" label="OK" class="p-button-primary" [disabled]="!newTokenName.trim()" (click)="renameToken()"></button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- Change Token Color Dialog -->
+  <p-dialog [(visible)]="showColorDialog" header="Change Token Color" [modal]="true" [closable]="true" [style]="{width: '400px'}" [appendTo]="'body'">
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <p-colorPicker [(ngModel)]="newTokenColor" [inline]="false" format="hex" [appendTo]="'body'"></p-colorPicker>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="showColorDialog = false"></button>
+        <button pButton type="button" label="OK" class="p-button-primary" (click)="changeTokenColor()"></button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- Resize Token Dialog -->
+  <p-dialog [(visible)]="showResizeDialog" header="Resize Token" [modal]="true" [closable]="true" [style]="{width: '400px'}" [appendTo]="'body'">
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <label style="color:#fff;">Token Size: {{(tokenResizeValue * 100).toFixed(0)}}%</label>
+      <input type="range" min="0.5" max="3" step="0.1" [(ngModel)]="tokenResizeValue" (ngModelChange)="onTokenResizeChange($event)" style="width:100%;cursor:pointer;">
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="cancelTokenResize()"></button>
+        <button pButton type="button" label="OK" class="p-button-primary" (click)="confirmTokenResize()"></button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- Rotate Token Dialog -->
+  <p-dialog [(visible)]="showRotateDialog" header="Rotate Token" [modal]="true" [closable]="true" [style]="{width: '400px'}" [appendTo]="'body'">
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <label style="color:#fff;">Rotation: {{tokenRotateValue.toFixed(0)}}°</label>
+      <input type="range" min="0" max="360" step="1" [(ngModel)]="tokenRotateValue" (ngModelChange)="onTokenRotateChange($event)" style="width:100%;cursor:pointer;">
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="cancelTokenRotate()"></button>
+        <button pButton type="button" label="OK" class="p-button-primary" (click)="confirmTokenRotate()"></button>
+      </div>
+    </div>
+  </p-dialog>
+</p-dialog>

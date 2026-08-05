@@ -1,0 +1,9 @@
+﻿.sheet { display: grid; gap: 1rem; }
+.sheet-header, .grid-2 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sheet-header > div, .grid-2 > label, .text-blocks > label { display: grid; gap: 0.25rem; }
+.text-blocks { display: grid; gap: 0.75rem; }
+textarea { min-height: 4rem; }
+.actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.import-label { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+.import-label input { display: none; }

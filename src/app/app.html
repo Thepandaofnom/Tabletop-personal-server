@@ -1,47 +1,47 @@
-<header class="site-header">
+﻿<header class="site-header">
   <div class="container">
     <h1>{{ title() }}</h1>
   </div>
 </header>
 
-<div class="main-menu-button-bar container">
-  <div class="left-buttons">
-    <button pButton type="button" label="Character Sheets" class="pill p-button-outlined"></button>
-    <button pButton type="button" label="Game Map" class="pill p-button-outlined" (click)="openGameMap()"></button>
-    <button pButton type="button" label="NPC Maker" class="pill p-button-outlined"></button>
-    <button pButton type="button" label="Dice Bag" class="pill p-button-outlined" (click)="openDiceBag()"></button>
-  </div>
-
-  <div class="hamburger-wrapper">
-    <ng-container *ngIf="loggedIn">
-      <button pButton type="button" class="user-btn p-button-text" icon="pi pi-user" style="margin-right:0.5rem" aria-label="Account" (click)="onAccount()"></button>
-    </ng-container>
-
-    <button type="button" class="hamburger p-button-text" (click)="menuOpen = !menuOpen" aria-label="Menu">&#9776;</button>
-    <div class="hamburger-menu" *ngIf="menuOpen">
-      <ng-container *ngIf="!loggedIn; else loggedTpl">
-        <button type="button" class="menu-item p-button-text" (click)="onLogin()">Login</button>
-        <button type="button" class="menu-item p-button-text" (click)="onSignup()">Sign up</button>
-      </ng-container>
-      <ng-template #loggedTpl>
-        <button type="button" class="menu-item p-button-text" (click)="onAccount()">Account</button>
-        <button type="button" class="menu-item p-button-text" (click)="doLogout()">Logout</button>
-      </ng-template>
-    </div>
-  </div>
-
-  <login-modal [visible]="loginVisible" (visibleChange)="loginVisible = $event" (loginSuccess)="onLoginSuccess($event)"></login-modal>
-  <account-modal [visible]="accountVisible" (visibleChange)="accountVisible = $event" (logout)="onLogout()"></account-modal>
+<div style="margin-top: 0;">
+  <main-menu-button-bar 
+    [loggedIn]="loggedIn"
+    [loginVisible]="loginVisible"
+    (loginVisibleChange)="loginVisible = $event"
+    (loginSuccess)="onLoginSuccess($event)"
+    (openGameMap)="onMenuGameMapClick()"
+    (openDiceBag)="onMenuDiceBagClick()"
+    (openCharacterSheets)="onMenuCharacterSheetsClick()"
+    (onLoginClick)="onMenuLogin()"
+    (onSignupClick)="onMenuSignup()"
+    (onAccountClick)="onMenuAccountClick()"
+    (onLogoutClick)="onMenuLogout()">
+  </main-menu-button-bar>
 </div>
 
 <dice-bag-modal [visible]="diceBagVisible" (visibleChange)="diceBagVisible = $event"></dice-bag-modal>
-
 <game-map-modal [visible]="gameMapVisible" (visibleChange)="gameMapVisible = $event"></game-map-modal>
-
 <new-user-sign-up [visible]="signupVisible" (visibleChange)="signupVisible = $event"></new-user-sign-up>
 
+<account-view-panel
+  *ngIf="accountViewVisible"
+  [username]="currentUsername"
+  [firstName]="currentFirstName"
+  [lastName]="currentLastName"
+  [email]="currentEmail"
+  (closePanel)="accountViewVisible = false">
+</account-view-panel>
+
 <main class="main-content">
-  <section class="landing">
+  <character-sheet-editor
+    *ngIf="currentView === 'character-sheet'"
+    [value]="characterSheet"
+    (valueChange)="onCharacterSheetChange($event)"
+    (saveSheet)="onCharacterSheetSave($event)">
+  </character-sheet-editor>
+
+  <section class="landing" *ngIf="currentView === 'landing'">
     <h2>Welcome</h2>
     <p class="lead">This is the Tabletop Personal Server landing page. Use the sidebar or navigation to get started.</p>
   </section>

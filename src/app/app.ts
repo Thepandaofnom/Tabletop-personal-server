@@ -1,89 +1,113 @@
-import { Component, signal } from '@angular/core';
+﻿import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
-import { ButtonModule } from 'primeng/button';
 import { AuthInterceptor } from './auth.interceptor';
-import { DiceBagModal } from './ui-components/dice-bag-modal/dice-bag-modal';
-import { GameMapModal } from './ui-components/game-map-modal/game-map-modal';
-import { NewUserSignUp } from './ui-components/new-user-sign-up/new-user-sign-up';
-import { LoginModal } from './ui-components/login-modal/login-modal';
-import { AccountModal } from './ui-components/account-modal/account-modal';
+import { DiceBagModal, GameMapModal, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData } from '@tabletop/ui-components';
+
+interface LoginResponse {
+  username: string;
+  token: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+type MainContentView = 'landing' | 'character-sheet';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, HttpClientModule, ButtonModule, DiceBagModal, GameMapModal, NewUserSignUp, LoginModal, AccountModal],
-    providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
-    templateUrl: './app.html',
-    styleUrls: ['./app.css']
+  imports: [RouterOutlet, CommonModule, HttpClientModule, DiceBagModal, GameMapModal, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor],
+  providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
+  templateUrl: './app.html',
+  styleUrls: ['./app.css']
 })
 export class App {
   protected readonly title = signal('Tabletop Personal Server');
   protected diceBagVisible = false;
   protected gameMapVisible = false;
   protected loginVisible = false;
+  protected loggedIn = false;
+  protected signupVisible = false;
+  protected accountViewVisible = false;
+  protected currentView: MainContentView = 'landing';
+  protected characterSheet: CharacterSheetData = this.createEmptyCharacterSheet();
+  protected currentUsername = '';
+  protected currentFirstName = '';
+  protected currentLastName = '';
+  protected currentEmail = '';
 
   constructor(private http: HttpClient) {}
 
-  // UI state for hamburger menu
-  protected menuOpen = false;
-  protected loggedIn = false; // toggled on successful login
-  protected signupVisible = false;
-
-  openDiceBag() { this.diceBagVisible = true; }
-  openGameMap() { this.gameMapVisible = true; }
-
-  // Hamburger menu actions
-  onLogin() {
-    this.menuOpen = false;
-    this.loginVisible = true;
-  }
-  onSignup() {
-    this.menuOpen = false;
-    this.signupVisible = true;
-  }
-  accountVisible = false;
-
-  onAccount() {
-    this.menuOpen = false;
-    this.accountVisible = true;
-  }
-
-  onLoginSuccess(event: { username: string; token: string }) {
+  onLoginSuccess(event: LoginResponse) {
     this.loggedIn = true;
-    console.log('Logged in as', event.username);
+    this.currentUsername = event.username || '';
+    this.currentFirstName = event.firstName || '';
+    this.currentLastName = event.lastName || '';
+    this.currentEmail = event.email || '';
+  }
+
+  onMenuCharacterSheetsClick() {
+    this.currentView = 'character-sheet';
+  }
+
+  onCharacterSheetChange(value: CharacterSheetData) {
+    this.characterSheet = value;
+  }
+
+  onCharacterSheetSave(value: CharacterSheetData) {
+    this.characterSheet = value;
+  }
+
+  private createEmptyCharacterSheet(): CharacterSheetData {
+    return {
+      characterName: '', playerName: '', classAndLevel: '', background: '', race: '', alignment: '', experiencePoints: '',
+      inspiration: '', proficiencyBonus: '', armorClass: '', initiative: '', speed: '', hitPointMaximum: '', currentHitPoints: '',
+      temporaryHitPoints: '', hitDice: '', deathSavesSuccesses: '', deathSavesFailures: '',
+      strengthScore: '', strengthModifier: '', dexterityScore: '', dexterityModifier: '', constitutionScore: '', constitutionModifier: '',
+      intelligenceScore: '', intelligenceModifier: '', wisdomScore: '', wisdomModifier: '', charismaScore: '', charismaModifier: '',
+      savingThrows: '', skills: '', passivePerception: '', otherProficienciesAndLanguages: '', equipment: '', featuresAndTraits: '',
+      attacksAndSpellcasting: '', personalityTraits: '', ideals: '', bonds: '', flaws: '', characterAppearance: '', alliesAndOrganizations: '',
+      backstory: '', treasure: ''
+    };
   }
 
   doLogout() {
-    // call backend to revoke token (best-effort), then clear JWT
     const token = (() => { try { return localStorage.getItem('jwt'); } catch { return null; } })();
     if (token) {
-      this.http.post<any>('http://localhost:8081/api/auth/logout', {}).subscribe({
+      this.http.post<any>('https://tabletop-personal-server-production.up.railway.app/api/auth/logout', {}).subscribe({
         next: () => {
           try { localStorage.removeItem('jwt'); } catch (e) { console.warn('Failed to remove jwt', e); }
           this.loggedIn = false;
-          this.menuOpen = false;
-          console.log('Logged out (server notified)');
+          this.currentUsername = '';
+          this.currentFirstName = '';
+          this.currentLastName = '';
+          this.currentEmail = '';
         },
-        error: (err) => {
-          console.warn('Logout request failed', err);
-          // still clear locally
+        error: () => {
           try { localStorage.removeItem('jwt'); } catch (e) { console.warn('Failed to remove jwt', e); }
           this.loggedIn = false;
-          this.menuOpen = false;
+          this.currentUsername = '';
+          this.currentFirstName = '';
+          this.currentLastName = '';
+          this.currentEmail = '';
         }
       });
     } else {
       try { localStorage.removeItem('jwt'); } catch (e) { console.warn('Failed to remove jwt', e); }
       this.loggedIn = false;
-      this.menuOpen = false;
-      console.log('Logged out (no token)');
+      this.currentUsername = '';
+      this.currentFirstName = '';
+      this.currentLastName = '';
+      this.currentEmail = '';
     }
   }
 
-  onLogout() {
-    // called from account-modal logout event
-    this.doLogout();
-  }
+  onMenuLogin() { this.loginVisible = true; }
+  onMenuSignup() { this.signupVisible = true; }
+  onMenuLogout() { this.doLogout(); }
+  onMenuGameMapClick() { this.gameMapVisible = true; }
+  onMenuDiceBagClick() { this.diceBagVisible = true; }
+  onMenuAccountClick() { this.accountViewVisible = true; }
 }
