@@ -417,6 +417,9 @@ export class GameMapModal implements OnDestroy {
         if (circle) {
           circle.radius(scaledSize);
         }
+        
+        // Update token image to match the new size
+        this.updateTokenImageSize(tokenId);
       });
       
       this.stage.draw();
@@ -755,6 +758,8 @@ export class GameMapModal implements OnDestroy {
           tokenGroup.moveToBottom();
           
           this.tokenImages.set(tokenId, konvaImage);
+          // Update image size to match the current token size (applies zoom)
+          this.updateTokenImageSize(tokenId);
           this.tokenLayer.draw();
         }
       };
@@ -762,6 +767,25 @@ export class GameMapModal implements OnDestroy {
     };
 
     reader.readAsDataURL(file);
+  }
+
+  private updateTokenImageSize(tokenId: string) {
+    const tokenGroup = this.tokens.get(tokenId);
+    const konvaImage = this.tokenImages.get(tokenId);
+    if (!tokenGroup || !konvaImage) return;
+
+    // Calculate current size: baseSize * userScale * zoom
+    const baseSize = this.tokenBaseSizes.get(tokenId) || 20;
+    const userScale = this.tokenUserScales.get(tokenId) || 1;
+    const scaledRadius = baseSize * userScale * this.zoom;
+    const diameter = scaledRadius * 2;
+
+    // Update image dimensions to match circle diameter
+    konvaImage.width(diameter);
+    konvaImage.height(diameter);
+    // Re-center the image (offset from center)
+    konvaImage.x(-scaledRadius);
+    konvaImage.y(-scaledRadius);
   }
 
   private openResizeDialog(tokenId: string) {
@@ -787,6 +811,9 @@ export class GameMapModal implements OnDestroy {
         circle.radius(scaledSize);
       }
       
+      // Update token image to match the new size
+      this.updateTokenImageSize(this.editingTokenId);
+      
       this.tokenLayer?.draw();
     }
   }
@@ -811,6 +838,9 @@ export class GameMapModal implements OnDestroy {
         if (circle) {
           circle.radius(scaledSize);
         }
+        
+        // Update token image to match the new size
+        this.updateTokenImageSize(this.editingTokenId);
         
         this.tokenLayer?.draw();
       }
@@ -1192,6 +1222,8 @@ export class GameMapModal implements OnDestroy {
       tokenGroup.add(konvaImage);
       tokenGroup.moveToBottom();
       this.tokenImages.set(tokenId, konvaImage);
+      // Update image size to match the current token size (applies zoom)
+      this.updateTokenImageSize(tokenId);
       this.tokenLayer?.draw();
     };
     img.onerror = () => {
