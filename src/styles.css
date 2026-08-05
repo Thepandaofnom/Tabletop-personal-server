@@ -49,67 +49,6 @@ a { color: var(--accent); }
 /* make forms, cards and other surfaces slightly lighter */
 .surface { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); border-radius: 8px; padding: 1rem; }
 
-/* Dice bag dialog custom styling */
-/* header slightly darker than body for subtle contrast */
-.dice-bag-dialog .p-dialog-titlebar {
-  background: #121212 !important; /* darker */
-  color: var(--text) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-.dice-bag-dialog .p-dialog-header {
-  background: #101010 !important; /* darker */
-  color: var(--text) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-.dice-bag-dialog .p-dialog-content {
-  background: #1e1e1e !important; /* body */
-  color: var(--text) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 1rem !important;
-}
-.dice-bag-dialog .p-dialog .p-button {
-  background: transparent;
-  border-color: rgba(255,255,255,0.06);
-  color: var(--text);
-}
-.dice-bag-dialog .p-dialog .p-button:hover {
-  background: rgba(255,255,255,0.03);
-}
-/* result layout for dice bag */
-.dice-bag-dialog .result-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 120px;
-  gap: 0.75rem;
-}
-.dice-bag-dialog .result-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  flex-wrap: wrap; /* allow wrapping when dialog is narrow */
-}
-.dice-bag-dialog .result-label {
-  font-weight: 600;
-  color: var(--text);
-  text-align: center;
-}
-.dice-bag-dialog #resultInput {
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: #141414;
-  color: var(--text);
-  text-align: center;
-  width: min(7ch, 100%); /* shrink to fit when dialog is small, but cap at 7ch */
-  box-sizing: border-box;
-  min-width: 3ch;
-}
-
 /* Apply dice-bag dialog appearance globally to all PrimeNG dialogs */
 .p-dialog .p-dialog-titlebar,
 .p-dialog .p-dialog-header {
@@ -131,30 +70,6 @@ a { color: var(--accent); }
   background: rgba(255,255,255,0.03) !important;
 }
 
-/* Keep per-dialog specific layout for dice bag preserved */
-.dice-bag-dialog .p-dialog-content { justify-content: center !important; }
-
-/* Center sign-up content within dice-bag-styled dialogs */
-.dice-bag-dialog .signup-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-.dice-bag-dialog .signup-input {
-  width: min(360px, 90%);
-  box-sizing: border-box;
-  background: #141414;
-  border: 1px solid rgba(255,255,255,0.06);
-  color: var(--text);
-  padding: 0.5rem;
-  border-radius: 6px;
-}
-.dice-bag-dialog .signup-input.p-password { padding: 0; }
-
 /* Rounded corners for dialogs */
 .p-dialog {
   border-radius: 12px !important;
@@ -169,81 +84,6 @@ a { color: var(--accent); }
   border-bottom-right-radius: 12px !important;
 }
 
-/* Dice grid for dice bag buttons - keep for fallback when PrimeFlex classes are present */
-.dice-bag-dialog .p-dialog-content .dice-grid,
-.dice-bag-dialog .dice-grid {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 1rem !important; /* breathing room between buttons */
-  width: 100% !important;
-  align-items: stretch !important;
-}
-
-/* Ensure columns using PrimeFlex's col-4 behave predictably in this dialog */
-.dice-bag-dialog .dice-grid > .col-4 {
-  flex: 0 0 calc(33.333% - 0.666rem) !important;
-  max-width: calc(33.333% - 0.666rem) !important;
-  box-sizing: border-box !important;
-}
-
-/* Force buttons to occupy full column width */
-.dice-bag-dialog .dice-grid .dice-btn,
-.dice-bag-dialog .dice-grid .p-button {
-  width: 100% !important;
-  display: block !important;
-}
-
-/* Also support case where PrimeFlex grid classes aren't applied: ensure direct children buttons size */
-.dice-bag-dialog .dice-grid > button.dice-btn {
-  flex: 1 1 calc(33.333% - 0.666rem) !important;
-  max-width: calc(33.333% - 0.666rem) !important;
-}
-/* Highest specificity and !important to override PrimeNG built-in styles */
-.dice-bag-dialog .p-dialog-content .dice-grid button.p-button,
-.dice-bag-dialog .p-dialog-content .dice-grid .p-button,
-.dice-bag-dialog .dice-grid button.p-button,
-.dice-bag-dialog .dice-grid .p-button,
-.dice-bag-dialog .dice-btn {
-  display: flex !important;
-  width: 100% !important;
-  height: 64px !important;
-  padding: 0 !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
-  border-radius: 10px !important;
-  border: 1px solid rgba(255,255,255,0.04) !important;
-  background: linear-gradient(180deg, #2b2b2b, #1f1f1f) !important; /* slightly lighter than dialog bg */
-  color: var(--text) !important;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.6) !important;
-  transition: transform 0.12s ease, box-shadow 0.12s ease !important;
-}
-.dice-bag-dialog .p-dialog-content .dice-grid button.p-button:hover,
-.dice-bag-dialog .p-dialog-content .dice-grid .p-button:hover,
-.dice-bag-dialog .dice-grid button.p-button:hover,
-.dice-bag-dialog .dice-grid .p-button:hover,
-.dice-bag-dialog .dice-btn:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.7) !important;
-}
-.dice-bag-dialog .p-dialog-content .dice-grid button.p-button:active,
-.dice-bag-dialog .p-dialog-content .dice-grid .p-button:active,
-.dice-bag-dialog .dice-grid button.p-button:active,
-.dice-bag-dialog .dice-grid .p-button:active,
-.dice-bag-dialog .dice-btn:active {
-  transform: translateY(0) !important;
-}
-/* Ensure the label fills the button so text is centered and padding is handled by button */
-.dice-bag-dialog .p-dialog-content .dice-grid button.p-button .p-button-label,
-.dice-bag-dialog .p-dialog-content .dice-grid .p-button .p-button-label,
-.dice-bag-dialog .dice-grid button.p-button .p-button-label,
-.dice-bag-dialog .dice-grid .p-button .p-button-label,
-.dice-bag-dialog .dice-btn .p-button-label {
-  display: block !important;
-  width: 100% !important;
-  text-align: center !important;
-  padding: 0 12px !important;
-}
 
 /* Game map modal hamburger menu styling */
 .p-menu {

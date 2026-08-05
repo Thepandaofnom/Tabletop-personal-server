@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [DialogModule, ButtonModule, CommonModule, FormsModule],
   templateUrl: './dice-bag-modal.html',
+  styleUrls: ['./dice-bag-modal.css'],
 })
 export class DiceBagModal {
   @Input() visible = false;
