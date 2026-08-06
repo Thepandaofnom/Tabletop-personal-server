@@ -1,24 +1,24 @@
-﻿<header class="site-header">
+<header class="site-header">
   <div class="container">
     <h1>{{ title() }}</h1>
   </div>
 </header>
 
-<div style="margin-top: 0;">
-  <main-menu-button-bar 
-    [loggedIn]="loggedIn"
-    [loginVisible]="loginVisible"
-    (loginVisibleChange)="loginVisible = $event"
-    (loginSuccess)="onLoginSuccess($event)"
-    (openGameMap)="onMenuGameMapClick()"
-    (openDiceBag)="onMenuDiceBagClick()"
-    (openCharacterSheets)="onMenuCharacterSheetsClick()"
-    (onLoginClick)="onMenuLogin()"
-    (onSignupClick)="onMenuSignup()"
-    (onAccountClick)="onMenuAccountClick()"
-    (onLogoutClick)="onMenuLogout()">
-  </main-menu-button-bar>
-</div>
+<main-menu-button-bar 
+  [loggedIn]="loggedIn"
+  [loginVisible]="loginVisible"
+  (loginVisibleChange)="loginVisible = $event"
+  (loginSuccess)="onLoginSuccess($event)"
+  (openGameMap)="onMenuGameMapClick()"
+  (openDiceBag)="onMenuDiceBagClick()"
+  (openCharacterSheets)="onMenuCharacterSheetsClick()"
+  (openNPCMaker)="onMenuNPCMakerClick()"
+  (openOptions)="onMenuOptionsClick()"
+  (onLoginClick)="onMenuLogin()"
+  (onSignupClick)="onMenuSignup()"
+  (onAccountClick)="onMenuAccountClick()"
+  (onLogoutClick)="onMenuLogout()">
+</main-menu-button-bar>
 
 <dice-bag-modal [visible]="diceBagVisible" (visibleChange)="diceBagVisible = $event"></dice-bag-modal>
 <new-user-sign-up [visible]="signupVisible" (visibleChange)="signupVisible = $event"></new-user-sign-up>
@@ -32,17 +32,97 @@
   (closePanel)="accountViewVisible = false">
 </account-view-panel>
 
-<main class="main-content">
+<main class="main-content" [class.app-dark-theme]="darkMode">
   <div [style.display]="currentView === 'game-map' ? 'block' : 'none'" style="width: 100%; height: 100%;">
-    <game-map-component></game-map-component>
+    <game-map-component [apiBaseUrl]="apiBaseUrl"></game-map-component>
   </div>
 
-  <character-sheet-editor
-    *ngIf="currentView === 'character-sheet'"
-    [value]="characterSheet"
-    (valueChange)="onCharacterSheetChange($event)"
-    (saveSheet)="onCharacterSheetSave($event)">
-  </character-sheet-editor>
+  <div *ngIf="currentView === 'global-settings'">
+    <global-settings-component [(darkMode)]="darkMode" (darkModeChange)="onAppThemeChange($event)"></global-settings-component>
+  </div>
+
+  <div *ngIf="currentView === 'npc-maker'">
+    <npc-maker-component></npc-maker-component>
+  </div>
+
+  <div *ngIf="currentView === 'character-sheet'" class="character-sheet-tabs">
+    <div class="character-sheet-tab-bar">
+      <button
+        *ngFor="let tab of characterSheetTabs"
+        type="button"
+        class="character-sheet-tab"
+        [class.active]="tab.id === activeCharacterSheetTabId"
+        (click)="onCharacterSheetTabClick(tab.id)"
+        (dblclick)="startEditingTab(tab.id)">
+        <input
+          *ngIf="editingTabId === tab.id"
+          #tabLabelInput
+          [value]="tab.label"
+          (blur)="finishEditingTab(tab.id, tabLabelInput.value)"
+          (keydown.escape)="editingTabId = undefined"
+          autofocus />
+        <span *ngIf="editingTabId !== tab.id">{{ tab.label }}</span>
+        <span class="character-sheet-tab-close" (click)="$event.stopPropagation(); removeCharacterSheetTab(tab.id)" aria-label="Delete tab">×</span>
+      </button>
+      <button type="button" class="character-sheet-tab add-tab" (click)="addCharacterSheetTab()">+</button>
+    </div>
+
+    <div class="character-sheet-tab-panels">
+      <div *ngFor="let tab of characterSheetTabs; trackBy: trackByTabId" [style.display]="tab.id === activeCharacterSheetTabId ? 'block' : 'none'">
+        <character-sheet-editor
+          [value]="tab.value"
+          [sheetType]="tab.sheetType"
+          [userId]="currentUserId"
+          [username]="currentUsername"
+          (sheetTypeChange)="onCharacterSheetTypeChange(tab.id, $event)"
+          (valueChange)="onCharacterSheetChange(tab.id, $event)"
+          (saveSheet)="onCharacterSheetSave(tab.id, $event)"
+          (openSaveDialog)="onOpenCharacterSheetSaveDialog()"
+          (openLoadDialog)="onOpenCharacterSheetLoadDialog()"
+          (openDeleteDialog)="onOpenCharacterSheetDeleteDialog()">
+        </character-sheet-editor>
+      </div>
+    </div>
+  </div>
+
+  <p-dialog [(visible)]="characterSheetSaveDialogVisible" header="Save character sheet" [modal]="true" [closable]="true" [style]="{width: 'min(92vw, 420px)'}" [contentStyle]="{overflow: 'visible'}">
+    <div class="p-fluid save-sheet-modal">
+      <label>Save name</label>
+      <input pInputText [(ngModel)]="characterSheetSaveName" placeholder="Enter save name" (keydown.enter)="confirmCharacterSheetSave()" />
+      <div class="sheet-dialog-actions">
+        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="characterSheetSaveDialogVisible = false"></button>
+        <button pButton type="button" label="Save" [disabled]="!loggedIn" (click)="confirmCharacterSheetSave()"></button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <p-dialog [(visible)]="characterSheetLoadDialogVisible" header="Load character sheet" [modal]="true" [closable]="true" [style]="{width: 'min(92vw, 420px)'}" [contentStyle]="{overflow: 'visible'}">
+    <div class="p-fluid save-sheet-modal">
+      <label>Saved sheets</label>
+      <select [(ngModel)]="selectedCharacterSheetSaveName" (keydown.enter)="confirmCharacterSheetLoad()">
+        <option value="" disabled>Select a save</option>
+        <option *ngFor="let save of savedCharacterSheets" [value]="save.saveName">{{ save.saveName }}</option>
+      </select>
+      <div class="sheet-dialog-actions">
+        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="characterSheetLoadDialogVisible = false"></button>
+        <button pButton type="button" label="OK" [disabled]="!loggedIn || !selectedCharacterSheetSaveName" (click)="confirmCharacterSheetLoad()"></button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <p-dialog [(visible)]="characterSheetDeleteDialogVisible" header="Delete character sheet" [modal]="true" [closable]="true" [style]="{width: 'min(92vw, 420px)'}" [contentStyle]="{overflow: 'visible'}">
+    <div class="p-fluid save-sheet-modal">
+      <label>Select a save to delete</label>
+      <select [(ngModel)]="selectedCharacterSheetSaveName">
+        <option value="" disabled>Select a save</option>
+        <option *ngFor="let save of savedCharacterSheets" [value]="save.saveName">{{ save.saveName }}</option>
+      </select>
+      <div class="sheet-dialog-actions">
+        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="characterSheetDeleteDialogVisible = false"></button>
+        <button pButton type="button" label="Delete" [disabled]="!loggedIn || !selectedCharacterSheetSaveName" (click)="confirmCharacterSheetDelete()"></button>
+      </div>
+    </div>
+  </p-dialog>
 
   <section class="landing" *ngIf="currentView === 'landing'">
     <h2>Welcome</h2>

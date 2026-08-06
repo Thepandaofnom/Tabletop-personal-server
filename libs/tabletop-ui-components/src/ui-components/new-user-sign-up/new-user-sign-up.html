@@ -1,16 +1,95 @@
 <p-toast></p-toast>
 
-<p-dialog [(visible)]="visibleLocal" header="Sign up" styleClass="dice-bag-dialog" [modal]="true" [closable]="true" [style]="{width: '420px'}">
-  <div class="p-fluid signup-content" style="display:flex;flex-direction:column;gap:0.5rem;align-items:center;">
-    <input pInputText class="signup-input" placeholder="First name" [(ngModel)]="firstName" />
-    <input pInputText class="signup-input" placeholder="Last name" [(ngModel)]="lastName" />
-    <input pInputText class="signup-input" placeholder="Email" type="email" [(ngModel)]="email" />
-    <input pInputText class="signup-input" placeholder="Username" [(ngModel)]="username" />
-    <p-password class="signup-input" [(ngModel)]="password" feedback="false" placeholder="Password"></p-password>
-
-    <div style="display:flex;justify-content:center;gap:0.5rem;margin-top:0.5rem;">
-      <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="onCancel()"></button>
-      <button pButton type="button" label="Create" (click)="createUser()" [disabled]="loading"></button>
+<p-dialog [(visible)]="visibleLocal" header="Sign up" styleClass="dice-bag-dialog" [modal]="true" [closable]="true" [style]="{width: 'min(92vw, 720px)'}">
+  <div class="p-fluid signup-content" style="display:flex;flex-direction:column;gap:0.75rem;align-items:stretch;max-width:100%;padding:1rem;" (keydown.enter)="createUser()">
+    
+    <!-- First Name -->
+    <div class="form-field">
+      <label class="form-label">First Name *</label>
+      <input 
+        pInputText 
+        class="signup-input" 
+        [class.input-invalid]="errors.firstName"
+        placeholder="First name" 
+        [(ngModel)]="firstName"
+        (change)="onFirstNameChange()"
+        (blur)="onFirstNameChange()" />
+      <div class="error-message" *ngIf="errors.firstName">{{ errors.firstName }}</div>
     </div>
+
+    <!-- Last Name -->
+    <div class="form-field">
+      <label class="form-label">Last Name *</label>
+      <input 
+        pInputText 
+        class="signup-input" 
+        [class.input-invalid]="errors.lastName"
+        placeholder="Last name" 
+        [(ngModel)]="lastName"
+        (change)="onLastNameChange()"
+        (blur)="onLastNameChange()" />
+      <div class="error-message" *ngIf="errors.lastName">{{ errors.lastName }}</div>
+    </div>
+
+    <!-- Email -->
+    <div class="form-field">
+      <label class="form-label">Email *</label>
+      <input 
+        pInputText 
+        class="signup-input" 
+        [class.input-invalid]="errors.email"
+        placeholder="Email (e.g. user@example.com)" 
+        type="text"
+        [(ngModel)]="email"
+        (change)="onEmailChange()"
+        (blur)="onEmailChange()" />
+      <div class="error-message" *ngIf="errors.email">{{ errors.email }}</div>
+    </div>
+
+    <!-- Username -->
+    <div class="form-field">
+      <label class="form-label">Username * <span *ngIf="checkingUsername" class="checking-text">(Checking...)</span></label>
+      <input 
+        pInputText 
+        class="signup-input" 
+        [class.input-invalid]="errors.username"
+        placeholder="Username" 
+        [(ngModel)]="username"
+        (change)="onUsernameChange()"
+        (blur)="onUsernameChange()"
+        [disabled]="checkingUsername" />
+      <div class="error-message" *ngIf="errors.username">{{ errors.username }}</div>
+    </div>
+
+    <!-- Password -->
+    <div class="form-field">
+      <label class="form-label">Password *</label>
+      <p-password 
+        [class.input-invalid]="errors.password"
+        [(ngModel)]="password" 
+        feedback="false" 
+        placeholder="Password"
+        (change)="onPasswordChange()"
+        (blur)="onPasswordChange()"></p-password>
+      <div class="error-message" *ngIf="errors.password">{{ errors.password }}</div>
+      <div class="password-requirements" *ngIf="password && !errors.password">
+        <div class="req" [class.met]="PASSWORD_MIN_LENGTH_CHECK">✓ At least 8 characters</div>
+        <div class="req" [class.met]="PASSWORD_UPPERCASE_CHECK">✓ One uppercase letter</div>
+        <div class="req" [class.met]="PASSWORD_NUMBER_CHECK">✓ One number</div>
+        <div class="req" [class.met]="PASSWORD_SPECIAL_CHECK">✓ One special character</div>
+      </div>
+    </div>
+
   </div>
+  <ng-template pTemplate="footer">
+    <div style="display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap;max-width:100%;padding:0 1rem 1rem;">
+      <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="onCancel()"></button>
+      <button 
+        pButton 
+        type="button" 
+        label="Create" 
+        (click)="createUser()" 
+        [disabled]="!isFormValid || loading"></button>
+    </div>
+  </ng-template>
 </p-dialog>

@@ -9,10 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserRepository repo;
@@ -31,14 +31,12 @@ public class UserController {
 
     @PostMapping
     public User create(@RequestBody User u) {
-        // basic validation
         if (u.getUsername() == null || u.getUsername().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "username required");
         }
         if (u.getPassword() == null || u.getPassword().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password required");
         }
-        // ensure uniqueness
         if (repo.findByUsername(u.getUsername()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "username_taken");
         }
@@ -48,13 +46,15 @@ public class UserController {
 
         try {
             u.setId(null);
+            if (u.getUid() == null || u.getUid().isBlank()) {
+                u.setUid(UUID.randomUUID().toString());
+            }
             u.setPassword(encoder.encode(u.getPassword()));
             u.setCreatedAt(LocalDateTime.now());
             User saved = repo.save(u);
             saved.setPassword(null);
             return saved;
         } catch (Exception e) {
-            // log full stack for debugging, return generic 500 message
             log.error("Error saving user", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error_saving_user");
         }
@@ -63,6 +63,19 @@ public class UserController {
     @GetMapping("/{id}")
     public User get(@PathVariable Long id) {
         User u = repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        u.setPassword(null);
+        return u;
+    }
+
+    @GetMapping("/check-username/{username}")
+    public CheckUsernameResponse checkUsername(@PathVariable String username) {
+        boolean exists = repo.findByUsername(username).isPresent();
+        return new CheckUsernameResponse(exists);
+    }
+
+    @GetMapping("/by-username/{username}")
+    public User getByUsername(@PathVariable String username) {
+        User u = repo.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         u.setPassword(null);
         return u;
     }

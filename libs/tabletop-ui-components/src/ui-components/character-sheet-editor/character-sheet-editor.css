@@ -1,4 +1,13 @@
-﻿.sheet { display: grid; gap: 1rem; }
+.sheet {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  background: linear-gradient(180deg, var(--surface), var(--surface-strong));
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25), 0 10px 24px rgba(0, 0, 0, 0.22);
+}
 
 .sheet-menu {
   display: flex;
@@ -6,19 +15,81 @@
   align-items: center;
   flex-wrap: wrap;
   padding: 0.75rem 1rem;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  margin: -1rem -1rem 0 -1rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 0;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
 }
 
+:host ::ng-deep .p-menu {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+}
+
+:host ::ng-deep .p-menu .p-menu-list {
+  background: var(--panel-bg);
+}
+
+:host ::ng-deep .p-menu .p-menuitem > a {
+  color: var(--text-soft);
+  background: var(--surface-alt);
+}
+
+:host ::ng-deep .p-menu .p-menuitem > a:hover {
+  background: var(--surface);
+}
+
+.sheet-menu-spacer {
+  flex: 1 1 auto;
+}
+
+.sheet-template {
+  display: grid;
+  gap: 1rem;
+}
+
+.sheet-type-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.sheet-type-label select {
+  padding: 0.45rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background-color: var(--surface-soft);
+  color: var(--text-soft);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: inherit;
+  font-size: 0.9rem;
+  margin-left: auto;
+}
+
+.hamburger-button {
+  padding: 0.5rem 0.75rem;
+  min-width: 2.5rem;
+}
+
+.theme-toggle ::ng-deep .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
+  background: var(--button-bg);
+}
+
 .sheet-menu button {
   padding: 0.5rem 1rem;
-  background-color: #2d2d2d;
-  color: #fff;
-  border: 1px solid #444;
+  background-color: var(--surface-soft);
+  color: var(--text-soft);
+  border: 1px solid var(--border);
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -26,25 +97,25 @@
 }
 
 .sheet-menu button:hover {
-  background-color: #404040;
+  background-color: var(--surface);
 }
 
 .sheet-menu .btn-save {
-  background-color: #4a90e2;
-  border-color: #3a7bc8;
+  background-color: var(--surface-alt);
+  border-color: var(--border);
 }
 
 .sheet-menu .btn-save:hover {
-  background-color: #3a7bc8;
+  background-color: var(--surface);
 }
 
 .sheet-menu .btn-download {
-  background-color: #2d5a2d;
-  border-color: #1f3f1f;
+  background-color: var(--surface-alt);
+  border-color: var(--border);
 }
 
 .sheet-menu .btn-download:hover {
-  background-color: #3d6a3d;
+  background-color: var(--surface);
 }
 
 .sheet-menu .import-label {
@@ -53,22 +124,60 @@
   gap: 0.5rem;
   cursor: pointer;
   padding: 0.5rem 1rem;
-  background-color: #2d4d2d;
-  border: 1px solid #1f3f1f;
+  background-color: var(--surface-soft);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: #fff;
+  color: var(--text-soft);
   transition: background-color 0.2s;
   font-size: 0.9rem;
 }
 
 .sheet-menu .import-label:hover {
-  background-color: #3d5d3d;
+  background-color: var(--surface);
 }
 
 .sheet-menu .import-label input { display: none; }
 
 .sheet-header, .grid-2 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
 .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
 .sheet-header > div, .grid-2 > label, .text-blocks > label { display: grid; gap: 0.25rem; }
 .text-blocks { display: grid; gap: 0.75rem; }
 textarea { min-height: 4rem; }
+
+.sheet-35 { display: grid; gap: 1rem; }
+.sheet-35-section { display: grid; gap: 0.75rem; }
+.sheet-35-section h3 { margin: 0; color: var(--text-soft); }
+.sheet-gurps { display: grid; gap: 1rem; }
+
+.sheet-template {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+
+.sheet-header input,
+.grid-2 input,
+.grid-3 input,
+.text-blocks input,
+.text-blocks textarea {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  border-radius: 4px;
+  padding: 0.45rem 0.55rem;
+}
+
+.sheet-header input:focus,
+.grid-2 input:focus,
+.grid-3 input:focus,
+.text-blocks input:focus,
+.text-blocks textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+}

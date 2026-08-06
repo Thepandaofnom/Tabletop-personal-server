@@ -1,0 +1,249 @@
+.result-container {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  background:
+    radial-gradient(circle at top, rgba(255, 230, 173, 0.35), transparent 42%),
+    linear-gradient(180deg, var(--surface), var(--surface-strong));
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 173, 0.25),
+    0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+:host ::ng-deep .dice-bag-modal .p-dialog-content {
+  background: transparent;
+  color: var(--text);
+}
+
+:host ::ng-deep .dice-bag-modal .p-dialog-header {
+  background: var(--header-bg);
+  color: #f8e7ba;
+  border-bottom: 1px solid rgba(255, 226, 168, 0.2);
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+}
+
+.result-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.8rem 0.9rem;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.result-label {
+  min-width: 6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.dice-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+
+.dice-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dice-count input[type="number"] {
+  width: 5rem;
+}
+
+.reset-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 1rem;
+}
+
+.dice-btn {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 96px;
+  min-width: 96px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 7px 14px rgba(0, 0, 0, 0.28);
+  background-image:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.14)),
+    radial-gradient(circle at 30% 25%, rgba(255, 247, 222, 0.14), transparent 32%);
+}
+
+.dice-btn::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(255, 238, 204, 0.28);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.dice-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.22), transparent 34%);
+  pointer-events: none;
+}
+
+.dice-btn::marker {
+  content: '';
+}
+
+.dice-d4 {
+  border-radius: 0;
+  clip-path: polygon(50% 1%, 99% 73%, 50% 99%, 1% 73%);
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 247, 222, 0.38), transparent 22%),
+    linear-gradient(135deg, #b87b37, #6c3f1a 75%);
+}
+
+.dice-d6 {
+  width: 80%;
+  height: 80%;
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, #a76b2d, #6b3f1a 72%),
+    linear-gradient(45deg, rgba(255, 255, 255, 0.14), transparent);
+  clip-path: none;
+}
+
+.dice-d8 {
+  border-radius: 0;
+  background:
+    linear-gradient(135deg, #8d5725, #4c2a12 75%),
+    radial-gradient(circle at 65% 28%, rgba(255, 255, 255, 0.15), transparent 28%);
+  clip-path: polygon(50% 1%, 88% 14%, 99% 50%, 88% 86%, 50% 99%, 12% 86%, 1% 50%, 12% 14%);
+}
+
+.dice-d10,
+.dice-d20 {
+  border-radius: 0;
+  background:
+    linear-gradient(145deg, #a86a2d, #4f2b13 78%),
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.16), transparent 26%);
+  clip-path: polygon(50% 0%, 79% 8%, 98% 33%, 98% 67%, 79% 92%, 50% 100%, 21% 92%, 2% 67%, 2% 33%, 21% 8%);
+}
+
+.dice-d12 {
+  border-radius: 0;
+  background:
+    linear-gradient(145deg, #b16f2d, #563014 78%),
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.16), transparent 26%);
+  clip-path: polygon(
+    50% 0%,
+    70% 4%,
+    87% 13%,
+    96% 29%,
+    100% 50%,
+    96% 71%,
+    87% 87%,
+    70% 96%,
+    50% 100%,
+    30% 96%,
+    13% 87%,
+    4% 71%,
+    0% 50%,
+    4% 29%,
+    13% 13%,
+    30% 4%
+  );
+}
+
+.dice-d10 {
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255, 247, 222, 0.28), transparent 22%),
+    linear-gradient(145deg, #c88a47, #6d3f1c 76%);
+  clip-path: polygon(50% 0%, 79% 8%, 98% 33%, 98% 67%, 79% 92%, 50% 100%, 21% 92%, 2% 67%, 2% 33%, 21% 8%);
+}
+
+.dice-label {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+  padding: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+  color: #fff3d7;
+}
+
+.result-input {
+  display: inline-block;
+  width: fit-content;
+  min-width: 7ch;
+  max-width: 100%;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  box-sizing: content-box;
+  flex: 0 0 auto;
+  line-height: 1.2;
+  height: 1.2em;
+  vertical-align: middle;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dice-count input[type="number"] {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  border-radius: 999px;
+  padding: 0.35rem 0.45rem;
+}
+
+:host-context(body.dark-mode) .dice-btn {
+  background-image:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.22)),
+    radial-gradient(circle at 30% 25%, rgba(255, 247, 222, 0.08), transparent 32%);
+}
+
+:host-context(body.dark-mode) .dice-label {
+  color: var(--text);
+}

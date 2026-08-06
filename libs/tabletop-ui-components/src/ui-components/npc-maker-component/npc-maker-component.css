@@ -1,0 +1,249 @@
+.npc-maker-shell {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(180deg, var(--surface), var(--surface-strong));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+  color: var(--text-soft);
+}
+
+.npc-maker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  gap: 1rem;
+}
+
+.npc-maker-header h2 {
+  margin: 0;
+  flex-shrink: 0;
+  color: var(--text-soft);
+}
+
+.header-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.header-btn {
+  padding: 0.5rem 1rem;
+  background-color: var(--surface-soft);
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.header-btn:hover:not(:disabled) {
+  background-color: var(--surface);
+}
+
+.header-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.npc-maker-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.generated-npc {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.generated-npc h3 {
+  margin: 0;
+  padding: 0.75rem 0;
+  color: var(--text-soft);
+  font-size: 1.1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.kept-npc {
+  display: grid;
+  gap: 0.75rem;
+  grid-column: 2;
+}
+
+.kept-npc h3 {
+  margin: 0;
+  padding: 0.75rem 0;
+  color: var(--text-soft);
+  font-size: 1.1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.kept-npc-tabs {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tabs-bar {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.kept-npc-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--surface-soft);
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.kept-npc-tab:hover {
+  background: var(--surface);
+}
+
+.kept-npc-tab.active {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.kept-npc-tab input {
+  width: 8rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  border-radius: 3px;
+}
+
+.delete-npc-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0;
+  min-width: auto;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.delete-npc-btn:hover {
+  opacity: 1;
+}
+
+.npc-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.npc-basic-info,
+.npc-personality,
+.npc-details {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.npc-personality h4,
+.npc-details h4 {
+  margin: 0;
+  padding: 0.5rem 0 0.25rem 0;
+  border-top: 1px solid var(--border);
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.npc-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 0.75rem;
+}
+
+.npc-row label {
+  font-weight: 600;
+  color: var(--text-soft);
+  flex-shrink: 0;
+}
+
+.npc-row span {
+  color: var(--text-soft);
+  word-wrap: break-word;
+}
+
+.npc-stats-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
+.npc-empty {
+  grid-column: 1 / -1;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+@media (max-width: 1024px) {
+  .npc-maker-content {
+    grid-template-columns: 1fr;
+  }
+
+  .npc-maker-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

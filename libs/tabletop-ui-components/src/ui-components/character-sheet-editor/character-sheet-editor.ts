@@ -1,6 +1,10 @@
-﻿import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { MenuModule } from 'primeng/menu';
+import { Menu } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 
 export interface CharacterSheetData {
   characterName: string;
@@ -50,17 +54,56 @@ export interface CharacterSheetData {
   treasure: string;
 }
 
+export type CharacterSheetType = 'D&D-5.0' | 'D&D-3.5' | 'GURPS' | 'pathfinder 1e' | 'Pathfinder 2e' | 'Pathfinder 2eR' | string;
+
 @Component({
   selector: 'character-sheet-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MenuModule, HttpClientModule],
   templateUrl: './character-sheet-editor.html',
   styleUrls: ['./character-sheet-editor.css']
 })
-export class CharacterSheetEditor {
+export class CharacterSheetEditor implements OnChanges {
   @Input() value: CharacterSheetData = this.createEmptySheet();
+  @Input() sheetType!: CharacterSheetType;
+  @Output() sheetTypeChange = new EventEmitter<CharacterSheetType>();
   @Output() valueChange = new EventEmitter<CharacterSheetData>();
   @Output() saveSheet = new EventEmitter<CharacterSheetData>();
+  @Input() userId: number | null = null;
+  @Input() username = '';
+  @Output() openSaveDialog = new EventEmitter<void>();
+  @Output() openLoadDialog = new EventEmitter<void>();
+  @Output() openDeleteDialog = new EventEmitter<void>();
+  @ViewChild('dnd50Template', { static: true }) dnd50Template!: TemplateRef<unknown>;
+  @ViewChild('dnd35Template', { static: true }) dnd35Template!: TemplateRef<unknown>;
+  @ViewChild('gurpsTemplate', { static: true }) gurpsTemplate!: TemplateRef<unknown>;
+  @ViewChild('pathfinder1eTemplate', { static: true }) pathfinder1eTemplate!: TemplateRef<unknown>;
+  @ViewChild('pathfinder2eTemplate', { static: true }) pathfinder2eTemplate!: TemplateRef<unknown>;
+  @ViewChild('pathfinder2erTemplate', { static: true }) pathfinder2erTemplate!: TemplateRef<unknown>;
+  @ViewChild('actionMenu') actionMenu!: Menu;
+  activeTemplate!: TemplateRef<unknown>;
+  actionMenuItems: MenuItem[] = [
+    { label: 'Download JSON', icon: 'pi pi-download', command: () => this.downloadSheet() },
+    { label: 'Import JSON', icon: 'pi pi-upload', command: () => this.triggerImport() },
+    { label: 'Save', icon: 'pi pi-save', command: () => this.openSaveDialog.emit(), disabled: true },
+    { label: 'Load', icon: 'pi pi-folder-open', command: () => this.openLoadDialog.emit(), disabled: true }
+  ];
+
+  constructor(private http: HttpClient) {}
+
+  get canPersistSheets(): boolean {
+    return this.userId !== null;
+  }
+
+  ngOnChanges(): void {
+    this.actionMenuItems = [
+      { label: 'Download JSON', icon: 'pi pi-download', command: () => this.downloadSheet() },
+      { label: 'Import JSON', icon: 'pi pi-upload', command: () => this.triggerImport() },
+      { label: 'Save', icon: 'pi pi-save', command: () => this.openSaveDialog.emit(), disabled: !this.canPersistSheets },
+      { label: 'Load', icon: 'pi pi-folder-open', command: () => this.openLoadDialog.emit(), disabled: !this.canPersistSheets },
+      { label: 'Delete', icon: 'pi pi-trash', command: () => this.openDeleteDialog.emit(), disabled: !this.canPersistSheets }
+    ];
+  }
 
   private createEmptySheet(): CharacterSheetData {
     return {
@@ -75,12 +118,33 @@ export class CharacterSheetEditor {
     };
   }
 
+  ngOnInit(): void {
+    if (!this.sheetType) {
+      this.sheetType = 'D&D-5.0';
+    }
+    this.activeTemplate = this.getTemplateForType(this.sheetType);
+  }
+
   onFieldChange(): void {
     this.valueChange.emit(this.value);
   }
 
-  onSave(): void {
-    this.saveSheet.emit(this.value);
+  onSheetTypeChange(type: CharacterSheetType): void {
+    this.sheetType = type;
+    this.activeTemplate = this.getTemplateForType(type);
+    this.sheetTypeChange.emit(type);
+  }
+
+  openActionMenu(event: Event): void {
+    this.actionMenu.toggle(event);
+  }
+
+  private triggerImport(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = (event) => this.onImportFile(event as unknown as Event);
+    input.click();
   }
 
   onImportFile(event: Event): void {
@@ -109,4 +173,24 @@ export class CharacterSheetEditor {
     link.click();
     URL.revokeObjectURL(url);
   }
+
+  private getTemplateForType(type: CharacterSheetType): TemplateRef<unknown> {
+    if (type === 'D&D-3.5') {
+      return this.dnd35Template;
+    }
+    if (type === 'GURPS') {
+      return this.gurpsTemplate;
+    }
+    if (type === 'pathfinder 1e') {
+      return this.pathfinder1eTemplate;
+    }
+    if (type === 'Pathfinder 2e') {
+      return this.pathfinder2eTemplate;
+    }
+    if (type === 'Pathfinder 2eR') {
+      return this.pathfinder2erTemplate;
+    }
+    return this.dnd50Template;
+  }
+
 }

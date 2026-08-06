@@ -2,11 +2,43 @@
 
 /* Global dark theme styles */
 :root {
-  --bg: #0b0b0d;
-  --surface: #0f1113;
-  --muted: #9aa4b2;
-  --text: #e6eef6;
-  --accent: #7c4dff;
+  --bg: #21160d;
+  --surface: #f3e1bf;
+--surface-strong: #e3c58e;
+--surface-soft: #fff8eb;
+--surface-alt: #ead0a0;
+--muted: #7d6342;
+--text: #2f2014;
+--text-soft: #3a2414;
+--accent: #8a5a2b;
+--border: rgba(96, 62, 30, 0.25);
+--header-bg: linear-gradient(180deg, #3a2414, #27180f);
+--bar-bg: linear-gradient(180deg, #d9be86, #b38a51);
+--button-bg: linear-gradient(180deg, #f5e3b9, #d2ad6a);
+--button-hover-bg: linear-gradient(180deg, #fff0cb, #dfb974);
+--panel-bg: #f1e0bc;
+--panel-border: rgba(122, 93, 52, 0.35);
+}
+
+body.dark-mode {
+--bg: #101317;
+--surface: #1a1f25;
+--surface-strong: #242a31;
+--surface-soft: #1a1f25;
+--surface-alt: #2b323a;
+--muted: #a4afba;
+--text: #eef2f6;
+--text-soft: #eef2f6;
+--accent: #9eb6cc;
+--border: rgba(180, 194, 208, 0.18);
+--header-bg: linear-gradient(180deg, #18202a, #101317);
+--bar-bg: linear-gradient(180deg, #2b3440, #1d242d);
+--button-bg: linear-gradient(180deg, #3a4654, #26313b);
+--button-hover-bg: linear-gradient(180deg, #475466, #303c48);
+--panel-bg: #1a1f25;
+--panel-border: rgba(180, 194, 208, 0.18);
+color: var(--text);
+background: linear-gradient(180deg, #101317 0%, #0b0d10 100%);
 }
 
 html, body, app-root {
@@ -15,7 +47,9 @@ html, body, app-root {
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at top, rgba(255, 224, 168, 0.18), transparent 34%),
+    linear-gradient(180deg, #24170e 0%, #17100a 100%);
   color: var(--text);
   font-family: 'Cinzel', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   -webkit-font-smoothing: antialiased;
@@ -23,267 +57,230 @@ body {
 }
 
 .site-header {
-  background: linear-gradient(90deg, rgba(124,77,255,0.08), rgba(124,77,255,0.03));
+  background:
+    linear-gradient(90deg, rgba(255, 228, 176, 0.14), rgba(123, 83, 33, 0.06)),
+    var(--header-bg);
   padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255, 225, 170, 0.12);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
-.site-header .container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
-.site-header h1 { margin: 0; font-size: 1.25rem; color: var(--text); font-weight: 600; }
+body.dark-mode .site-header {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
+    var(--header-bg);
+  border-bottom-color: rgba(180, 194, 208, 0.12);
+}
 
-.main-menu-button-bar { display: flex; justify-content: center; gap: 0.5rem; align-items: center; padding: 0.75rem 1.25rem; background: linear-gradient(90deg, rgba(124,77,255,0.08), rgba(124,77,255,0.03)); width: 100%; margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.04); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.site-header .container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
+.site-header h1 { margin: 0; font-size: 1.25rem; color: #f7e4bc; font-weight: 700; letter-spacing: 0.04em; text-shadow: 0 1px 0 rgba(0,0,0,0.45); }
+
+body.dark-mode .site-header h1 {
+  color: #eef2f6;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.65);
+}
+
+.main-menu-button-bar { display: flex; justify-content: center; gap: 0.5rem; align-items: center; padding: 0.85rem 1.25rem; background: var(--bar-bg); width: 100%; margin-top: 0; border-bottom: 1px solid rgba(66, 41, 17, 0.35); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 .main-menu-button-bar.container { max-width: 1100px; margin: 0 auto; }
-.main-menu-button-bar .pill { border-radius: 999px; padding: 0.5rem 1rem; font-weight: 600; }
-.main-menu-button-bar .pill.p-button { border-radius: 999px; }
-.main-menu-button-bar .pill.p-button:hover { background: rgba(124,77,255,0.14); color: var(--text); }
+.main-menu-button-bar .pill { border-radius: 999px; padding: 0.55rem 1rem; font-weight: 700; }
+.main-menu-button-bar .pill.p-button { border-radius: 999px; background: var(--button-bg); color: var(--text-soft); border: 1px solid var(--border); }
+.main-menu-button-bar .pill.p-button:hover { background: var(--button-hover-bg); color: var(--text-soft); }
 
 .main-content { padding: 2rem; min-height: calc(100vh - 64px); }
+.dark-mode .main-content { background: var(--bg); color: var(--text); }
 .landing { max-width: 900px; margin: 2rem auto; text-align: center; }
 .lead { color: var(--muted); font-size: 1.125rem; }
 
 a { color: var(--accent); }
 
 /* make forms, cards and other surfaces slightly lighter */
-.surface { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); border-radius: 8px; padding: 1rem; }
-
-/* Dice bag dialog custom styling */
-/* header slightly darker than body for subtle contrast */
-.dice-bag-dialog .p-dialog-titlebar {
-  background: #121212 !important; /* darker */
-  color: var(--text) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-.dice-bag-dialog .p-dialog-header {
-  background: #101010 !important; /* darker */
-  color: var(--text) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-.dice-bag-dialog .p-dialog-content {
-  background: #1e1e1e !important; /* body */
-  color: var(--text) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 1rem !important;
-}
-.dice-bag-dialog .p-dialog .p-button {
-  background: transparent;
-  border-color: rgba(255,255,255,0.06);
-  color: var(--text);
-}
-.dice-bag-dialog .p-dialog .p-button:hover {
-  background: rgba(255,255,255,0.03);
-}
-/* result layout for dice bag */
-.dice-bag-dialog .result-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 120px;
-  gap: 0.75rem;
-}
-.dice-bag-dialog .result-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  flex-wrap: wrap; /* allow wrapping when dialog is narrow */
-}
-.dice-bag-dialog .result-label {
-  font-weight: 600;
-  color: var(--text);
-  text-align: center;
-}
-.dice-bag-dialog #resultInput {
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: #141414;
-  color: var(--text);
-  text-align: center;
-  width: min(7ch, 100%); /* shrink to fit when dialog is small, but cap at 7ch */
-  box-sizing: border-box;
-  min-width: 3ch;
-}
+.surface { background: linear-gradient(180deg, var(--surface), var(--surface-strong)); border-radius: 10px; padding: 1rem; border: 1px solid var(--border); box-shadow: inset 0 1px 0 rgba(255,255,255,0.45); }
 
 /* Apply dice-bag dialog appearance globally to all PrimeNG dialogs */
 .p-dialog .p-dialog-titlebar,
 .p-dialog .p-dialog-header {
-  background: #101010 !important;
-  color: var(--text) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.03) !important;
+  background: var(--header-bg) !important;
+  color: #f8e7ba !important;
+  border-bottom: 1px solid rgba(255,225,170,0.08) !important;
+  padding: 1rem 1.25rem 0.75rem !important;
 }
 .p-dialog .p-dialog-content {
-  background: #1e1e1e !important;
-  color: var(--text) !important;
-  padding: 1rem !important;
+  background: var(--panel-bg) !important;
+  color: var(--text-soft) !important;
+  padding: 1rem 1.25rem !important;
 }
-.p-dialog .p-dialog .p-button {
-  background: transparent !important;
-  border-color: rgba(255,255,255,0.06) !important;
-  color: var(--text) !important;
+.p-dialog .p-dialog-footer {
+  background: var(--panel-bg) !important;
+  padding: 0 1.25rem 1rem !important;
 }
-.p-dialog .p-dialog .p-button:hover {
-  background: rgba(255,255,255,0.03) !important;
+.p-dialog .p-dialog-title,
+.p-dialog .p-dialog-header span {
+  display: block !important;
+  padding-right: 0.5rem !important;
 }
-
-/* Keep per-dialog specific layout for dice bag preserved */
-.dice-bag-dialog .p-dialog-content { justify-content: center !important; }
-
-/* Center sign-up content within dice-bag-styled dialogs */
-.dice-bag-dialog .signup-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  box-sizing: border-box;
+.p-dialog .p-dialog-footer .p-button {
+  margin: 0 !important;
 }
-.dice-bag-dialog .signup-input {
-  width: min(360px, 90%);
-  box-sizing: border-box;
-  background: #141414;
-  border: 1px solid rgba(255,255,255,0.06);
-  color: var(--text);
-  padding: 0.5rem;
-  border-radius: 6px;
+.p-dialog .p-button {
+  background: var(--button-bg) !important;
+  border-color: var(--border) !important;
+  color: var(--text-soft) !important;
 }
-.dice-bag-dialog .signup-input.p-password { padding: 0; }
+.p-dialog .p-button:hover {
+  background: var(--button-hover-bg) !important;
+}
 
 /* Rounded corners for dialogs */
 .p-dialog {
-  border-radius: 12px !important;
+  border-radius: 16px !important;
   overflow: hidden !important;
 }
 .p-dialog .p-dialog-titlebar, .p-dialog .p-dialog-header {
-  border-top-left-radius: 12px !important;
-  border-top-right-radius: 12px !important;
+  border-top-left-radius: 16px !important;
+  border-top-right-radius: 16px !important;
 }
 .p-dialog .p-dialog-content {
-  border-bottom-left-radius: 12px !important;
-  border-bottom-right-radius: 12px !important;
+  border-bottom-left-radius: 16px !important;
+  border-bottom-right-radius: 16px !important;
 }
 
-/* Dice grid for dice bag buttons - keep for fallback when PrimeFlex classes are present */
-.dice-bag-dialog .p-dialog-content .dice-grid,
-.dice-bag-dialog .dice-grid {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 1rem !important; /* breathing room between buttons */
-  width: 100% !important;
-  align-items: stretch !important;
-}
-
-/* Ensure columns using PrimeFlex's col-4 behave predictably in this dialog */
-.dice-bag-dialog .dice-grid > .col-4 {
-  flex: 0 0 calc(33.333% - 0.666rem) !important;
-  max-width: calc(33.333% - 0.666rem) !important;
-  box-sizing: border-box !important;
-}
-
-/* Force buttons to occupy full column width */
-.dice-bag-dialog .dice-grid .dice-btn,
-.dice-bag-dialog .dice-grid .p-button {
-  width: 100% !important;
-  display: block !important;
-}
-
-/* Also support case where PrimeFlex grid classes aren't applied: ensure direct children buttons size */
-.dice-bag-dialog .dice-grid > button.dice-btn {
-  flex: 1 1 calc(33.333% - 0.666rem) !important;
-  max-width: calc(33.333% - 0.666rem) !important;
-}
-/* Highest specificity and !important to override PrimeNG built-in styles */
-.dice-bag-dialog .p-dialog-content .dice-grid button.p-button,
-.dice-bag-dialog .p-dialog-content .dice-grid .p-button,
-.dice-bag-dialog .dice-grid button.p-button,
-.dice-bag-dialog .dice-grid .p-button,
-.dice-bag-dialog .dice-btn {
-  display: flex !important;
-  width: 100% !important;
-  height: 64px !important;
-  padding: 0 !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
-  border-radius: 10px !important;
-  border: 1px solid rgba(255,255,255,0.04) !important;
-  background: linear-gradient(180deg, #2b2b2b, #1f1f1f) !important; /* slightly lighter than dialog bg */
-  color: var(--text) !important;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.6) !important;
-  transition: transform 0.12s ease, box-shadow 0.12s ease !important;
-}
-.dice-bag-dialog .p-dialog-content .dice-grid button.p-button:hover,
-.dice-bag-dialog .p-dialog-content .dice-grid .p-button:hover,
-.dice-bag-dialog .dice-grid button.p-button:hover,
-.dice-bag-dialog .dice-grid .p-button:hover,
-.dice-bag-dialog .dice-btn:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.7) !important;
-}
-.dice-bag-dialog .p-dialog-content .dice-grid button.p-button:active,
-.dice-bag-dialog .p-dialog-content .dice-grid .p-button:active,
-.dice-bag-dialog .dice-grid button.p-button:active,
-.dice-bag-dialog .dice-grid .p-button:active,
-.dice-bag-dialog .dice-btn:active {
-  transform: translateY(0) !important;
-}
-/* Ensure the label fills the button so text is centered and padding is handled by button */
-.dice-bag-dialog .p-dialog-content .dice-grid button.p-button .p-button-label,
-.dice-bag-dialog .p-dialog-content .dice-grid .p-button .p-button-label,
-.dice-bag-dialog .dice-grid button.p-button .p-button-label,
-.dice-bag-dialog .dice-grid .p-button .p-button-label,
-.dice-bag-dialog .dice-btn .p-button-label {
-  display: block !important;
-  width: 100% !important;
-  text-align: center !important;
-  padding: 0 12px !important;
-}
 
 /* Game map modal hamburger menu styling */
 .p-menu {
-  background-color: #1a1a1a !important;
+  background-color: var(--panel-bg) !important;
+  border: 1px solid var(--panel-border) !important;
 }
 
 .p-menu .p-menu-list {
-  background-color: #1a1a1a !important;
+  background-color: var(--panel-bg) !important;
   padding: 0.5rem 0 !important;
 }
 
 .p-menu .p-menuitem {
-  background-color: #2d2d2d !important;
+  background-color: var(--surface-alt) !important;
   margin: 0.25rem 0.5rem !important;
-  border-radius: 4px !important;
+  border-radius: 6px !important;
   padding: 0 !important;
 }
 
 .p-menu .p-menuitem > a {
-  background-color: #2d2d2d !important;
-  color: #fff !important;
-  border: 2px solid #000000 !important;
+  background-color: var(--surface-alt) !important;
+  color: var(--text-soft) !important;
+  border: 1px solid var(--border) !important;
   padding: 0.75rem 1rem !important;
   display: block !important;
-  border-radius: 4px !important;
+  border-radius: 6px !important;
 }
 
 .p-menu .p-menuitem > a:hover,
 .p-menu .p-menuitem:hover > a {
-  background-color: #404040 !important;
-  color: #fff !important;
+  background-color: var(--surface) !important;
+  color: var(--text-soft) !important;
 }
 
 .p-menu .p-menuitem.p-highlight > a,
 .p-menu .p-menuitem.p-focus > a {
-  background-color: #404040 !important;
-  color: #fff !important;
+  background-color: #f4dca8 !important;
+  color: #2f1f12 !important;
 }
 
 .p-menu .p-menuitem a span,
 .p-menu .p-menuitem a .p-menuitem-text {
-  color: #fff !important;
+  color: var(--text-soft) !important;
+}
+
+.p-inputtext,
+.p-inputnumber input,
+.p-dropdown,
+.p-dropdown .p-dropdown-label,
+.p-inputtextarea,
+textarea,
+input[type="text"],
+input[type="number"] {
+  background: var(--surface-soft) !important;
+  color: var(--text-soft) !important;
+  border-color: var(--border) !important;
+}
+
+.p-inputswitch .p-inputswitch-slider {
+  background: var(--button-bg) !important;
+}
+
+.p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
+  background: var(--button-hover-bg) !important;
+}
+
+.p-checkbox .p-checkbox-box,
+.p-radiobutton .p-radiobutton-box {
+  background: var(--surface-soft) !important;
+  border-color: var(--border) !important;
+}
+
+.p-checkbox .p-checkbox-box.p-highlight,
+.p-radiobutton .p-radiobutton-box.p-highlight {
+  background: var(--button-bg) !important;
+  border-color: var(--border) !important;
+}
+
+.p-tabview .p-tabview-nav,
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background: var(--surface-alt) !important;
+  color: var(--text-soft) !important;
+  border-color: var(--border) !important;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background: var(--surface-soft) !important;
+  color: var(--text-soft) !important;
+}
+
+.p-toast {
+  bottom: 1rem !important;
+  right: 1rem !important;
+  left: auto !important;
+  top: auto !important;
+}
+
+.p-toast .p-toast-message {
+  margin: 0 0 0.5rem auto !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35) !important;
+  backdrop-filter: blur(6px);
+}
+
+.p-toast .p-toast-message .p-toast-message-content {
+  color: #1c1209 !important;
+  font-weight: 700;
+}
+
+.p-toast .p-toast-message .p-toast-message-text {
+  color: #1c1209 !important;
+}
+
+.p-toast .p-toast-message .p-toast-summary {
+  color: #1c1209 !important;
+  font-weight: 800;
+}
+
+.p-toast .p-toast-message .p-toast-detail {
+  color: #3a2414 !important;
+  font-weight: 600;
+}
+
+.p-toast .p-toast-message.p-toast-message-success {
+  background: linear-gradient(180deg, #fff7d6, #f1c94a) !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-info {
+  background: linear-gradient(180deg, #e8f4ff, #8fc6ff) !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-warn {
+  background: linear-gradient(180deg, #fff1c4, #ffcb4d) !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-error {
+  background: linear-gradient(180deg, #ffe3e3, #ff8a8a) !important;
 }

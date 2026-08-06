@@ -2,7 +2,7 @@
   <div class="left-buttons">
     <button pButton type="button" label="Character Sheets" class="pill p-button-outlined" (click)="onMenuCharacterSheetsClick()"></button>
     <button pButton type="button" label="Game Map" class="pill p-button-outlined" (click)="onGameMapClick()"></button>
-    <button pButton type="button" label="NPC Maker" class="pill p-button-outlined"></button>
+    <button pButton type="button" label="NPC Maker" class="pill p-button-outlined" (click)="onNPCMakerClick()"></button>
     <button pButton type="button" label="Dice Bag" class="pill p-button-outlined" (click)="onDiceBagClick()"></button>
   </div>
 
@@ -16,10 +16,12 @@
       <ng-container *ngIf="!loggedIn; else loggedTpl">
         <button type="button" class="menu-item p-button-text" (click)="onMenuLoginClick()">Login</button>
         <button type="button" class="menu-item p-button-text" (click)="onMenuSignupClick()">Sign up</button>
+        <button type="button" class="menu-item p-button-text" (click)="onOptionsClick()">Option</button>
       </ng-container>
       <ng-template #loggedTpl>
         <button type="button" class="menu-item p-button-text" (click)="onMenuAccountClick()">Account</button>
         <button type="button" class="menu-item p-button-text" (click)="onMenuLogoutClick()">Logout</button>
+        <button type="button" class="menu-item p-button-text" (click)="onOptionsClick()">Option</button>
       </ng-template>
     </div>
   </div>

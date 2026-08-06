@@ -19,6 +19,8 @@ export class MainMenuButtonBar {
   @Output() openGameMap = new EventEmitter<void>();
   @Output() openDiceBag = new EventEmitter<void>();
   @Output() openCharacterSheets = new EventEmitter<void>();
+  @Output() openOptions = new EventEmitter<void>();
+  @Output() openNPCMaker = new EventEmitter<void>();
   @Output() onLoginClick = new EventEmitter<void>();
   @Output() onSignupClick = new EventEmitter<void>();
   @Output() onAccountClick = new EventEmitter<void>();
@@ -52,6 +54,14 @@ export class MainMenuButtonBar {
 
   onDiceBagClick() {
     this.openDiceBag.emit();
+  }
+
+  onNPCMakerClick() {
+    this.openNPCMaker.emit();
+  }
+
+  onOptionsClick() {
+    this.openOptions.emit();
   }
 
   onLoginModalSuccess(event: { username: string; token: string }) {

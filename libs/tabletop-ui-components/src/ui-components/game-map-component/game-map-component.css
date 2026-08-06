@@ -1,38 +1,175 @@
-/* Hamburger menu styling - target menu container */
-::ng-deep .p-menu {
-  background-color: #1a1a1a !important;
+.game-map-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background:
+    radial-gradient(circle at top left, rgba(255, 247, 224, 0.35), transparent 30%),
+    linear-gradient(180deg, var(--surface), var(--surface-strong));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 12px 24px rgba(0,0,0,0.18);
+  overflow: hidden;
 }
 
-::ng-deep .p-menu .p-menu-list {
-  background-color: #1a1a1a !important;
+.game-map-toolbar,
+.game-map-control-row,
+.game-map-dialog-body {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.9rem;
+  background: rgba(255, 248, 235, 0.78);
+  border: 1px solid var(--border);
+  border-radius: 10px;
 }
 
-/* Style all menu items */
-::ng-deep .p-menu .p-menuitem {
-  background-color: #2d2d2d !important;
-  margin: 2px 0;
+.game-map-toolbar-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-::ng-deep .p-menu .p-menuitem > a {
-  background-color: #2d2d2d !important;
-  color: #fff !important;
-  border: none !important;
-  padding: 0.75rem 1rem !important;
+.game-map-toolbar-actions {
+  margin-left: auto;
 }
 
-::ng-deep .p-menu .p-menuitem > a:hover,
-::ng-deep .p-menu .p-menuitem:hover > a {
-  background-color: #404040 !important;
-  color: #fff !important;
+.game-map-stage {
+  width: 100%;
+  flex: 1 1 0;
+  min-height: 440px;
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.18), rgba(0,0,0,0.03)),
+    var(--panel-bg);
+  overflow: hidden;
 }
 
-::ng-deep .p-menu .p-menuitem.p-highlight > a,
-::ng-deep .p-menu .p-menuitem.p-focus > a {
-  background-color: #404040 !important;
-  color: #fff !important;
+.game-map-control-row {
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
-/* Ensure text is visible */
-::ng-deep .p-menu .p-menuitem a span {
-  color: #fff !important;
+.game-map-control-label,
+.game-map-check,
+.game-map-inline-field label,
+.game-map-dialog-body label {
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.game-map-range {
+  flex: 1 1 auto;
+}
+
+.game-map-inline-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.game-map-inline-field input,
+.game-map-dialog-body input[type="text"],
+.game-map-dialog-body input[type="number"] {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  border-radius: 4px;
+  padding: 0.4rem 0.5rem;
+}
+
+.game-map-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  width: 100%;
+  margin-left: 0;
+}
+
+.game-map-shell ::ng-deep .p-dialog-header .p-dialog-title,
+.game-map-shell ::ng-deep .p-dialog-header span {
+  display: block;
+  padding-right: 0.5rem;
+}
+
+.game-map-dialog-actions button,
+.game-map-shell ::ng-deep .p-dialog-footer button {
+  max-width: 100%;
+}
+
+.game-map-shell ::ng-deep .p-button,
+.game-map-shell ::ng-deep .p-colorpicker,
+.game-map-shell ::ng-deep .p-inputtext {
+  background: var(--button-bg);
+  color: var(--text-soft);
+  border-color: var(--border);
+}
+
+.game-map-shell ::ng-deep .p-button:hover {
+  background: var(--button-hover-bg);
+}
+
+.game-map-shell ::ng-deep .p-menu {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+}
+
+.game-map-shell ::ng-deep .p-menu .p-menuitem > a {
+  background: var(--surface-alt);
+  color: var(--text-soft);
+}
+
+.game-map-shell ::ng-deep .p-menu .p-menuitem > a:hover {
+  background: var(--surface);
+}
+
+.game-map-shell ::ng-deep .p-dialog-header {
+  background: var(--header-bg);
+  color: #f8e7ba;
+  padding: 1rem 1rem 0.75rem;
+}
+
+.game-map-shell ::ng-deep .p-dialog-content {
+  background: var(--panel-bg);
+  color: var(--text-soft);
+  padding: 1rem;
+}
+
+.game-map-shell ::ng-deep .p-dialog-footer {
+  background: var(--panel-bg);
+  padding: 0 1rem 1rem;
+}
+
+.game-map-shell ::ng-deep .p-dialog .p-dialog-content {
+  overflow: auto;
+}
+
+.game-map-shell ::ng-deep canvas {
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.game-map-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: transparent;
+}
+
+.game-map-toolbar,
+.game-map-control-row,
+.game-map-dialog-body {
+  position: relative;
+  z-index: 2;
 }
