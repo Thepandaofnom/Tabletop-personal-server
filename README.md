@@ -1,6 +1,6 @@
-# TabletopPersonalServer
+# Tabletop
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.0.
+Tabletop is a client-only Angular application for dice rolling, character sheets, maps, and NPC creation. It does not require a backend server.
 
 ## Development server
 
@@ -38,9 +38,7 @@ This will compile your project and store the build artifacts in the `dist/` dire
 
 ## GitHub Pages deployment
 
-Pushing to `main` runs `.github/workflows/deploy-pages.yml`, which builds the Angular app and deploys `dist/Tabletop-Personal-Server/browser` through GitHub Pages. In the repository's **Settings > Pages**, set the deployment source to **GitHub Actions**. The production build uses the repository base path, so the app is served from `https://thepandaofnom.github.io/Tabletop-personal-server/`.
-
-GitHub Pages only hosts the static Angular frontend. It cannot run this project's Spring Boot API, PostgreSQL database, or server-side session handling. Those services must remain deployed separately (the frontend currently targets the Railway API); that backend must continue allowing credentialed CORS requests from `https://thepandaofnom.github.io`.
+Pushing to `main` runs `.github/workflows/deploy-pages.yml`, which builds the Angular app and publishes `dist/Tabletop-Personal-Server/browser` to the `gh-pages` branch. GitHub Pages serves that branch at `https://thepandaofnom.github.io/Tabletop-personal-server/`.
 
 ## Running unit tests
 

@@ -3,9 +3,6 @@
     <div class="game-map-toolbar-group">
       <input type="file" accept="image/*" (change)="onFileChange($event)" />
       <button pButton type="button" label="Clear" class="p-button-secondary" (click)="clearMap()"></button>
-      <button pButton type="button" label="Save" class="p-button-secondary" (click)="openSaveDialog()"></button>
-      <button pButton type="button" label="Load" class="p-button-secondary" (click)="openLoadDialog()"></button>
-      <button pButton type="button" label="Delete" class="p-button-secondary" (click)="openDeleteDialog()"></button>
     </div>
     <div class="game-map-toolbar-group game-map-toolbar-actions">
       <p-colorPicker [(ngModel)]="gridColor" (ngModelChange)="onGridColorChange(gridColor)" [inline]="false" format="hex" [appendTo]="'body'"></p-colorPicker>
@@ -13,32 +10,65 @@
       <p-menu #menu [model]="menuItems" [popup]="true" [appendTo]="'body'"></p-menu>
     </div>
   </div>
-  <div #stageContainer class="game-map-stage"></div>
-  <div class="game-map-control-row">
-    <span class="game-map-control-label">Map zoom: {{(zoom * 100).toFixed(0)}}%</span>
-    <input type="range" min="0.1" max="3" step="0.1" [(ngModel)]="zoom" (ngModelChange)="onZoomChange($event * 100)" class="game-map-range">
-    <label class="game-map-check" pTooltip="Scales grid with map image when checked" tooltipPosition="top">
-      <input type="checkbox" [(ngModel)]="scaleGrid">
-      <span>Scale Grid</span>
-    </label>
-  </div>
-  <div *ngIf="!scaleGrid" class="game-map-control-row">
-    <span class="game-map-control-label">Grid zoom: {{(gridZoom * 100).toFixed(0)}}%</span>
-    <input type="range" min="0.1" max="3" step="0.1" [(ngModel)]="gridZoom" (ngModelChange)="onGridZoomChange($event * 100)" class="game-map-range">
-  </div>
-
-  <!-- Grid Line Size Settings -->
-  <div class="game-map-control-row game-map-grid-size-row">
-    <span class="game-map-control-label">Grid Size:</span>
-    <div class="game-map-inline-field">
-      <label>Width:</label>
-      <input type="number" [(ngModel)]="gridCellWidth" (ngModelChange)="onGridSizeChange()" min="1" max="200" />
-      <span>px</span>
-    </div>
-    <div class="game-map-inline-field">
-      <label>Height:</label>
-      <input type="number" [(ngModel)]="gridCellHeight" (ngModelChange)="onGridSizeChange()" min="1" max="200" />
-      <span>px</span>
+  <div
+    class="game-map-stage-wrapper"
+    (pointerenter)="onMapPointerMove()"
+    (pointermove)="onMapPointerMove()">
+    <div #stageContainer class="game-map-stage">
+      <div #konvaContainer class="game-map-konva-container"></div>
+      <div class="game-map-control-panel" [class.is-visible]="!isFullscreen || showFullscreenControlPanel">
+        <div class="game-map-control-content">
+          <div class="game-map-control-row">
+            <span class="game-map-control-label">Map zoom: {{(zoom * 100).toFixed(0)}}%</span>
+            <input
+              type="range"
+              min="0.1"
+              max="3"
+              step="0.1"
+              [(ngModel)]="zoom"
+              (ngModelChange)="onZoomChange($event * 100)"
+              class="game-map-range game-map-viewport-range"
+              aria-label="Map zoom">
+            <label class="game-map-check" pTooltip="Scales grid with map image when checked" tooltipPosition="top">
+              <input type="checkbox" [(ngModel)]="scaleGrid">
+              <span>Scale Grid</span>
+            </label>
+          </div>
+          <div *ngIf="!scaleGrid" class="game-map-control-row">
+            <span class="game-map-control-label">Grid zoom: {{(gridZoom * 100).toFixed(0)}}%</span>
+            <input
+              type="range"
+              min="0.1"
+              max="3"
+              step="0.1"
+              [(ngModel)]="gridZoom"
+              (ngModelChange)="onGridZoomChange($event * 100)"
+              class="game-map-range game-map-viewport-range"
+              aria-label="Grid zoom">
+          </div>
+          <div class="game-map-control-row game-map-grid-size-row">
+            <span class="game-map-control-label">Grid Size:</span>
+            <div class="game-map-inline-field">
+              <label>Width:</label>
+              <input type="number" [(ngModel)]="gridCellWidth" (ngModelChange)="onGridSizeChange()" min="1" max="200" />
+              <span>px</span>
+            </div>
+            <div class="game-map-inline-field">
+              <label>Height:</label>
+              <input type="number" [(ngModel)]="gridCellHeight" (ngModelChange)="onGridSizeChange()" min="1" max="200" />
+              <span>px</span>
+            </div>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="game-map-fullscreen-control"
+          [attr.aria-label]="isFullscreen ? 'Exit fullscreen map view' : 'Enter fullscreen map view'"
+          [attr.aria-pressed]="isFullscreen"
+          (click)="toggleFullscreen($event)">
+          <i [class]="isFullscreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'" aria-hidden="true"></i>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -111,48 +141,4 @@
     </ng-template>
   </p-dialog>
 
-  <p-dialog [(visible)]="mapSaveDialogVisible" header="Save map settings" [modal]="true" [closable]="true" [style]="{width: 'min(92vw, 420px)'}" [appendTo]="'body'">
-    <div class="game-map-dialog-body">
-      <label>Save name</label>
-      <input pInputText [(ngModel)]="mapSaveName" placeholder="Enter save name" />
-    </div>
-    <ng-template pTemplate="footer">
-      <div class="game-map-dialog-actions">
-        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="mapSaveDialogVisible = false"></button>
-        <button pButton type="button" label="Save" [disabled]="!mapSaveName.trim()" (click)="confirmSaveMapSettings()"></button>
-      </div>
-    </ng-template>
-  </p-dialog>
-
-  <p-dialog [(visible)]="mapLoadDialogVisible" header="Load map settings" [modal]="true" [closable]="true" [style]="{width: 'min(92vw, 420px)'}" [appendTo]="'body'">
-    <div class="game-map-dialog-body">
-      <label>Saved maps</label>
-      <select [(ngModel)]="selectedMapSaveName">
-        <option value="" disabled>Select a save</option>
-        <option *ngFor="let save of savedMapSettings" [value]="save.saveName">{{ save.saveName }}</option>
-      </select>
-    </div>
-    <ng-template pTemplate="footer">
-      <div class="game-map-dialog-actions">
-        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="mapLoadDialogVisible = false"></button>
-        <button pButton type="button" label="OK" [disabled]="!selectedMapSaveName" (click)="confirmLoadMapSettings()"></button>
-      </div>
-    </ng-template>
-  </p-dialog>
-
-  <p-dialog [(visible)]="mapDeleteDialogVisible" header="Delete map settings" [modal]="true" [closable]="true" [style]="{width: 'min(92vw, 420px)'}" [appendTo]="'body'">
-    <div class="game-map-dialog-body">
-      <label>Select a save to delete</label>
-      <select [(ngModel)]="selectedMapSaveName">
-        <option value="" disabled>Select a save</option>
-        <option *ngFor="let save of savedMapSettings" [value]="save.saveName">{{ save.saveName }}</option>
-      </select>
-    </div>
-    <ng-template pTemplate="footer">
-      <div class="game-map-dialog-actions">
-        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="mapDeleteDialogVisible = false"></button>
-        <button pButton type="button" label="Delete" [disabled]="!selectedMapSaveName" (click)="confirmDeleteMapSettings()"></button>
-      </div>
-    </ng-template>
-  </p-dialog>
 </div>

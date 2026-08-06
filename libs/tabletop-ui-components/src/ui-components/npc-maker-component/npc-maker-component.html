@@ -6,9 +6,6 @@
       <button type="button" class="header-btn" (click)="keepNPC()" [disabled]="!generatedNPC">Keep NPC</button>
       <button type="button" class="header-btn" (click)="saveAllNPCs()" [disabled]="keptNPCs.length === 0">Save all NPC</button>
       <button type="button" class="header-btn" (click)="importNPCs()">Import NPC</button>
-      <button type="button" class="header-btn" (click)="openSaveDialog()" [disabled]="keptNPCs.length === 0">Save</button>
-      <button type="button" class="header-btn" (click)="openLoadDialog()" [disabled]="keptNPCs.length === 0">Load</button>
-      <button type="button" class="header-btn" (click)="openDeleteDialog()" [disabled]="keptNPCs.length === 0">Delete</button>
     </div>
   </div>
 
@@ -68,50 +65,6 @@
             </div>
           </div>
 
-          <p-dialog [(visible)]="saveDialogVisible" header="Save NPC set" [modal]="true" [closable]="true" [style]="{width: 'min(92vw, 720px)'}" [appendTo]="'body'">
-            <div class="npc-save-modal">
-              <label>Save name</label>
-              <input type="text" pInputText [(ngModel)]="saveName" placeholder="Enter save name" />
-            </div>
-            <ng-template pTemplate="footer">
-              <div class="dialog-actions">
-                <button type="button" class="header-btn" (click)="saveDialogVisible = false">Cancel</button>
-                <button type="button" class="header-btn" [disabled]="!saveName.trim()" (click)="confirmSaveNPCs()">Save</button>
-              </div>
-            </ng-template>
-          </p-dialog>
-
-          <p-dialog [(visible)]="loadDialogVisible" header="Load NPC set" [modal]="true" [closable]="true" [style]="{width: 'min(92vw, 720px)'}" [appendTo]="'body'">
-            <div class="npc-save-modal">
-              <label>Saved NPC sets</label>
-              <select [(ngModel)]="selectedSaveName">
-                <option value="" disabled>Select a save</option>
-                <option *ngFor="let save of savedNPCSets" [value]="save.saveName">{{ save.saveName }}</option>
-              </select>
-            </div>
-            <ng-template pTemplate="footer">
-              <div class="dialog-actions">
-                <button type="button" class="header-btn" (click)="loadDialogVisible = false">Cancel</button>
-                <button type="button" class="header-btn" [disabled]="!selectedSaveName" (click)="confirmLoadNPCs()">OK</button>
-              </div>
-            </ng-template>
-          </p-dialog>
-
-          <p-dialog [(visible)]="deleteDialogVisible" header="Delete NPC set" [modal]="true" [closable]="true" [style]="{width: 'min(92vw, 720px)'}" [appendTo]="'body'">
-            <div class="npc-save-modal">
-              <label>Select a save to delete</label>
-              <select [(ngModel)]="selectedSaveName">
-                <option value="" disabled>Select a save</option>
-                <option *ngFor="let save of savedNPCSets" [value]="save.saveName">{{ save.saveName }}</option>
-              </select>
-            </div>
-            <ng-template pTemplate="footer">
-              <div class="dialog-actions">
-                <button type="button" class="header-btn" (click)="deleteDialogVisible = false">Cancel</button>
-                <button type="button" class="header-btn" [disabled]="!selectedSaveName" (click)="confirmDeleteNPCs()">Delete</button>
-              </div>
-            </ng-template>
-          </p-dialog>
         </div>
 
         <div class="npc-personality">

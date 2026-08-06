@@ -1,16 +1,16 @@
 # Tabletop UI Components Library
 
-A standalone, reusable UI components library for the Tabletop Personal Server application.
+A standalone, reusable UI components library for the Tabletop application.
 
 ## Components
 
 This library exports the following Angular standalone components:
 
-- **LoginModal** - User login dialog
-- **AccountModal** - User account management dialog  
 - **DiceBagModal** - Dice rolling interface
 - **GameMapComponent** - Game map visualization with Konva.js
-- **NewUserSignUp** - User registration dialog
+- **CharacterSheetEditor** - Editable character sheets with JSON import and export
+- **NPCMakerComponent** - Random NPC generator with JSON import and export
+- **GlobalSettingsComponent** - Application display settings
 
 ## Installation
 
@@ -25,14 +25,13 @@ npm install
 Import components from `@tabletop/ui-components`:
 
 ```typescript
-import { LoginModal, GameMapComponent } from '@tabletop/ui-components';
+import { DiceBagModal, GameMapComponent } from '@tabletop/ui-components';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [LoginModal, GameMapComponent],
+  imports: [DiceBagModal, GameMapComponent],
   template: `
-    <login-modal [visible]="loginVisible" (visibleChange)="onLoginChange($event)"></login-modal>
     <game-map-component></game-map-component>
   `
 })
@@ -69,11 +68,11 @@ The library is structured as follows:
 libs/tabletop-ui-components/
 ├── src/
 │   ├── ui-components/          # Component folders
-│   │   ├── login-modal/
-│   │   ├── account-modal/
 │   │   ├── dice-bag-modal/
 │   │   ├── game-map-component/
-│   │   └── new-user-sign-up/
+│   │   ├── character-sheet-editor/
+│   │   ├── npc-maker-component/
+│   │   └── global-settings-component/
 │   ├── public-api.ts           # Main barrel export
 │   └── index.ts                # Entry point
 ├── tsconfig.json               # Library TypeScript config

@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, OnDestroy, AfterViewInit, Input } from '@angular/core';
+import { Component, ElementRef, ViewChild, OnDestroy, AfterViewInit } from '@angular/core';
 import Konva from 'konva';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -10,18 +10,6 @@ import { FormsModule } from '@angular/forms';
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { InputTextModule } from 'primeng/inputtext';
-import { HttpClient } from '@angular/common/http';
-import { apiBaseUrl } from '../../api';
-
-interface MapSettingsSaveSummary {
-  id: number;
-  saveName: string;
-}
-
-interface MapSettingsRecord {
-  saveName: string;
-  settingsJson: string;
-}
 
 interface SavedMapTokenState {
   id: string;
@@ -63,6 +51,7 @@ interface SavedMapScene {
 })
 export class GameMapComponent implements OnDestroy, AfterViewInit {
   @ViewChild('stageContainer', { static: false }) stageContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('konvaContainer', { static: false }) konvaContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('menu') menu!: Menu;
 
   showGrid = false;
@@ -72,6 +61,8 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   zoom = 1;
   scaleGrid = false;
   gridZoom = 1;
+  showFullscreenControlPanel = false;
+  isFullscreen = false;
 
   // Token dialog state
   showTokenDialog = false;
@@ -90,13 +81,6 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   tokenResizeOldValue = 1;
   tokenRotateValue = 0;
   tokenRotateOldValue = 0;
-  mapSaveDialogVisible = false;
-  mapLoadDialogVisible = false;
-  mapDeleteDialogVisible = false;
-  mapSaveName = '';
-  selectedMapSaveName = '';
-  savedMapSettings: MapSettingsSaveSummary[] = [];
-
   menuItems: MenuItem[] = [
     {
       label: 'Show Grid',
@@ -118,31 +102,16 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
       icon: 'pi pi-upload',
       command: () => this.importMapSettings(),
     },
-    {
-      label: 'Save Map Settings',
-      icon: 'pi pi-save',
-      command: () => this.openSaveDialog(),
-    },
-    {
-      label: 'Load Map Settings',
-      icon: 'pi pi-folder-open',
-      command: () => this.openLoadDialog(),
-    },
-    {
-      label: 'Delete Map Settings',
-      icon: 'pi pi-trash',
-      command: () => this.openDeleteDialog(),
-    }
   ];
 
-  @Input() apiBaseUrl = `${apiBaseUrl}/api`;
-  @Input() currentUserId: number | null = null;
   private stage?: Konva.Stage;
   private layer?: Konva.Layer;
   private gridLayer?: Konva.Layer;
   private tokenLayer?: Konva.Layer;
   private mapImage?: Konva.Image;
   private resizeObserver?: ResizeObserver;
+  private stageInitializationTimeout?: ReturnType<typeof setTimeout>;
+  private fullscreenControlTimeout?: ReturnType<typeof setTimeout>;
   private isDragging = false;
   private dragStartX = 0;
   private dragStartY = 0;
@@ -159,72 +128,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   private selectedTokenIds: Set<string> = new Set();
   private selectionRect?: Konva.Rect;
   private selectionStart?: { x: number; y: number };
-  private groupDragAnchor?: { x: number; y: number; tokenPositions: Map<string, { x: number; y: number }> };
   private ctrlSelectActive = false;
-
-  constructor(private http: HttpClient) {}
-
-  openSaveDialog(): void { this.mapSaveDialogVisible = true; }
-  openLoadDialog(): void { this.mapLoadDialogVisible = true; this.refreshSavedMapSettings(); }
-  openDeleteDialog(): void { this.mapDeleteDialogVisible = true; this.refreshSavedMapSettings(); }
-
-  confirmSaveMapSettings(): void {
-    if (this.currentUserId === null) {
-      alert('Please log in again before saving map settings.');
-      return;
-    }
-    if (!this.mapSaveName.trim()) return;
-    const payload = this.serializeMapSettings();
-    this.http.post(`${this.apiBaseUrl}/map-settings/user/${this.currentUserId}`, {
-      saveName: this.mapSaveName.trim(),
-      settingsJson: payload
-    }).subscribe({
-      next: () => {
-        this.mapSaveDialogVisible = false;
-        this.mapSaveName = '';
-        this.refreshSavedMapSettings();
-      },
-      error: () => {
-        this.mapSaveDialogVisible = false;
-        this.mapSaveName = '';
-      }
-    });
-  }
-
-  confirmLoadMapSettings(): void {
-    if (this.currentUserId === null) {
-      alert('Please log in again before loading map settings.');
-      return;
-    }
-    if (!this.selectedMapSaveName) return;
-    this.http.get<MapSettingsRecord>(`${this.apiBaseUrl}/map-settings/user/${this.currentUserId}/${encodeURIComponent(this.selectedMapSaveName)}`).subscribe({
-      next: record => { this.applyMapSettings(record.settingsJson); this.mapLoadDialogVisible = false; },
-      error: () => { this.mapLoadDialogVisible = false; }
-    });
-  }
-
-  confirmDeleteMapSettings(): void {
-    if (this.currentUserId === null) {
-      alert('Please log in again before deleting map settings.');
-      return;
-    }
-    if (!this.selectedMapSaveName) return;
-    this.http.delete(`${this.apiBaseUrl}/map-settings/user/${this.currentUserId}/${encodeURIComponent(this.selectedMapSaveName)}`).subscribe({
-      next: () => { this.mapDeleteDialogVisible = false; this.selectedMapSaveName = ''; this.refreshSavedMapSettings(); },
-      error: () => { this.mapDeleteDialogVisible = false; this.selectedMapSaveName = ''; }
-    });
-  }
-
-  private refreshSavedMapSettings(): void {
-    this.http.get<MapSettingsSaveSummary[]>(`${this.apiBaseUrl}/map-settings/user/${this.currentUserId}`).subscribe({
-      next: saves => this.savedMapSettings = saves || [],
-      error: () => this.savedMapSettings = []
-    });
-  }
-
-  private serializeMapSettings(): string {
-    return JSON.stringify(this.buildSavedMapScene());
-  }
 
   private exportMapSettingsData(): string {
     return JSON.stringify(this.buildSavedMapScene(), null, 2);
@@ -312,41 +216,6 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     this.stage?.draw();
   }
 
-  private getLocalMapSettingsList(): MapSettingsSaveSummary[] {
-    try {
-      const raw = localStorage.getItem('local-map-settings');
-      return raw ? JSON.parse(raw) as MapSettingsSaveSummary[] : [];
-    } catch {
-      return [];
-    }
-  }
-
-  private getLocalMapSettings(saveName: string): MapSettingsRecord | null {
-    try {
-      const raw = localStorage.getItem(`local-map-settings:${saveName}`);
-      return raw ? JSON.parse(raw) as MapSettingsRecord : null;
-    } catch {
-      return null;
-    }
-  }
-
-  private saveLocalMapSettings(saveName: string, settingsJson: string): void {
-    try {
-      localStorage.setItem(`local-map-settings:${saveName}`, JSON.stringify({ saveName, settingsJson }));
-      const list = this.getLocalMapSettingsList().filter(item => item.saveName !== saveName);
-      list.unshift({ id: Date.now(), saveName });
-      localStorage.setItem('local-map-settings', JSON.stringify(list));
-    } catch {}
-  }
-
-  private deleteLocalMapSettings(saveName: string): void {
-    try {
-      localStorage.removeItem(`local-map-settings:${saveName}`);
-      const list = this.getLocalMapSettingsList().filter(item => item.saveName !== saveName);
-      localStorage.setItem('local-map-settings', JSON.stringify(list));
-    } catch {}
-  }
-
   private resetSceneLayers(): void {
     if (this.mapImage) {
       this.mapImage.destroy();
@@ -366,39 +235,43 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     this.selectionRect?.destroy();
     this.selectionRect = undefined;
     this.selectionStart = undefined;
-    this.groupDragAnchor = undefined;
     this.tokenLayer?.draw();
     this.layer?.draw();
   }
 
   private initStage() {
     try {
-      if (!this.stageContainer) return;
-      const container = this.stageContainer.nativeElement;
+      if (!this.stageContainer || !this.konvaContainer) return;
+      const container = this.konvaContainer.nativeElement;
       // prevent double init
       if (this.stage) return;
 
       const attemptInit = (attempt = 1) => {
-        const w = container.clientWidth;
-        const h = container.clientHeight;
-        console.log('initStage attempt', attempt, 'container size', w, h);
-        if (h === 0 && attempt <= 10) {
-          // not laid out yet — retry after a short delay
-          setTimeout(() => attemptInit(attempt + 1), 50);
+        const dimensions = this.getStageDimensions();
+        if (!dimensions) {
           return;
         }
 
-        // fallback if still zero
-        const finalW = w || Math.floor(window.innerWidth * 0.8);
-        const finalH = h || Math.floor(window.innerHeight * 0.8) - 48; // approximate header height
+        const { width, height } = dimensions;
+        console.log('initStage attempt', attempt, 'container size', width, height);
+        if ((width === 0 || height === 0) && attempt <= 10) {
+          // not laid out yet — retry after a short delay
+          this.stageInitializationTimeout = setTimeout(() => {
+            this.stageInitializationTimeout = undefined;
+            attemptInit(attempt + 1);
+          }, 50);
+          return;
+        }
 
-        if (h === 0) {
-          console.warn('Container height is 0 after retries — setting explicit height fallback', finalH);
-          container.style.height = `${finalH}px`;
+        if (this.isFullscreen && (width === 0 || height === 0)) {
+          console.warn('Fullscreen map container has no size after initialization retries');
+          return;
         }
-        if (w === 0) {
-          container.style.width = `${finalW}px`;
-        }
+
+        // Create the stage with a fallback drawing buffer while the host awaits its first layout.
+        // Do not set fallback dimensions on the host: they would override fullscreen CSS sizing.
+        const finalW = width || Math.floor(window.innerWidth * 0.8);
+        const finalH = height || Math.floor(window.innerHeight * 0.8) - 48;
 
         this.stage = new Konva.Stage({
           container: container,
@@ -424,11 +297,9 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
         // Add wheel zoom handler
         container.addEventListener('wheel', (e) => this.onStageWheel(e));
 
-        // observe container resize for dynamic resizing
+        // The stage host is the fullscreen element, so its box is the Konva viewport.
         this.resizeObserver = new ResizeObserver(() => this.onContainerResize());
-        this.resizeObserver.observe(container);
-
-        window.addEventListener('resize', this.onWindowResize);
+        this.resizeObserver.observe(this.stageContainer.nativeElement);
       };
 
       attemptInit();
@@ -437,35 +308,111 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  private getStageDimensions(): { width: number; height: number } | undefined {
+    if (!this.stageContainer) {
+      return undefined;
+    }
+
+    const container = this.stageContainer.nativeElement;
+    return {
+      width: container.clientWidth,
+      height: container.clientHeight,
+    };
+  }
+
   private onContainerResize() {
-    if (!this.stage || !this.stageContainer) return;
-    const c = this.stageContainer.nativeElement;
-    this.stage.width(c.clientWidth);
-    this.stage.height(c.clientHeight);
+    if (!this.stage) return;
+
+    const dimensions = this.getStageDimensions();
+    if (!dimensions || dimensions.width === 0 || dimensions.height === 0) {
+      return;
+    }
+
+    this.stage.width(dimensions.width);
+    this.stage.height(dimensions.height);
+    if (this.showGrid) {
+      this.drawGrid();
+    }
     this.stage.draw();
   }
 
   private onWindowResize = () => {
-    if (!this.stage || !this.stageContainer) return;
-    const c = this.stageContainer.nativeElement;
-    this.stage.width(c.clientWidth);
-    this.stage.height(c.clientHeight);
-    this.stage.draw();
+    this.onContainerResize();
   };
 
   ngAfterViewInit() {
     // Component content is attached to the DOM — initialize stage
-    setTimeout(() => this.initStage(), 0);
+    this.stageInitializationTimeout = setTimeout(() => {
+      this.stageInitializationTimeout = undefined;
+      this.initStage();
+    }, 0);
 
-    // Set up a ResizeObserver to handle container resize
-    if (this.stageContainer) {
-      const resizeObserver = new ResizeObserver(() => {
-        this.onContainerResize();
-      });
-      resizeObserver.observe(this.stageContainer.nativeElement);
-    }
+    window.addEventListener('resize', this.onWindowResize);
     document.addEventListener('mousemove', this.onDocumentMouseMove);
     document.addEventListener('mouseup', this.onDocumentMouseUp);
+    document.addEventListener('fullscreenchange', this.onFullscreenChange);
+  }
+
+  onMapPointerMove(): void {
+    if (!this.isFullscreen) {
+      return;
+    }
+
+    this.showFullscreenControlPanel = true;
+    this.scheduleFullscreenControlHide();
+  }
+
+  toggleFullscreen(event: MouseEvent): void {
+    event.stopPropagation();
+
+    if (!this.stageContainer) {
+      return;
+    }
+
+    if (document.fullscreenElement === this.stageContainer.nativeElement) {
+      void document.exitFullscreen().catch((error: unknown) => {
+        console.error('Failed to exit fullscreen map view', error);
+      });
+      return;
+    }
+
+    void this.stageContainer.nativeElement.requestFullscreen().catch((error: unknown) => {
+      console.error('Failed to enter fullscreen map view', error);
+    });
+  }
+
+  private scheduleFullscreenControlHide(): void {
+    this.clearFullscreenControlHideTimeout();
+    this.fullscreenControlTimeout = setTimeout(() => {
+      this.hideFullscreenControlPanel();
+    }, 3000);
+  }
+
+  private clearFullscreenControlHideTimeout(): void {
+    if (this.fullscreenControlTimeout !== undefined) {
+      clearTimeout(this.fullscreenControlTimeout);
+      this.fullscreenControlTimeout = undefined;
+    }
+  }
+
+  private onFullscreenChange = (): void => {
+    this.isFullscreen = document.fullscreenElement === this.stageContainer?.nativeElement;
+    this.clearFullscreenControlHideTimeout();
+    this.hideFullscreenControlPanel();
+    requestAnimationFrame(() => this.onContainerResize());
+  };
+
+  private hideFullscreenControlPanel(): void {
+    this.showFullscreenControlPanel = false;
+
+    const activeElement = document.activeElement;
+    if (
+      this.isFullscreen &&
+      activeElement instanceof HTMLElement &&
+      this.stageContainer?.nativeElement.contains(activeElement)
+    ) {
+      activeElement.blur();
+    }
   }
 
   private onStageMouseDown(e: Konva.KonvaEventObject<MouseEvent>) {
@@ -502,7 +449,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     const deltaY = e.evt.clientY - this.dragStartY;
 
     if (this.draggingTokenId) {
-      if (this.selectedTokenIds.size > 1 && this.selectedTokenIds.has(this.draggingTokenId) && this.groupDragAnchor) {
+      if (this.selectedTokenIds.size > 1 && this.selectedTokenIds.has(this.draggingTokenId)) {
         this.moveSelectedTokens(deltaX, deltaY);
       } else {
         // Move the token independently
@@ -533,6 +480,10 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
         this.tokenLayer.x(this.tokenLayer.x() + deltaX);
         this.tokenLayer.y(this.tokenLayer.y() + deltaY);
       }
+
+      if (this.showGrid) {
+        this.drawGrid();
+      }
     }
 
     // Update drag start position for next move
@@ -549,7 +500,6 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     }
     this.isDragging = false;
     this.draggingTokenId = undefined;
-    this.groupDragAnchor = undefined;
   }
 
   private onDocumentMouseMove = (event: MouseEvent) => {
@@ -723,7 +673,11 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
         // Update token image to match the new size
         this.updateTokenImageSize(tokenId);
       });
-      
+
+      if (this.showGrid) {
+        this.drawGrid();
+      }
+
       this.stage.draw();
     }
   }
@@ -732,6 +686,9 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     this.gridZoom = newGridZoom / 100; // Convert percentage to decimal
     if (this.gridLayer && this.stage) {
       this.gridLayer.scale({ x: this.gridZoom, y: this.gridZoom });
+      if (this.showGrid) {
+        this.drawGrid();
+      }
       this.stage.draw();
     }
   }
@@ -745,11 +702,30 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     const cellHeight = this.gridCellHeight;
     const stageW = this.stage.width();
     const stageH = this.stage.height();
-    
+    const scaleX = this.gridLayer.scaleX();
+    const scaleY = this.gridLayer.scaleY();
+
+    if (scaleX === 0 || scaleY === 0) {
+      return;
+    }
+
+    // Convert the stage viewport into grid-layer coordinates so the grid remains
+    // continuous when its layer is panned or zoomed.
+    const gridX = this.gridLayer.x();
+    const gridY = this.gridLayer.y();
+    const visibleLeft = -gridX / scaleX;
+    const visibleRight = (stageW - gridX) / scaleX;
+    const visibleTop = -gridY / scaleY;
+    const visibleBottom = (stageH - gridY) / scaleY;
+    const minX = Math.floor(Math.min(visibleLeft, visibleRight) / cellWidth) * cellWidth;
+    const maxX = Math.ceil(Math.max(visibleLeft, visibleRight) / cellWidth) * cellWidth;
+    const minY = Math.floor(Math.min(visibleTop, visibleBottom) / cellHeight) * cellHeight;
+    const maxY = Math.ceil(Math.max(visibleTop, visibleBottom) / cellHeight) * cellHeight;
+
     // Draw vertical lines
-    for (let x = 0; x < stageW; x += cellWidth) {
+    for (let x = minX; x <= maxX; x += cellWidth) {
       const line = new Konva.Line({
-        points: [x, 0, x, stageH],
+        points: [x, minY, x, maxY],
         stroke: this.gridColor,
         strokeWidth: 1,
         opacity: 0.3,
@@ -758,9 +734,9 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     }
     
     // Draw horizontal lines
-    for (let y = 0; y < stageH; y += cellHeight) {
+    for (let y = minY; y <= maxY; y += cellHeight) {
       const line = new Konva.Line({
-        points: [0, y, stageW, y],
+        points: [minX, y, maxX, y],
         stroke: this.gridColor,
         strokeWidth: 1,
         opacity: 0.3,
@@ -835,34 +811,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     tokenGroup.add(circle);
     tokenGroup.add(text);
 
-    // Add hover effects
-    tokenGroup.on('mouseover', () => {
-      circle.fill('#5ba3ff');
-      this.hoveredTokenId = tokenId;
-      document.body.style.cursor = 'grab';
-      this.stage?.draw();
-    });
-
-    tokenGroup.on('mouseout', () => {
-      circle.fill('#4a90e2');
-      this.hoveredTokenId = undefined;
-      document.body.style.cursor = 'default';
-      this.stage?.draw();
-    });
-
-    // Add mousedown handler for token dragging
-    tokenGroup.on('mousedown', (e) => {
-      if (e.evt.ctrlKey) {
-        e.cancelBubble = true;
-        this.startSelection(e.evt);
-        return;
-      }
-      e.cancelBubble = true; // Prevent event from bubbling to stage
-      this.draggingTokenId = tokenId;
-      this.isDragging = true;
-      this.dragStartX = e.evt.clientX;
-      this.dragStartY = e.evt.clientY;
-    });
+    this.attachTokenInteractions(tokenId, tokenGroup, circle);
 
     // Add right-click context menu
     tokenGroup.on('contextmenu', (e) => {
@@ -995,11 +944,12 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
 
   private startSelection(event: MouseEvent): void {
     if (!this.stage || !this.tokenLayer) return;
-    const pos = this.stage.getPointerPosition();
+    const pos = this.getTokenLayerPointerPosition();
     if (!pos) return;
     this.ctrlSelectActive = true;
     this.selectionStart = pos;
     this.selectedTokenIds.clear();
+    this.updateSelectionHighlights();
     this.selectionRect?.destroy();
     this.selectionRect = new Konva.Rect({
       x: pos.x,
@@ -1019,7 +969,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
 
   private updateSelection(event: MouseEvent): void {
     if (!this.stage || !this.selectionRect || !this.selectionStart || !this.ctrlSelectActive) return;
-    const pos = this.stage.getPointerPosition();
+    const pos = this.getTokenLayerPointerPosition();
     if (!pos) return;
     const x = Math.min(this.selectionStart.x, pos.x);
     const y = Math.min(this.selectionStart.y, pos.y);
@@ -1046,6 +996,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     this.selectionRect = undefined;
     this.selectionStart = undefined;
     this.ctrlSelectActive = false;
+    this.updateSelectionHighlights();
     this.tokenLayer?.draw();
   }
 
@@ -1063,6 +1014,65 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     this.tokenLayer?.draw();
     this.dragStartX += deltaX;
     this.dragStartY += deltaY;
+  }
+
+  private getTokenLayerPointerPosition(): { x: number; y: number } | undefined {
+    const pointerPosition = this.stage?.getPointerPosition();
+    if (!pointerPosition || !this.tokenLayer) return undefined;
+
+    return this.tokenLayer.getAbsoluteTransform().copy().invert().point(pointerPosition);
+  }
+
+  private attachTokenInteractions(
+    tokenId: string,
+    tokenGroup: Konva.Group,
+    circle: Konva.Circle
+  ): void {
+    tokenGroup.on('mouseover', () => {
+      circle.fill('#5ba3ff');
+      this.hoveredTokenId = tokenId;
+      document.body.style.cursor = 'grab';
+      this.stage?.draw();
+    });
+
+    tokenGroup.on('mouseout', () => {
+      circle.fill(this.tokenColors.get(tokenId) || '#4a90e2');
+      this.hoveredTokenId = undefined;
+      document.body.style.cursor = 'default';
+      this.stage?.draw();
+    });
+
+    tokenGroup.on('mousedown', (e) => {
+      e.cancelBubble = true;
+      if (e.evt.button !== 0) return;
+
+      if (e.evt.ctrlKey) {
+        this.startSelection(e.evt);
+        return;
+      }
+
+      if (!this.selectedTokenIds.has(tokenId)) {
+        this.selectedTokenIds.clear();
+        this.selectedTokenIds.add(tokenId);
+        this.updateSelectionHighlights();
+      }
+
+      this.draggingTokenId = tokenId;
+      this.isDragging = true;
+      this.dragStartX = e.evt.clientX;
+      this.dragStartY = e.evt.clientY;
+    });
+  }
+
+  private updateSelectionHighlights(): void {
+    this.tokens.forEach((tokenGroup, tokenId) => {
+      const circle = tokenGroup.findOne('Circle') as Konva.Circle | null;
+      if (!circle) return;
+
+      const isSelected = this.selectedTokenIds.has(tokenId);
+      circle.stroke(isSelected ? '#f8e7ba' : '#2c5aa0');
+      circle.strokeWidth(isSelected ? 4 : 2);
+    });
   }
 
   private restoreSavedToken(saved: SavedMapTokenState): void {
@@ -1096,21 +1106,10 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     if (saved.rotation) {
       tokenGroup.rotation(saved.rotation);
     }
+    this.attachTokenInteractions(saved.id, tokenGroup, circle);
     tokenGroup.on('contextmenu', (e) => {
       e.evt.preventDefault();
       this.showTokenContextMenu(saved.id, e.evt);
-    });
-    tokenGroup.on('mousedown', (e) => {
-      if (e.evt.ctrlKey) {
-        e.cancelBubble = true;
-        this.startSelection(e.evt);
-        return;
-      }
-      e.cancelBubble = true;
-      this.draggingTokenId = saved.id;
-      this.isDragging = true;
-      this.dragStartX = e.evt.clientX;
-      this.dragStartY = e.evt.clientY;
     });
     if (saved.image) {
       const img = new Image();
@@ -1543,6 +1542,10 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     this.tokenBaseSizes.clear();
     this.tokenUserScales.clear();
     this.tokenRotations.clear();
+    this.selectedTokenIds.clear();
+    this.selectionRect?.destroy();
+    this.selectionRect = undefined;
+    this.selectionStart = undefined;
 
     // Restore map image if present (async)
     if (mapData.mapImage) {
@@ -1642,27 +1645,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     tokenGroup.add(circle);
     tokenGroup.add(text);
 
-    // Add hover effects
-    tokenGroup.on('mouseover', () => {
-      circle.fill('#5ba3ff');
-      document.body.style.cursor = 'grab';
-      this.stage?.draw();
-    });
-
-    tokenGroup.on('mouseout', () => {
-      circle.fill(circleColor);
-      document.body.style.cursor = 'default';
-      this.stage?.draw();
-    });
-
-    // Add mousedown handler for token dragging
-    tokenGroup.on('mousedown', (e) => {
-      e.cancelBubble = true;
-      this.draggingTokenId = tokenId;
-      this.isDragging = true;
-      this.dragStartX = e.evt.clientX;
-      this.dragStartY = e.evt.clientY;
-    });
+    this.attachTokenInteractions(tokenId, tokenGroup, circle);
 
     // Add right-click context menu
     tokenGroup.on('contextmenu', (e) => {
@@ -1753,6 +1736,14 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
+    if (this.stageInitializationTimeout !== undefined) {
+      clearTimeout(this.stageInitializationTimeout);
+      this.stageInitializationTimeout = undefined;
+    }
+    this.clearFullscreenControlHideTimeout();
+    document.removeEventListener('fullscreenchange', this.onFullscreenChange);
+    document.removeEventListener('mousemove', this.onDocumentMouseMove);
+    document.removeEventListener('mouseup', this.onDocumentMouseUp);
     this.destroyStage();
   }
 }
