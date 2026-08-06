@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -116,16 +116,7 @@ export class NPCMakerComponent implements OnInit {
   selectedSaveName = '';
   savedNPCSets: NPCSaveSummary[] = [];
   private readonly apiBaseUrl = 'https://tabletop-personal-server-production.up.railway.app/api';
-  private readonly currentUserId = (() => {
-    try {
-      const token = localStorage.getItem('jwt');
-      if (!token) return null;
-      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-      return typeof payload.id === 'number' ? payload.id : null;
-    } catch {
-      return null;
-    }
-  })();
+  @Input() currentUserId: number | null = null;
 
   constructor(private http: HttpClient) {}
 

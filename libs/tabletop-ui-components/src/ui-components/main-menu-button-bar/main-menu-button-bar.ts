@@ -56,20 +56,16 @@ export class MainMenuButtonBar {
     this.openDiceBag.emit();
   }
 
-<<<<<<< HEAD
   onLoginModalSuccess(event: LoginResponse) {
-=======
+    this.loginSuccess.emit(event);
+  }
+
   onNPCMakerClick() {
     this.openNPCMaker.emit();
   }
 
   onOptionsClick() {
     this.openOptions.emit();
-  }
-
-  onLoginModalSuccess(event: { username: string; token: string }) {
->>>>>>> origin/main
-    this.loginSuccess.emit(event);
   }
 
   get loginVisibleLocal() {

@@ -3,6 +3,7 @@ package com.thepandaofnom.tabletop;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import jakarta.servlet.http.HttpSession;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,17 +20,20 @@ public class UsersSavedNpcController {
     }
 
     @GetMapping("/user/{userId}")
-    public List<UsersSavedNpc> list(@PathVariable Long userId) {
+    public List<UsersSavedNpc> list(@PathVariable Long userId, HttpSession session) {
+        SessionUser.requireUserId(session, userId);
         return repo.findByUserIdOrderByUpdatedAtDesc(userId);
     }
 
     @GetMapping("/user/{userId}/{saveName}")
-    public UsersSavedNpc get(@PathVariable Long userId, @PathVariable String saveName) {
+    public UsersSavedNpc get(@PathVariable Long userId, @PathVariable String saveName, HttpSession session) {
+        SessionUser.requireUserId(session, userId);
         return repo.findByUserIdAndSaveName(userId, saveName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/user/{userId}")
-    public UsersSavedNpc save(@PathVariable Long userId, @RequestBody UsersSavedNpcRequest req) {
+    public UsersSavedNpc save(@PathVariable Long userId, @RequestBody UsersSavedNpcRequest req, HttpSession session) {
+        SessionUser.requireUserId(session, userId);
         userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
         UsersSavedNpc record = repo.findByUserIdAndSaveName(userId, req.getSaveName()).orElseGet(UsersSavedNpc::new);
         record.setUserId(userId);
@@ -43,7 +47,8 @@ public class UsersSavedNpcController {
     }
 
     @DeleteMapping("/user/{userId}/{saveName}")
-    public void delete(@PathVariable Long userId, @PathVariable String saveName) {
+    public void delete(@PathVariable Long userId, @PathVariable String saveName, HttpSession session) {
+        SessionUser.requireUserId(session, userId);
         userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
         repo.deleteByUserIdAndSaveName(userId, saveName);
     }
