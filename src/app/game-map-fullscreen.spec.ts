@@ -282,6 +282,24 @@ describe('GameMapComponent control panel rendering', () => {
     expect(styles.pointerEvents).toBe('auto');
   });
 
+  it('layers the control panel above the clipped Konva viewport inside the map stage', () => {
+    const stage = fixture.nativeElement.querySelector('.game-map-stage') as HTMLElement;
+    const konvaContainer = fixture.nativeElement.querySelector('.game-map-konva-container') as HTMLElement;
+    const panel = fixture.nativeElement.querySelector('.game-map-control-panel') as HTMLElement;
+    const stageStyles = getComputedStyle(stage);
+    const konvaStyles = getComputedStyle(konvaContainer);
+    const panelStyles = getComputedStyle(panel);
+
+    expect(panel.parentElement).toBe(stage);
+    expect(stageStyles.position).toBe('relative');
+    expect(stageStyles.overflow).toBe('hidden');
+    expect(konvaStyles.position).toBe('absolute');
+    expect(konvaStyles.zIndex).toBe('1');
+    expect(panelStyles.position).toBe('absolute');
+    expect(panelStyles.bottom).toBe('12px');
+    expect(Number(panelStyles.zIndex)).toBeGreaterThan(Number(konvaStyles.zIndex));
+  });
+
   it('hides fullscreen controls until pointer activity, then hides them after three seconds', () => {
     jasmine.clock().install();
     const component = fixture.componentInstance;
