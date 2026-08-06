@@ -11,6 +11,7 @@ import { ToastModule } from 'primeng/toast';
 import { apiBaseUrl } from '../../api';
 
 export interface LoginResponse {
+  id?: number;
   username: string;
   firstName?: string;
   lastName?: string;
