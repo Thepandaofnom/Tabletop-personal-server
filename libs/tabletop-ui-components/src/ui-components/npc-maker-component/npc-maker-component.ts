@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { DialogModule } from 'primeng/dialog';
+import { apiBaseUrl } from '../../api';
 
 export interface NPCData {
   name: string;
@@ -115,7 +116,7 @@ export class NPCMakerComponent implements OnInit {
   saveName = '';
   selectedSaveName = '';
   savedNPCSets: NPCSaveSummary[] = [];
-  private readonly apiBaseUrl = 'https://tabletop-personal-server-production.up.railway.app/api';
+  private readonly apiBaseUrl = `${apiBaseUrl}/api`;
   @Input() currentUserId: number | null = null;
 
   constructor(private http: HttpClient) {}
