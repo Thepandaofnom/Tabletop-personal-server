@@ -226,8 +226,6 @@ export class App {
     });
   }
 
-  }
-
   onMenuLogin() { this.loginVisible = true; }
   onMenuSignup() { this.signupVisible = true; }
   onMenuLogout() { this.doLogout(); }
