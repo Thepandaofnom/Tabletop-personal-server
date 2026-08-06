@@ -76,12 +76,45 @@
   border-radius: 0;
 }
 
-.game-map-fullscreen-control {
+.game-map-control-panel {
   position: absolute;
-  right: 1rem;
-  bottom: 1rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  left: 0.75rem;
   z-index: 3;
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  width: min(calc(100% - 1.5rem), 54rem);
+  margin-inline: auto;
+  transition: opacity 180ms ease, visibility 0s linear 180ms;
+}
+
+.game-map-control-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.game-map-stage:fullscreen .game-map-control-panel:not(.is-visible):not(:focus-within) {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.game-map-stage:fullscreen .game-map-control-panel.is-visible,
+.game-map-stage:fullscreen .game-map-control-panel:focus-within {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.game-map-fullscreen-control {
   display: grid;
+  flex: 0 0 auto;
   width: 2.5rem;
   height: 2.5rem;
   place-items: center;
@@ -91,18 +124,6 @@
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 50%;
   cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 180ms ease, visibility 0s linear 180ms;
-}
-
-.game-map-fullscreen-control.is-visible,
-.game-map-fullscreen-control:focus-visible {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition-delay: 0s;
 }
 
 .game-map-fullscreen-control:hover {
@@ -129,6 +150,13 @@
 
 .game-map-range {
   flex: 1 1 auto;
+}
+
+.game-map-viewport-range {
+  flex: 0 1 10rem;
+  width: clamp(7rem, 18vw, 10rem);
+  min-width: 7rem;
+  height: 2.25rem;
 }
 
 .game-map-inline-field {
@@ -234,4 +262,14 @@
 .game-map-dialog-body {
   position: relative;
   z-index: 2;
+}
+
+@media (max-width: 680px) {
+  .game-map-control-panel {
+    align-items: stretch;
+  }
+
+  .game-map-fullscreen-control {
+    align-self: flex-end;
+  }
 }

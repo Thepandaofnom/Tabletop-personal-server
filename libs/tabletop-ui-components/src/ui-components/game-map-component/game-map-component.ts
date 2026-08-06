@@ -61,7 +61,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   zoom = 1;
   scaleGrid = false;
   gridZoom = 1;
-  showFullscreenControl = false;
+  showFullscreenControlPanel = false;
   isFullscreen = false;
 
   // Token dialog state
@@ -354,13 +354,13 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   }
 
   onMapPointerMove(): void {
-    this.showFullscreenControl = true;
+    this.showFullscreenControlPanel = true;
     this.scheduleFullscreenControlHide();
   }
 
   onMapPointerLeave(): void {
     this.clearFullscreenControlHideTimeout();
-    this.showFullscreenControl = false;
+    this.showFullscreenControlPanel = false;
   }
 
   toggleFullscreen(event: MouseEvent): void {
@@ -385,7 +385,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   private scheduleFullscreenControlHide(): void {
     this.clearFullscreenControlHideTimeout();
     this.fullscreenControlTimeout = setTimeout(() => {
-      this.showFullscreenControl = false;
+      this.showFullscreenControlPanel = false;
     }, 3000);
   }
 
@@ -398,6 +398,8 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
 
   private onFullscreenChange = (): void => {
     this.isFullscreen = document.fullscreenElement === this.stageContainer?.nativeElement;
+    this.clearFullscreenControlHideTimeout();
+    this.showFullscreenControlPanel = false;
     requestAnimationFrame(() => this.onContainerResize());
   };
 
