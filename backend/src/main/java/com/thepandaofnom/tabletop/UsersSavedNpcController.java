@@ -1,5 +1,6 @@
 package com.thepandaofnom.tabletop;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -11,27 +12,29 @@ import java.util.List;
 @RequestMapping("/api/saved-npcs")
 public class UsersSavedNpcController {
     private final UsersSavedNpcRepository repo;
-    private final UserRepository userRepo;
+    private final SessionUser sessionUser;
 
-    public UsersSavedNpcController(UsersSavedNpcRepository repo, UserRepository userRepo) {
+    public UsersSavedNpcController(UsersSavedNpcRepository repo, SessionUser sessionUser) {
         this.repo = repo;
-        this.userRepo = userRepo;
+        this.sessionUser = sessionUser;
     }
 
-    @GetMapping("/user/{userId}")
-    public List<UsersSavedNpc> list(@PathVariable Long userId) {
-        return repo.findByUserIdOrderByUpdatedAtDesc(userId);
+    @GetMapping("/me")
+    public List<UsersSavedNpc> list(HttpServletRequest request) {
+        return repo.findByUserIdOrderByUpdatedAtDesc(sessionUser.id(request));
     }
 
-    @GetMapping("/user/{userId}/{saveName}")
-    public UsersSavedNpc get(@PathVariable Long userId, @PathVariable String saveName) {
-        return repo.findByUserIdAndSaveName(userId, saveName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    @GetMapping("/me/{saveName}")
+    public UsersSavedNpc get(@PathVariable String saveName, HttpServletRequest request) {
+        return repo.findByUserIdAndSaveName(sessionUser.id(request), saveName)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping("/user/{userId}")
-    public UsersSavedNpc save(@PathVariable Long userId, @RequestBody UsersSavedNpcRequest req) {
-        userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
-        UsersSavedNpc record = repo.findByUserIdAndSaveName(userId, req.getSaveName()).orElseGet(UsersSavedNpc::new);
+    @PostMapping("/me")
+    public UsersSavedNpc save(@RequestBody UsersSavedNpcRequest req, HttpServletRequest request) {
+        Long userId = sessionUser.id(request);
+        UsersSavedNpc record = repo.findByUserIdAndSaveName(userId, req.getSaveName())
+                .orElseGet(UsersSavedNpc::new);
         record.setUserId(userId);
         record.setSaveName(req.getSaveName());
         record.setNpcJson(req.getNpcJson());
@@ -42,9 +45,8 @@ public class UsersSavedNpcController {
         return repo.save(record);
     }
 
-    @DeleteMapping("/user/{userId}/{saveName}")
-    public void delete(@PathVariable Long userId, @PathVariable String saveName) {
-        userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
-        repo.deleteByUserIdAndSaveName(userId, saveName);
+    @DeleteMapping("/me/{saveName}")
+    public void delete(@PathVariable String saveName, HttpServletRequest request) {
+        repo.deleteByUserIdAndSaveName(sessionUser.id(request), saveName);
     }
 }

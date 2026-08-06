@@ -1,5 +1,6 @@
 package com.thepandaofnom.tabletop;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -11,27 +12,29 @@ import java.util.List;
 @RequestMapping("/api/map-settings")
 public class UserMapSettingsController {
     private final UserMapSettingsRepository repo;
-    private final UserRepository userRepo;
+    private final SessionUser sessionUser;
 
-    public UserMapSettingsController(UserMapSettingsRepository repo, UserRepository userRepo) {
+    public UserMapSettingsController(UserMapSettingsRepository repo, SessionUser sessionUser) {
         this.repo = repo;
-        this.userRepo = userRepo;
+        this.sessionUser = sessionUser;
     }
 
-    @GetMapping("/user/{userId}")
-    public List<UserMapSettings> list(@PathVariable Long userId) {
-        return repo.findByUserIdOrderByUpdatedAtDesc(userId);
+    @GetMapping("/me")
+    public List<UserMapSettings> list(HttpServletRequest request) {
+        return repo.findByUserIdOrderByUpdatedAtDesc(sessionUser.id(request));
     }
 
-    @GetMapping("/user/{userId}/{saveName}")
-    public UserMapSettings get(@PathVariable Long userId, @PathVariable String saveName) {
-        return repo.findByUserIdAndSaveName(userId, saveName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    @GetMapping("/me/{saveName}")
+    public UserMapSettings get(@PathVariable String saveName, HttpServletRequest request) {
+        return repo.findByUserIdAndSaveName(sessionUser.id(request), saveName)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping("/user/{userId}")
-    public UserMapSettings save(@PathVariable Long userId, @RequestBody UserMapSettingsRequest req) {
-        userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
-        UserMapSettings record = repo.findByUserIdAndSaveName(userId, req.getSaveName()).orElseGet(UserMapSettings::new);
+    @PostMapping("/me")
+    public UserMapSettings save(@RequestBody UserMapSettingsRequest req, HttpServletRequest request) {
+        Long userId = sessionUser.id(request);
+        UserMapSettings record = repo.findByUserIdAndSaveName(userId, req.getSaveName())
+                .orElseGet(UserMapSettings::new);
         record.setUserId(userId);
         record.setSaveName(req.getSaveName());
         record.setSettingsJson(req.getSettingsJson());
@@ -42,10 +45,8 @@ public class UserMapSettingsController {
         return repo.save(record);
     }
 
-    @DeleteMapping("/user/{userId}/{saveName}")
-    public void delete(@PathVariable Long userId, @PathVariable String saveName) {
-        userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
-        repo.deleteByUserIdAndSaveName(userId, saveName);
+    @DeleteMapping("/me/{saveName}")
+    public void delete(@PathVariable String saveName, HttpServletRequest request) {
+        repo.deleteByUserIdAndSaveName(sessionUser.id(request), saveName);
     }
-
 }

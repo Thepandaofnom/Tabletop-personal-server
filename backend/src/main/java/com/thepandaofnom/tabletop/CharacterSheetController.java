@@ -1,5 +1,6 @@
 package com.thepandaofnom.tabletop;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -11,28 +12,29 @@ import java.util.List;
 @RequestMapping("/api/character-sheets")
 public class CharacterSheetController {
     private final CharacterSheetRecordRepository repo;
-    private final UserRepository userRepo;
+    private final SessionUser sessionUser;
 
-    public CharacterSheetController(CharacterSheetRecordRepository repo, UserRepository userRepo) {
+    public CharacterSheetController(CharacterSheetRecordRepository repo, SessionUser sessionUser) {
         this.repo = repo;
-        this.userRepo = userRepo;
+        this.sessionUser = sessionUser;
     }
 
-    @GetMapping("/user/{userId}")
-    public List<CharacterSheetRecord> list(@PathVariable Long userId) {
-        return repo.findByUserIdOrderByUpdatedAtDesc(userId);
+    @GetMapping("/me")
+    public List<CharacterSheetRecord> list(HttpServletRequest request) {
+        return repo.findByUserIdOrderByUpdatedAtDesc(sessionUser.id(request));
     }
 
-    @GetMapping("/user/{userId}/{saveName}")
-    public CharacterSheetRecord get(@PathVariable Long userId, @PathVariable String saveName) {
-        return repo.findByUserIdAndSaveName(userId, saveName)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    @GetMapping("/me/{saveName}")
+    public CharacterSheetRecord get(@PathVariable String saveName, HttpServletRequest request) {
+        return repo.findByUserIdAndSaveName(sessionUser.id(request), saveName)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping("/user/{userId}")
-    public CharacterSheetRecord save(@PathVariable Long userId, @RequestBody CharacterSheetSaveRequest req) {
-        userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
-        CharacterSheetRecord record = repo.findByUserIdAndSaveName(userId, req.getSaveName()).orElseGet(CharacterSheetRecord::new);
+    @PostMapping("/me")
+    public CharacterSheetRecord save(@RequestBody CharacterSheetSaveRequest req, HttpServletRequest request) {
+        Long userId = sessionUser.id(request);
+        CharacterSheetRecord record = repo.findByUserIdAndSaveName(userId, req.getSaveName())
+                .orElseGet(CharacterSheetRecord::new);
         record.setUserId(userId);
         record.setSaveName(req.getSaveName());
         record.setSheetType(req.getSheetType());
@@ -44,9 +46,8 @@ public class CharacterSheetController {
         return repo.save(record);
     }
 
-    @DeleteMapping("/user/{userId}/{saveName}")
-    public void delete(@PathVariable Long userId, @PathVariable String saveName) {
-        userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
-        repo.deleteByUserIdAndSaveName(userId, saveName);
+    @DeleteMapping("/me/{saveName}")
+    public void delete(@PathVariable String saveName, HttpServletRequest request) {
+        repo.deleteByUserIdAndSaveName(sessionUser.id(request), saveName);
     }
 }
