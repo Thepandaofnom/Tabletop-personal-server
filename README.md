@@ -31,10 +31,16 @@ ng generate --help
 To build the project run:
 
 ```bash
-ng build
+npm run build
 ```
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+
+## GitHub Pages deployment
+
+Pushing to `main` runs `.github/workflows/deploy-pages.yml`, which builds the Angular app and deploys `dist/Tabletop-Personal-Server/browser` through GitHub Pages. In the repository's **Settings > Pages**, set the deployment source to **GitHub Actions**. The production build uses the repository base path, so the app is served from `https://thepandaofnom.github.io/Tabletop-personal-server/`.
+
+GitHub Pages only hosts the static Angular frontend. It cannot run this project's Spring Boot API, PostgreSQL database, or server-side session handling. Those services must remain deployed separately (the frontend currently targets the Railway API); that backend must continue allowing credentialed CORS requests from `https://thepandaofnom.github.io`.
 
 ## Running unit tests
 
