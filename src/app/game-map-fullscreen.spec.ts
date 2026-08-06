@@ -300,6 +300,16 @@ describe('GameMapComponent control panel rendering', () => {
     expect(Number(panelStyles.zIndex)).toBeGreaterThan(Number(konvaStyles.zIndex));
   });
 
+  it('sizes the regular map stage to its wrapper instead of the browser viewport', () => {
+    const wrapper = fixture.nativeElement.querySelector('.game-map-stage-wrapper') as HTMLElement;
+    const stage = fixture.nativeElement.querySelector('.game-map-stage') as HTMLElement;
+    wrapper.style.width = '800px';
+    wrapper.style.height = '600px';
+
+    expect(stage.getBoundingClientRect().width).toBe(wrapper.getBoundingClientRect().width);
+    expect(stage.getBoundingClientRect().height).toBe(wrapper.getBoundingClientRect().height);
+  });
+
   it('hides fullscreen controls until pointer activity, then hides them after three seconds', () => {
     jasmine.clock().install();
     const component = fixture.componentInstance;
