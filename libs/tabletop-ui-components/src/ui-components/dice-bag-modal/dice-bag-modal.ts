@@ -2,18 +2,25 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'dice-bag-modal',
   standalone: true,
-  imports: [DialogModule, ButtonModule, CommonModule],
+  imports: [DialogModule, ButtonModule, CommonModule, FormsModule],
   templateUrl: './dice-bag-modal.html',
+  styleUrls: ['./dice-bag-modal.css'],
 })
 export class DiceBagModal {
   @Input() visible = false;
   @Output() visibleChange = new EventEmitter<boolean>();
 
   result: string = '';
+  rollCount = 0;
+  resetAfterRoll = true;
+  get resultSize(): number {
+    return Math.max(7, this.result.length + 2);
+  }
 
   get visibleLocal() {
     return this.visible;
@@ -24,31 +31,45 @@ export class DiceBagModal {
   }
 
   rollD4() {
-    const rnd = Math.floor(Math.random() * 4) + 1;
-    this.result = String(rnd);
+    this.rollDie(4);
   }
   rollD6() {
-    const rnd = Math.floor(Math.random() * 6) + 1;
-    this.result = String(rnd);
+    this.rollDie(6);
   }
   rollD8() {
-    const rnd = Math.floor(Math.random() * 8) + 1;
-    this.result = String(rnd);
+    this.rollDie(8);
   }
   rollD10() {
-    const rnd = Math.floor(Math.random() * 10) + 1;
-    this.result = String(rnd);
+    this.rollDie(10);
   }
   rollD12() {
-    const rnd = Math.floor(Math.random() * 12) + 1;
-    this.result = String(rnd);
+    this.rollDie(12);
   }
   rollD20() {
-    const rnd = Math.floor(Math.random() * 20) + 1;
-    this.result = String(rnd);
+    this.rollDie(20);
   }
   rollDPer() {
-    const rnd = (Math.floor(Math.random() * 9) + 1)*10;
-    this.result = String(rnd);
+    this.rollDie(10, true);
+  }
+
+  private rollDie(sides: number, percent = false): void {
+    const count = Math.min(999, Math.max(0, Math.floor(this.rollCount || 0)));
+    const rollTotal = count > 1 ? count : 1;
+    const rolls: number[] = [];
+    for (let i = 0; i < rollTotal; i++) {
+      const rnd = percent ? (Math.floor(Math.random() * 9) + 1) * 10 : Math.floor(Math.random() * sides) + 1;
+      rolls.push(rnd);
+    }
+
+    if (count <= 1) {
+      this.result = String(rolls[0]);
+    } else {
+      const total = rolls.reduce((sum, roll) => sum + roll, 0);
+      this.result = rolls.join(' + ') + ' = ' + total + ' total';
+    }
+
+    if (this.resetAfterRoll) {
+      this.rollCount = 0;
+    }
   }
 }

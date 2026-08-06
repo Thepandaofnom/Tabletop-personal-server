@@ -2,10 +2,10 @@ package com.thepandaofnom.tabletop;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +15,9 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true, nullable = false)
+    private String uid;
 
     private String firstName;
     private String lastName;
@@ -33,6 +36,9 @@ public class User {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public String getUid() { return uid; }
+    public void setUid(String uid) { this.uid = uid; }
 
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
