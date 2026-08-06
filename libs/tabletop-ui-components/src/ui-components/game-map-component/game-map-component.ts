@@ -328,6 +328,11 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
         ? this.fullscreenContainer.nativeElement
         : this.stageContainer.nativeElement;
 
+    if (this.isFullscreen) {
+      const { width, height } = container.getBoundingClientRect();
+      return { width, height };
+    }
+
     return {
       width: container.clientWidth,
       height: container.clientHeight,

@@ -51,16 +51,21 @@ describe('GameMapComponent fullscreen control', () => {
     expect(component.isFullscreen).toBeFalse();
   });
 
-  it('sizes the stage from the fullscreen element and restores the stage container size on exit', () => {
+  it('sizes the Konva stage to rendered fullscreen bounds and restores normal sizing', () => {
     const stageContainer = document.createElement('div');
     Object.defineProperties(stageContainer, {
       clientWidth: { configurable: true, value: 800 },
       clientHeight: { configurable: true, value: 600 },
     });
-    Object.defineProperties(fullscreenContainer, {
-      clientWidth: { configurable: true, value: 1920 },
-      clientHeight: { configurable: true, value: 1080 },
-    });
+    let fullscreenWidth = 1920;
+    let fullscreenHeight = 1080;
+    spyOn(fullscreenContainer, 'getBoundingClientRect').and.callFake(
+      () =>
+        ({
+          width: fullscreenWidth,
+          height: fullscreenHeight,
+        }) as DOMRect,
+    );
 
     const stage = {
       width: jasmine.createSpy('width'),
@@ -83,10 +88,8 @@ describe('GameMapComponent fullscreen control', () => {
     expect(stage.width).toHaveBeenCalledWith(1920);
     expect(stage.height).toHaveBeenCalledWith(1080);
 
-    Object.defineProperties(fullscreenContainer, {
-      clientWidth: { configurable: true, value: 1600 },
-      clientHeight: { configurable: true, value: 900 },
-    });
+    fullscreenWidth = 1600;
+    fullscreenHeight = 900;
     window.dispatchEvent(new Event('resize'));
     expect(stage.width).toHaveBeenCalledWith(1600);
     expect(stage.height).toHaveBeenCalledWith(900);
