@@ -123,7 +123,6 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   private selectedTokenIds: Set<string> = new Set();
   private selectionRect?: Konva.Rect;
   private selectionStart?: { x: number; y: number };
-  private groupDragAnchor?: { x: number; y: number; tokenPositions: Map<string, { x: number; y: number }> };
   private ctrlSelectActive = false;
 
   private exportMapSettingsData(): string {
@@ -231,7 +230,6 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     this.selectionRect?.destroy();
     this.selectionRect = undefined;
     this.selectionStart = undefined;
-    this.groupDragAnchor = undefined;
     this.tokenLayer?.draw();
     this.layer?.draw();
   }
@@ -367,7 +365,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     const deltaY = e.evt.clientY - this.dragStartY;
 
     if (this.draggingTokenId) {
-      if (this.selectedTokenIds.size > 1 && this.selectedTokenIds.has(this.draggingTokenId) && this.groupDragAnchor) {
+      if (this.selectedTokenIds.size > 1 && this.selectedTokenIds.has(this.draggingTokenId)) {
         this.moveSelectedTokens(deltaX, deltaY);
       } else {
         // Move the token independently
@@ -414,7 +412,6 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     }
     this.isDragging = false;
     this.draggingTokenId = undefined;
-    this.groupDragAnchor = undefined;
   }
 
   private onDocumentMouseMove = (event: MouseEvent) => {
@@ -700,34 +697,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     tokenGroup.add(circle);
     tokenGroup.add(text);
 
-    // Add hover effects
-    tokenGroup.on('mouseover', () => {
-      circle.fill('#5ba3ff');
-      this.hoveredTokenId = tokenId;
-      document.body.style.cursor = 'grab';
-      this.stage?.draw();
-    });
-
-    tokenGroup.on('mouseout', () => {
-      circle.fill('#4a90e2');
-      this.hoveredTokenId = undefined;
-      document.body.style.cursor = 'default';
-      this.stage?.draw();
-    });
-
-    // Add mousedown handler for token dragging
-    tokenGroup.on('mousedown', (e) => {
-      if (e.evt.ctrlKey) {
-        e.cancelBubble = true;
-        this.startSelection(e.evt);
-        return;
-      }
-      e.cancelBubble = true; // Prevent event from bubbling to stage
-      this.draggingTokenId = tokenId;
-      this.isDragging = true;
-      this.dragStartX = e.evt.clientX;
-      this.dragStartY = e.evt.clientY;
-    });
+    this.attachTokenInteractions(tokenId, tokenGroup, circle);
 
     // Add right-click context menu
     tokenGroup.on('contextmenu', (e) => {
@@ -860,11 +830,12 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
 
   private startSelection(event: MouseEvent): void {
     if (!this.stage || !this.tokenLayer) return;
-    const pos = this.stage.getPointerPosition();
+    const pos = this.getTokenLayerPointerPosition();
     if (!pos) return;
     this.ctrlSelectActive = true;
     this.selectionStart = pos;
     this.selectedTokenIds.clear();
+    this.updateSelectionHighlights();
     this.selectionRect?.destroy();
     this.selectionRect = new Konva.Rect({
       x: pos.x,
@@ -884,7 +855,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
 
   private updateSelection(event: MouseEvent): void {
     if (!this.stage || !this.selectionRect || !this.selectionStart || !this.ctrlSelectActive) return;
-    const pos = this.stage.getPointerPosition();
+    const pos = this.getTokenLayerPointerPosition();
     if (!pos) return;
     const x = Math.min(this.selectionStart.x, pos.x);
     const y = Math.min(this.selectionStart.y, pos.y);
@@ -911,6 +882,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     this.selectionRect = undefined;
     this.selectionStart = undefined;
     this.ctrlSelectActive = false;
+    this.updateSelectionHighlights();
     this.tokenLayer?.draw();
   }
 
@@ -928,6 +900,65 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     this.tokenLayer?.draw();
     this.dragStartX += deltaX;
     this.dragStartY += deltaY;
+  }
+
+  private getTokenLayerPointerPosition(): { x: number; y: number } | undefined {
+    const pointerPosition = this.stage?.getPointerPosition();
+    if (!pointerPosition || !this.tokenLayer) return undefined;
+
+    return this.tokenLayer.getAbsoluteTransform().copy().invert().point(pointerPosition);
+  }
+
+  private attachTokenInteractions(
+    tokenId: string,
+    tokenGroup: Konva.Group,
+    circle: Konva.Circle
+  ): void {
+    tokenGroup.on('mouseover', () => {
+      circle.fill('#5ba3ff');
+      this.hoveredTokenId = tokenId;
+      document.body.style.cursor = 'grab';
+      this.stage?.draw();
+    });
+
+    tokenGroup.on('mouseout', () => {
+      circle.fill(this.tokenColors.get(tokenId) || '#4a90e2');
+      this.hoveredTokenId = undefined;
+      document.body.style.cursor = 'default';
+      this.stage?.draw();
+    });
+
+    tokenGroup.on('mousedown', (e) => {
+      e.cancelBubble = true;
+      if (e.evt.button !== 0) return;
+
+      if (e.evt.ctrlKey) {
+        this.startSelection(e.evt);
+        return;
+      }
+
+      if (!this.selectedTokenIds.has(tokenId)) {
+        this.selectedTokenIds.clear();
+        this.selectedTokenIds.add(tokenId);
+        this.updateSelectionHighlights();
+      }
+
+      this.draggingTokenId = tokenId;
+      this.isDragging = true;
+      this.dragStartX = e.evt.clientX;
+      this.dragStartY = e.evt.clientY;
+    });
+  }
+
+  private updateSelectionHighlights(): void {
+    this.tokens.forEach((tokenGroup, tokenId) => {
+      const circle = tokenGroup.findOne('Circle') as Konva.Circle | null;
+      if (!circle) return;
+
+      const isSelected = this.selectedTokenIds.has(tokenId);
+      circle.stroke(isSelected ? '#f8e7ba' : '#2c5aa0');
+      circle.strokeWidth(isSelected ? 4 : 2);
+    });
   }
 
   private restoreSavedToken(saved: SavedMapTokenState): void {
@@ -961,21 +992,10 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     if (saved.rotation) {
       tokenGroup.rotation(saved.rotation);
     }
+    this.attachTokenInteractions(saved.id, tokenGroup, circle);
     tokenGroup.on('contextmenu', (e) => {
       e.evt.preventDefault();
       this.showTokenContextMenu(saved.id, e.evt);
-    });
-    tokenGroup.on('mousedown', (e) => {
-      if (e.evt.ctrlKey) {
-        e.cancelBubble = true;
-        this.startSelection(e.evt);
-        return;
-      }
-      e.cancelBubble = true;
-      this.draggingTokenId = saved.id;
-      this.isDragging = true;
-      this.dragStartX = e.evt.clientX;
-      this.dragStartY = e.evt.clientY;
     });
     if (saved.image) {
       const img = new Image();
@@ -1408,6 +1428,10 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     this.tokenBaseSizes.clear();
     this.tokenUserScales.clear();
     this.tokenRotations.clear();
+    this.selectedTokenIds.clear();
+    this.selectionRect?.destroy();
+    this.selectionRect = undefined;
+    this.selectionStart = undefined;
 
     // Restore map image if present (async)
     if (mapData.mapImage) {
@@ -1507,27 +1531,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     tokenGroup.add(circle);
     tokenGroup.add(text);
 
-    // Add hover effects
-    tokenGroup.on('mouseover', () => {
-      circle.fill('#5ba3ff');
-      document.body.style.cursor = 'grab';
-      this.stage?.draw();
-    });
-
-    tokenGroup.on('mouseout', () => {
-      circle.fill(circleColor);
-      document.body.style.cursor = 'default';
-      this.stage?.draw();
-    });
-
-    // Add mousedown handler for token dragging
-    tokenGroup.on('mousedown', (e) => {
-      e.cancelBubble = true;
-      this.draggingTokenId = tokenId;
-      this.isDragging = true;
-      this.dragStartX = e.evt.clientX;
-      this.dragStartY = e.evt.clientY;
-    });
+    this.attachTokenInteractions(tokenId, tokenGroup, circle);
 
     // Add right-click context menu
     tokenGroup.on('contextmenu', (e) => {
