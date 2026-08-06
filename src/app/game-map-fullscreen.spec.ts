@@ -52,19 +52,27 @@ describe('GameMapComponent fullscreen control', () => {
     expect(component.isFullscreen).toBeFalse();
   });
 
-  it('sizes the Konva stage to rendered fullscreen bounds and restores normal sizing', () => {
+  it('sizes the Konva stage to the rendered stage host and restores normal sizing', () => {
     const stageContainer = document.createElement('div');
-    Object.defineProperties(stageContainer, {
-      clientWidth: { configurable: true, value: 800 },
-      clientHeight: { configurable: true, value: 600 },
-    });
+    const normalWidth = 800;
+    const normalHeight = 600;
     let fullscreenWidth = 1920;
     let fullscreenHeight = 1080;
+    Object.defineProperties(stageContainer, {
+      clientWidth: {
+        configurable: true,
+        get: () => (component.isFullscreen ? fullscreenWidth : normalWidth),
+      },
+      clientHeight: {
+        configurable: true,
+        get: () => (component.isFullscreen ? fullscreenHeight : normalHeight),
+      },
+    });
     spyOn(fullscreenContainer, 'getBoundingClientRect').and.callFake(
       () =>
         ({
-          width: fullscreenWidth,
-          height: fullscreenHeight,
+          width: fullscreenWidth - 16,
+          height: fullscreenHeight - 16,
         }) as DOMRect,
     );
 
@@ -100,8 +108,8 @@ describe('GameMapComponent fullscreen control', () => {
       value: null,
     });
     document.dispatchEvent(new Event('fullscreenchange'));
-    expect(stage.width).toHaveBeenCalledWith(800);
-    expect(stage.height).toHaveBeenCalledWith(600);
+    expect(stage.width).toHaveBeenCalledWith(normalWidth);
+    expect(stage.height).toHaveBeenCalledWith(normalHeight);
   });
 
   it('redraws the grid across resized viewport bounds after panning and zooming', () => {
