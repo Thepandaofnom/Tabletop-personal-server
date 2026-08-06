@@ -135,7 +135,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   ];
 
   @Input() apiBaseUrl = 'https://tabletop-personal-server-production.up.railway.app/api';
-  private currentUserId: number | null = null;
+  @Input() currentUserId: number | null = null;
   private stage?: Konva.Stage;
   private layer?: Konva.Layer;
   private gridLayer?: Konva.Layer;
@@ -163,31 +163,11 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
 
   constructor(private http: HttpClient) {}
 
-  private refreshCurrentUserIdFromToken(): void {
-    try {
-      const token = localStorage.getItem('jwt');
-      if (!token) {
-        this.currentUserId = null;
-        return;
-      }
-      const parts = token.split('.');
-      if (parts.length < 2 || !parts[1]) {
-        this.currentUserId = null;
-        return;
-      }
-      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-      this.currentUserId = typeof payload.id === 'number' ? payload.id : null;
-    } catch {
-      this.currentUserId = null;
-    }
-  }
-
-  openSaveDialog(): void { this.refreshCurrentUserIdFromToken(); this.mapSaveDialogVisible = true; }
-  openLoadDialog(): void { this.refreshCurrentUserIdFromToken(); this.mapLoadDialogVisible = true; this.refreshSavedMapSettings(); }
-  openDeleteDialog(): void { this.refreshCurrentUserIdFromToken(); this.mapDeleteDialogVisible = true; this.refreshSavedMapSettings(); }
+  openSaveDialog(): void { this.mapSaveDialogVisible = true; }
+  openLoadDialog(): void { this.mapLoadDialogVisible = true; this.refreshSavedMapSettings(); }
+  openDeleteDialog(): void { this.mapDeleteDialogVisible = true; this.refreshSavedMapSettings(); }
 
   confirmSaveMapSettings(): void {
-    this.refreshCurrentUserIdFromToken();
     if (this.currentUserId === null) {
       alert('Please log in again before saving map settings.');
       return;
@@ -211,7 +191,6 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   }
 
   confirmLoadMapSettings(): void {
-    this.refreshCurrentUserIdFromToken();
     if (this.currentUserId === null) {
       alert('Please log in again before loading map settings.');
       return;
@@ -224,7 +203,6 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   }
 
   confirmDeleteMapSettings(): void {
-    this.refreshCurrentUserIdFromToken();
     if (this.currentUserId === null) {
       alert('Please log in again before deleting map settings.');
       return;

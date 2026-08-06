@@ -4,14 +4,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
-<<<<<<< HEAD
-import { apiBaseUrl, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData } from '@tabletop/ui-components';
-=======
-import { DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData, CharacterSheetType, GlobalSettingsComponent, NPCMakerComponent } from '@tabletop/ui-components';
+import { apiBaseUrl, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData, CharacterSheetType, GlobalSettingsComponent, NPCMakerComponent } from '@tabletop/ui-components';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
->>>>>>> origin/main
 
 interface LoginResponse {
   username: string;
@@ -90,10 +86,6 @@ export class App {
     this.currentLastName = event.lastName || '';
     this.currentEmail = event.email || '';
     this.currentUserId = event.id ?? null;
-    if (event.token) {
-      try { localStorage.setItem('jwt', event.token); } catch {}
-      this.currentUserId = this.decodeUserId(event.token) ?? this.currentUserId;
-    }
   }
 
   onOpenCharacterSheetSaveDialog() {
@@ -228,27 +220,10 @@ export class App {
   }
 
   doLogout() {
-<<<<<<< HEAD
     this.http.post(`${apiBaseUrl}/api/auth/logout`, {}).subscribe({
-      next: () => this.clearUserSession(),
-      error: () => this.clearUserSession()
+      next: () => this.clearLoginState(),
+      error: () => this.clearLoginState()
     });
-  }
-
-  private clearUserSession() {
-    this.loggedIn = false;
-    this.currentUsername = '';
-    this.currentFirstName = '';
-    this.currentLastName = '';
-    this.currentEmail = '';
-=======
-    const token = (() => { try { return localStorage.getItem('jwt'); } catch { return null; } })();
-    if (token) {
-      this.http.post<any>('https://tabletop-personal-server-production.up.railway.app/api/auth/logout', {}).subscribe({ next: () => this.clearLoginState(), error: () => this.clearLoginState() });
-    } else {
-      this.clearLoginState();
-    }
->>>>>>> origin/main
   }
 
   onMenuLogin() { this.loginVisible = true; }
@@ -257,33 +232,13 @@ export class App {
   onMenuGameMapClick() { this.currentView = 'game-map'; }
   onMenuDiceBagClick() { this.diceBagVisible = true; }
   onMenuAccountClick() { this.accountViewVisible = true; }
-<<<<<<< HEAD
-=======
   onMenuNPCMakerClick() { this.currentView = 'npc-maker'; }
   onMenuOptionsClick() { this.currentView = 'global-settings'; }
   onAppThemeChange(darkMode: boolean) { this.darkMode = darkMode; this.applyBodyTheme(this.darkMode); }
 
-  private clearLoginState() { try { localStorage.removeItem('jwt'); } catch {} this.loggedIn = false; this.currentUsername = ''; this.currentFirstName = ''; this.currentLastName = ''; this.currentEmail = ''; this.currentUserId = null; }
+  private clearLoginState() { this.loggedIn = false; this.currentUsername = ''; this.currentFirstName = ''; this.currentLastName = ''; this.currentEmail = ''; this.currentUserId = null; }
   private applyBodyTheme(darkMode: boolean) { if (typeof document === 'undefined' || !document.body) return; document.body.classList.toggle('dark-mode', darkMode); }
-  private decodeUserId(token: string): number | null { try { const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); return typeof payload.id === 'number' ? payload.id : null; } catch { return null; } }
-  private decodeTokenUsername(token: string): string {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-      return typeof payload.username === 'string' ? payload.username : '';
-    } catch {
-      return '';
-    }
-  }
-  private restoreLoginState() {
-    let token: string | null = null;
-    try { token = localStorage.getItem('jwt'); } catch { token = null; }
-    if (!token) {
-      return;
-    }
-    this.loggedIn = true;
-    this.currentUserId = this.decodeUserId(token);
-    this.currentUsername = this.decodeTokenUsername(token);
-  }
+  private restoreLoginState() {}
   private persistLocalCharacterSheetSave(sheetType: CharacterSheetType, value: CharacterSheetData, saveName: string) {
     try {
       const existing = this.getLocalCharacterSheetSaves();
@@ -312,5 +267,4 @@ export class App {
   private getLocalCharacterSheetSave(saveName: string): LocalCharacterSheetSave | undefined {
     return this.getLocalCharacterSheetSaves().find(save => save.saveName === saveName);
   }
->>>>>>> origin/main
 }
