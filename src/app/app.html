@@ -1,16 +1,18 @@
-<header class="site-header">
-  <div class="container">
-    <h1>{{ title() }}</h1>
-  </div>
-</header>
+<div class="app-navigation">
+  <header class="site-header">
+    <div class="container">
+      <h1>{{ title() }}</h1>
+    </div>
+  </header>
 
-<main-menu-button-bar 
-  (openGameMap)="onMenuGameMapClick()"
-  (openDiceBag)="onMenuDiceBagClick()"
-  (openCharacterSheets)="onMenuCharacterSheetsClick()"
-  (openNPCMaker)="onMenuNPCMakerClick()"
-  (openOptions)="onMenuOptionsClick()">
-</main-menu-button-bar>
+  <main-menu-button-bar
+    (openGameMap)="onMenuGameMapClick()"
+    (openDiceBag)="onMenuDiceBagClick()"
+    (openCharacterSheets)="onMenuCharacterSheetsClick()"
+    (openNPCMaker)="onMenuNPCMakerClick()"
+    (openOptions)="onMenuOptionsClick()">
+  </main-menu-button-bar>
+</div>
 
 <dice-bag-modal [visible]="diceBagVisible" (visibleChange)="diceBagVisible = $event"></dice-bag-modal>
 
