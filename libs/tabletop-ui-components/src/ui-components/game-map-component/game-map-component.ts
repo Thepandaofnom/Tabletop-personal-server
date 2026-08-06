@@ -349,6 +349,9 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
 
     this.stage.width(dimensions.width);
     this.stage.height(dimensions.height);
+    if (this.showGrid) {
+      this.drawGrid();
+    }
     this.stage.draw();
   }
 
@@ -481,6 +484,10 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
       if (this.tokenLayer) {
         this.tokenLayer.x(this.tokenLayer.x() + deltaX);
         this.tokenLayer.y(this.tokenLayer.y() + deltaY);
+      }
+
+      if (this.showGrid) {
+        this.drawGrid();
       }
     }
 
@@ -671,7 +678,11 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
         // Update token image to match the new size
         this.updateTokenImageSize(tokenId);
       });
-      
+
+      if (this.showGrid) {
+        this.drawGrid();
+      }
+
       this.stage.draw();
     }
   }
@@ -680,6 +691,9 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     this.gridZoom = newGridZoom / 100; // Convert percentage to decimal
     if (this.gridLayer && this.stage) {
       this.gridLayer.scale({ x: this.gridZoom, y: this.gridZoom });
+      if (this.showGrid) {
+        this.drawGrid();
+      }
       this.stage.draw();
     }
   }
@@ -693,11 +707,30 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     const cellHeight = this.gridCellHeight;
     const stageW = this.stage.width();
     const stageH = this.stage.height();
-    
+    const scaleX = this.gridLayer.scaleX();
+    const scaleY = this.gridLayer.scaleY();
+
+    if (scaleX === 0 || scaleY === 0) {
+      return;
+    }
+
+    // Convert the stage viewport into grid-layer coordinates so the grid remains
+    // continuous when its layer is panned or zoomed.
+    const gridX = this.gridLayer.x();
+    const gridY = this.gridLayer.y();
+    const visibleLeft = -gridX / scaleX;
+    const visibleRight = (stageW - gridX) / scaleX;
+    const visibleTop = -gridY / scaleY;
+    const visibleBottom = (stageH - gridY) / scaleY;
+    const minX = Math.floor(Math.min(visibleLeft, visibleRight) / cellWidth) * cellWidth;
+    const maxX = Math.ceil(Math.max(visibleLeft, visibleRight) / cellWidth) * cellWidth;
+    const minY = Math.floor(Math.min(visibleTop, visibleBottom) / cellHeight) * cellHeight;
+    const maxY = Math.ceil(Math.max(visibleTop, visibleBottom) / cellHeight) * cellHeight;
+
     // Draw vertical lines
-    for (let x = 0; x < stageW; x += cellWidth) {
+    for (let x = minX; x <= maxX; x += cellWidth) {
       const line = new Konva.Line({
-        points: [x, 0, x, stageH],
+        points: [x, minY, x, maxY],
         stroke: this.gridColor,
         strokeWidth: 1,
         opacity: 0.3,
@@ -706,9 +739,9 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     }
     
     // Draw horizontal lines
-    for (let y = 0; y < stageH; y += cellHeight) {
+    for (let y = minY; y <= maxY; y += cellHeight) {
       const line = new Konva.Line({
-        points: [0, y, stageW, y],
+        points: [minX, y, maxX, y],
         stroke: this.gridColor,
         strokeWidth: 1,
         opacity: 0.3,
