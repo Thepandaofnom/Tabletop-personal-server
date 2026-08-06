@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { MenuModule } from 'primeng/menu';
 import { Menu } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
@@ -59,7 +59,7 @@ export type CharacterSheetType = 'D&D-5.0' | 'D&D-3.5' | 'GURPS' | 'pathfinder 1
 @Component({
   selector: 'character-sheet-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, MenuModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, MenuModule],
   templateUrl: './character-sheet-editor.html',
   styleUrls: ['./character-sheet-editor.css']
 })

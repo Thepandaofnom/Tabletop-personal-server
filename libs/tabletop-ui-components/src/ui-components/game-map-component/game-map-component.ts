@@ -11,6 +11,7 @@ import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { InputTextModule } from 'primeng/inputtext';
 import { HttpClient } from '@angular/common/http';
+import { apiBaseUrl } from '../../api';
 
 interface MapSettingsSaveSummary {
   id: number;
@@ -134,7 +135,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     }
   ];
 
-  @Input() apiBaseUrl = 'https://tabletop-personal-server-production.up.railway.app/api';
+  @Input() apiBaseUrl = `${apiBaseUrl}/api`;
   @Input() currentUserId: number | null = null;
   private stage?: Konva.Stage;
   private layer?: Konva.Layer;

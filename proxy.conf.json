@@ -1,0 +1,7 @@
+{
+  "/api": {
+    "target": "https://tabletop-personal-server-production.up.railway.app",
+    "secure": true,
+    "changeOrigin": true
+  }
+}

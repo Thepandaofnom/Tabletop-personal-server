@@ -2,8 +2,7 @@ import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
-import { AuthInterceptor } from './auth.interceptor';
+import { HttpClient } from '@angular/common/http';
 import { apiBaseUrl, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData, CharacterSheetType, GlobalSettingsComponent, NPCMakerComponent } from '@tabletop/ui-components';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -41,13 +40,12 @@ interface LocalCharacterSheetSave {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, FormsModule, HttpClientModule, DialogModule, ButtonModule, InputTextModule, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, GlobalSettingsComponent, NPCMakerComponent],
-  providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
+  imports: [RouterOutlet, CommonModule, FormsModule, DialogModule, ButtonModule, InputTextModule, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, GlobalSettingsComponent, NPCMakerComponent],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
 export class App {
-  protected readonly apiBaseUrl = 'https://tabletop-personal-server-production.up.railway.app/api';
+  protected readonly apiBaseUrl = `${apiBaseUrl}/api`;
   protected readonly title = signal('Tabletop Personal Server');
   protected diceBagVisible = false;
   protected loginVisible = false;
