@@ -1,6 +1,6 @@
-# TabletopPersonalServer
+# Tabletop
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.0.
+Tabletop is a client-only Angular application for dice rolling, character sheets, maps, and NPC creation. It does not require a backend server.
 
 ## Development server
 

@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, OnDestroy, AfterViewInit, Input } from '@angular/core';
+import { Component, ElementRef, ViewChild, OnDestroy, AfterViewInit } from '@angular/core';
 import Konva from 'konva';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -10,18 +10,6 @@ import { FormsModule } from '@angular/forms';
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { InputTextModule } from 'primeng/inputtext';
-import { HttpClient } from '@angular/common/http';
-import { apiBaseUrl } from '../../api';
-
-interface MapSettingsSaveSummary {
-  id: number;
-  saveName: string;
-}
-
-interface MapSettingsRecord {
-  saveName: string;
-  settingsJson: string;
-}
 
 interface SavedMapTokenState {
   id: string;
@@ -90,13 +78,6 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   tokenResizeOldValue = 1;
   tokenRotateValue = 0;
   tokenRotateOldValue = 0;
-  mapSaveDialogVisible = false;
-  mapLoadDialogVisible = false;
-  mapDeleteDialogVisible = false;
-  mapSaveName = '';
-  selectedMapSaveName = '';
-  savedMapSettings: MapSettingsSaveSummary[] = [];
-
   menuItems: MenuItem[] = [
     {
       label: 'Show Grid',
@@ -118,25 +99,8 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
       icon: 'pi pi-upload',
       command: () => this.importMapSettings(),
     },
-    {
-      label: 'Save Map Settings',
-      icon: 'pi pi-save',
-      command: () => this.openSaveDialog(),
-    },
-    {
-      label: 'Load Map Settings',
-      icon: 'pi pi-folder-open',
-      command: () => this.openLoadDialog(),
-    },
-    {
-      label: 'Delete Map Settings',
-      icon: 'pi pi-trash',
-      command: () => this.openDeleteDialog(),
-    }
   ];
 
-  @Input() apiBaseUrl = `${apiBaseUrl}/api`;
-  @Input() currentUserId: number | null = null;
   private stage?: Konva.Stage;
   private layer?: Konva.Layer;
   private gridLayer?: Konva.Layer;
@@ -161,70 +125,6 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   private selectionStart?: { x: number; y: number };
   private groupDragAnchor?: { x: number; y: number; tokenPositions: Map<string, { x: number; y: number }> };
   private ctrlSelectActive = false;
-
-  constructor(private http: HttpClient) {}
-
-  openSaveDialog(): void { this.mapSaveDialogVisible = true; }
-  openLoadDialog(): void { this.mapLoadDialogVisible = true; this.refreshSavedMapSettings(); }
-  openDeleteDialog(): void { this.mapDeleteDialogVisible = true; this.refreshSavedMapSettings(); }
-
-  confirmSaveMapSettings(): void {
-    if (this.currentUserId === null) {
-      alert('Please log in again before saving map settings.');
-      return;
-    }
-    if (!this.mapSaveName.trim()) return;
-    const payload = this.serializeMapSettings();
-    this.http.post(`${this.apiBaseUrl}/map-settings/user/${this.currentUserId}`, {
-      saveName: this.mapSaveName.trim(),
-      settingsJson: payload
-    }).subscribe({
-      next: () => {
-        this.mapSaveDialogVisible = false;
-        this.mapSaveName = '';
-        this.refreshSavedMapSettings();
-      },
-      error: () => {
-        this.mapSaveDialogVisible = false;
-        this.mapSaveName = '';
-      }
-    });
-  }
-
-  confirmLoadMapSettings(): void {
-    if (this.currentUserId === null) {
-      alert('Please log in again before loading map settings.');
-      return;
-    }
-    if (!this.selectedMapSaveName) return;
-    this.http.get<MapSettingsRecord>(`${this.apiBaseUrl}/map-settings/user/${this.currentUserId}/${encodeURIComponent(this.selectedMapSaveName)}`).subscribe({
-      next: record => { this.applyMapSettings(record.settingsJson); this.mapLoadDialogVisible = false; },
-      error: () => { this.mapLoadDialogVisible = false; }
-    });
-  }
-
-  confirmDeleteMapSettings(): void {
-    if (this.currentUserId === null) {
-      alert('Please log in again before deleting map settings.');
-      return;
-    }
-    if (!this.selectedMapSaveName) return;
-    this.http.delete(`${this.apiBaseUrl}/map-settings/user/${this.currentUserId}/${encodeURIComponent(this.selectedMapSaveName)}`).subscribe({
-      next: () => { this.mapDeleteDialogVisible = false; this.selectedMapSaveName = ''; this.refreshSavedMapSettings(); },
-      error: () => { this.mapDeleteDialogVisible = false; this.selectedMapSaveName = ''; }
-    });
-  }
-
-  private refreshSavedMapSettings(): void {
-    this.http.get<MapSettingsSaveSummary[]>(`${this.apiBaseUrl}/map-settings/user/${this.currentUserId}`).subscribe({
-      next: saves => this.savedMapSettings = saves || [],
-      error: () => this.savedMapSettings = []
-    });
-  }
-
-  private serializeMapSettings(): string {
-    return JSON.stringify(this.buildSavedMapScene());
-  }
 
   private exportMapSettingsData(): string {
     return JSON.stringify(this.buildSavedMapScene(), null, 2);
@@ -310,41 +210,6 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
       this.clearGrid();
     }
     this.stage?.draw();
-  }
-
-  private getLocalMapSettingsList(): MapSettingsSaveSummary[] {
-    try {
-      const raw = localStorage.getItem('local-map-settings');
-      return raw ? JSON.parse(raw) as MapSettingsSaveSummary[] : [];
-    } catch {
-      return [];
-    }
-  }
-
-  private getLocalMapSettings(saveName: string): MapSettingsRecord | null {
-    try {
-      const raw = localStorage.getItem(`local-map-settings:${saveName}`);
-      return raw ? JSON.parse(raw) as MapSettingsRecord : null;
-    } catch {
-      return null;
-    }
-  }
-
-  private saveLocalMapSettings(saveName: string, settingsJson: string): void {
-    try {
-      localStorage.setItem(`local-map-settings:${saveName}`, JSON.stringify({ saveName, settingsJson }));
-      const list = this.getLocalMapSettingsList().filter(item => item.saveName !== saveName);
-      list.unshift({ id: Date.now(), saveName });
-      localStorage.setItem('local-map-settings', JSON.stringify(list));
-    } catch {}
-  }
-
-  private deleteLocalMapSettings(saveName: string): void {
-    try {
-      localStorage.removeItem(`local-map-settings:${saveName}`);
-      const list = this.getLocalMapSettingsList().filter(item => item.saveName !== saveName);
-      localStorage.setItem('local-map-settings', JSON.stringify(list));
-    } catch {}
   }
 
   private resetSceneLayers(): void {
