@@ -51,6 +51,7 @@ interface SavedMapScene {
 })
 export class GameMapComponent implements OnDestroy, AfterViewInit {
   @ViewChild('stageContainer', { static: false }) stageContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('fullscreenContainer', { static: false }) fullscreenContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('menu') menu!: Menu;
 
   showGrid = false;
@@ -60,6 +61,8 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   zoom = 1;
   scaleGrid = false;
   gridZoom = 1;
+  showFullscreenControl = false;
+  isFullscreen = false;
 
   // Token dialog state
   showTokenDialog = false;
@@ -107,6 +110,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   private tokenLayer?: Konva.Layer;
   private mapImage?: Konva.Image;
   private resizeObserver?: ResizeObserver;
+  private fullscreenControlTimeout?: ReturnType<typeof setTimeout>;
   private isDragging = false;
   private dragStartX = 0;
   private dragStartY = 0;
@@ -329,7 +333,56 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     }
     document.addEventListener('mousemove', this.onDocumentMouseMove);
     document.addEventListener('mouseup', this.onDocumentMouseUp);
+    document.addEventListener('fullscreenchange', this.onFullscreenChange);
   }
+
+  onMapPointerMove(): void {
+    this.showFullscreenControl = true;
+    this.scheduleFullscreenControlHide();
+  }
+
+  onMapPointerLeave(): void {
+    this.clearFullscreenControlHideTimeout();
+    this.showFullscreenControl = false;
+  }
+
+  toggleFullscreen(event: MouseEvent): void {
+    event.stopPropagation();
+
+    if (!this.fullscreenContainer) {
+      return;
+    }
+
+    if (document.fullscreenElement === this.fullscreenContainer.nativeElement) {
+      void document.exitFullscreen().catch((error: unknown) => {
+        console.error('Failed to exit fullscreen map view', error);
+      });
+      return;
+    }
+
+    void this.fullscreenContainer.nativeElement.requestFullscreen().catch((error: unknown) => {
+      console.error('Failed to enter fullscreen map view', error);
+    });
+  }
+
+  private scheduleFullscreenControlHide(): void {
+    this.clearFullscreenControlHideTimeout();
+    this.fullscreenControlTimeout = setTimeout(() => {
+      this.showFullscreenControl = false;
+    }, 3000);
+  }
+
+  private clearFullscreenControlHideTimeout(): void {
+    if (this.fullscreenControlTimeout !== undefined) {
+      clearTimeout(this.fullscreenControlTimeout);
+      this.fullscreenControlTimeout = undefined;
+    }
+  }
+
+  private onFullscreenChange = (): void => {
+    this.isFullscreen = document.fullscreenElement === this.fullscreenContainer?.nativeElement;
+    requestAnimationFrame(() => this.onContainerResize());
+  };
 
   private onStageMouseDown(e: Konva.KonvaEventObject<MouseEvent>) {
     if (e.evt.ctrlKey && e.evt.button === 0) {
@@ -1622,6 +1675,10 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
+    this.clearFullscreenControlHideTimeout();
+    document.removeEventListener('fullscreenchange', this.onFullscreenChange);
+    document.removeEventListener('mousemove', this.onDocumentMouseMove);
+    document.removeEventListener('mouseup', this.onDocumentMouseUp);
     this.destroyStage();
   }
 }
