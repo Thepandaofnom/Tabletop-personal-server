@@ -23,12 +23,13 @@
 }
 
 .left-buttons {
-  position: relative;
   display: flex;
+  flex: 1 1 auto;
   gap: 0.5rem;
   flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
+  min-width: 0;
 }
 
 .left-buttons button {
@@ -65,11 +66,11 @@
 }
 
 .hamburger-wrapper {
-  position: absolute;
-  right: 0;
+  position: relative;
   display: flex;
   align-items: center;
-  padding-right: 0.5rem;
+  justify-content: flex-end;
+  padding-right: 0;
   flex-shrink: 0;
 }
 
@@ -172,9 +173,7 @@
   }
 
   .hamburger-wrapper {
-    position: static;
     align-self: flex-start;
-    padding-right: 0;
   }
 }
 

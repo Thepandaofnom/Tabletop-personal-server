@@ -1,73 +1,74 @@
-<div class="app-navigation">
-  <header class="site-header">
-    <div class="container">
-      <h1>{{ title() }}</h1>
-    </div>
-  </header>
+<div class="app-shell">
+  <div class="app-navigation">
+    <header class="site-header">
+      <div class="container">
+        <h1>{{ title() }}</h1>
+      </div>
+    </header>
 
-  <main-menu-button-bar
-    (openGameMap)="onMenuGameMapClick()"
-    (openDiceBag)="onMenuDiceBagClick()"
-    (openCharacterSheets)="onMenuCharacterSheetsClick()"
-    (openNPCMaker)="onMenuNPCMakerClick()"
-    (openOptions)="onMenuOptionsClick()">
-  </main-menu-button-bar>
+    <main-menu-button-bar
+      (openGameMap)="onMenuGameMapClick()"
+      (openDiceBag)="onMenuDiceBagClick()"
+      (openCharacterSheets)="onMenuCharacterSheetsClick()"
+      (openNPCMaker)="onMenuNPCMakerClick()"
+      (openOptions)="onMenuOptionsClick()">
+    </main-menu-button-bar>
+  </div>
+
+  <main class="main-content" [class.app-dark-theme]="darkMode">
+    <div [style.display]="currentView === 'game-map' ? 'block' : 'none'" class="game-map-view">
+      <game-map-component></game-map-component>
+    </div>
+
+    <div *ngIf="currentView === 'global-settings'">
+      <global-settings-component [(darkMode)]="darkMode" (darkModeChange)="onAppThemeChange($event)"></global-settings-component>
+    </div>
+
+    <div *ngIf="currentView === 'npc-maker'">
+      <npc-maker-component></npc-maker-component>
+    </div>
+
+    <div *ngIf="currentView === 'character-sheet'" class="character-sheet-tabs">
+      <div class="character-sheet-tab-bar">
+        <button
+          *ngFor="let tab of characterSheetTabs"
+          type="button"
+          class="character-sheet-tab"
+          [class.active]="tab.id === activeCharacterSheetTabId"
+          (click)="onCharacterSheetTabClick(tab.id)"
+          (dblclick)="startEditingTab(tab.id)">
+          <input
+            *ngIf="editingTabId === tab.id"
+            #tabLabelInput
+            [value]="tab.label"
+            (blur)="finishEditingTab(tab.id, tabLabelInput.value)"
+            (keydown.escape)="editingTabId = undefined"
+            autofocus />
+          <span *ngIf="editingTabId !== tab.id">{{ tab.label }}</span>
+          <span class="character-sheet-tab-close" (click)="$event.stopPropagation(); removeCharacterSheetTab(tab.id)" aria-label="Delete tab">×</span>
+        </button>
+        <button type="button" class="character-sheet-tab add-tab" (click)="addCharacterSheetTab()">+</button>
+      </div>
+
+      <div class="character-sheet-tab-panels">
+        <div *ngFor="let tab of characterSheetTabs; trackBy: trackByTabId" [style.display]="tab.id === activeCharacterSheetTabId ? 'block' : 'none'">
+          <character-sheet-editor
+            [value]="tab.value"
+            [sheetType]="tab.sheetType"
+            (sheetTypeChange)="onCharacterSheetTypeChange(tab.id, $event)"
+            (valueChange)="onCharacterSheetChange(tab.id, $event)"
+            (saveSheet)="onCharacterSheetSave(tab.id, $event)">
+          </character-sheet-editor>
+        </div>
+      </div>
+    </div>
+
+    <section class="landing" *ngIf="currentView === 'landing'">
+      <h2>Welcome</h2>
+      <p class="lead">This is the Digital Tabletop.</p>
+    </section>
+  </main>
 </div>
 
 <dice-bag-modal [visible]="diceBagVisible" (visibleChange)="diceBagVisible = $event"></dice-bag-modal>
-
-<main class="main-content" [class.app-dark-theme]="darkMode">
-  <div [style.display]="currentView === 'game-map' ? 'block' : 'none'" style="width: 100%; height: 100%;">
-    <game-map-component></game-map-component>
-  </div>
-
-  <div *ngIf="currentView === 'global-settings'">
-    <global-settings-component [(darkMode)]="darkMode" (darkModeChange)="onAppThemeChange($event)"></global-settings-component>
-  </div>
-
-  <div *ngIf="currentView === 'npc-maker'">
-    <npc-maker-component></npc-maker-component>
-  </div>
-
-  <div *ngIf="currentView === 'character-sheet'" class="character-sheet-tabs">
-    <div class="character-sheet-tab-bar">
-      <button
-        *ngFor="let tab of characterSheetTabs"
-        type="button"
-        class="character-sheet-tab"
-        [class.active]="tab.id === activeCharacterSheetTabId"
-        (click)="onCharacterSheetTabClick(tab.id)"
-        (dblclick)="startEditingTab(tab.id)">
-        <input
-          *ngIf="editingTabId === tab.id"
-          #tabLabelInput
-          [value]="tab.label"
-          (blur)="finishEditingTab(tab.id, tabLabelInput.value)"
-          (keydown.escape)="editingTabId = undefined"
-          autofocus />
-        <span *ngIf="editingTabId !== tab.id">{{ tab.label }}</span>
-        <span class="character-sheet-tab-close" (click)="$event.stopPropagation(); removeCharacterSheetTab(tab.id)" aria-label="Delete tab">×</span>
-      </button>
-      <button type="button" class="character-sheet-tab add-tab" (click)="addCharacterSheetTab()">+</button>
-    </div>
-
-    <div class="character-sheet-tab-panels">
-      <div *ngFor="let tab of characterSheetTabs; trackBy: trackByTabId" [style.display]="tab.id === activeCharacterSheetTabId ? 'block' : 'none'">
-        <character-sheet-editor
-          [value]="tab.value"
-          [sheetType]="tab.sheetType"
-          (sheetTypeChange)="onCharacterSheetTypeChange(tab.id, $event)"
-          (valueChange)="onCharacterSheetChange(tab.id, $event)"
-          (saveSheet)="onCharacterSheetSave(tab.id, $event)">
-        </character-sheet-editor>
-      </div>
-    </div>
-  </div>
-
-  <section class="landing" *ngIf="currentView === 'landing'">
-    <h2>Welcome</h2>
-    <p class="lead">This is the Digital Tabletop.</p>
-  </section>
-</main>
-
 <router-outlet />
