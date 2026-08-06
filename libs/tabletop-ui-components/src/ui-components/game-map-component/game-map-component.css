@@ -60,19 +60,18 @@
   overflow: hidden;
 }
 
-.game-map-stage-wrapper:fullscreen {
-  position: fixed;
-  inset: 0;
-  min-height: 0;
-  background: var(--panel-bg);
-  overflow: hidden;
+.game-map-konva-container {
+  width: 100%;
+  height: 100%;
 }
 
-.game-map-stage-wrapper:fullscreen .game-map-stage {
-  position: absolute;
+.game-map-stage:fullscreen {
+  position: fixed;
   inset: 0;
-  width: auto;
-  height: auto;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
   border: 0;
   border-radius: 0;
 }
