@@ -1,4 +1,4 @@
-﻿export { LoginModal } from './ui-components/login-modal';
+export { LoginModal } from './ui-components/login-modal';
 export type { LoginResponse } from './ui-components/login-modal/login-modal';
 export { DiceBagModal } from './ui-components/dice-bag-modal';
 export { GameMapComponent } from './ui-components/game-map-component';
@@ -6,7 +6,12 @@ export { NewUserSignUp } from './ui-components/new-user-sign-up';
 export { MainMenuButtonBar } from './ui-components/main-menu-button-bar';
 export { AccountViewPanel } from './ui-components/account-view-panel';
 export { CharacterSheetEditor } from './ui-components/character-sheet-editor';
+<<<<<<< HEAD
+export type { CharacterSheetData } from './ui-components/character-sheet-editor/character-sheet-editor';
+export * from './api';
+=======
 export type { CharacterSheetData, CharacterSheetType } from './ui-components/character-sheet-editor/character-sheet-editor';
 export { GlobalSettingsComponent } from './ui-components/global-settings-component/global-settings-component';
 export { NPCMakerComponent } from './ui-components/npc-maker-component';
 export type { NPCData } from './ui-components/npc-maker-component/npc-maker-component';
+>>>>>>> origin/main

@@ -1,17 +1,20 @@
-﻿import { Component, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
+<<<<<<< HEAD
+import { apiBaseUrl, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData } from '@tabletop/ui-components';
+=======
 import { DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData, CharacterSheetType, GlobalSettingsComponent, NPCMakerComponent } from '@tabletop/ui-components';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+>>>>>>> origin/main
 
 interface LoginResponse {
   username: string;
-  token: string;
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -225,12 +228,27 @@ export class App {
   }
 
   doLogout() {
+<<<<<<< HEAD
+    this.http.post(`${apiBaseUrl}/api/auth/logout`, {}).subscribe({
+      next: () => this.clearUserSession(),
+      error: () => this.clearUserSession()
+    });
+  }
+
+  private clearUserSession() {
+    this.loggedIn = false;
+    this.currentUsername = '';
+    this.currentFirstName = '';
+    this.currentLastName = '';
+    this.currentEmail = '';
+=======
     const token = (() => { try { return localStorage.getItem('jwt'); } catch { return null; } })();
     if (token) {
       this.http.post<any>('https://tabletop-personal-server-production.up.railway.app/api/auth/logout', {}).subscribe({ next: () => this.clearLoginState(), error: () => this.clearLoginState() });
     } else {
       this.clearLoginState();
     }
+>>>>>>> origin/main
   }
 
   onMenuLogin() { this.loginVisible = true; }
@@ -239,6 +257,8 @@ export class App {
   onMenuGameMapClick() { this.currentView = 'game-map'; }
   onMenuDiceBagClick() { this.diceBagVisible = true; }
   onMenuAccountClick() { this.accountViewVisible = true; }
+<<<<<<< HEAD
+=======
   onMenuNPCMakerClick() { this.currentView = 'npc-maker'; }
   onMenuOptionsClick() { this.currentView = 'global-settings'; }
   onAppThemeChange(darkMode: boolean) { this.darkMode = darkMode; this.applyBodyTheme(this.darkMode); }
@@ -292,4 +312,5 @@ export class App {
   private getLocalCharacterSheetSave(saveName: string): LocalCharacterSheetSave | undefined {
     return this.getLocalCharacterSheetSaves().find(save => save.saveName === saveName);
   }
+>>>>>>> origin/main
 }
