@@ -31,10 +31,14 @@ ng generate --help
 To build the project run:
 
 ```bash
-ng build
+npm run build
 ```
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+
+## GitHub Pages deployment
+
+Pushing to `main` runs `.github/workflows/deploy-pages.yml`, which builds the Angular app and publishes `dist/Tabletop-Personal-Server/browser` to the `gh-pages` branch. GitHub Pages serves that branch at `https://thepandaofnom.github.io/Tabletop-personal-server/`.
 
 ## Running unit tests
 
