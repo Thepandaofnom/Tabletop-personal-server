@@ -1,6 +1,4 @@
 :host {
-  position: relative;
-  z-index: 9;
   display: block;
 }
 
@@ -154,6 +152,30 @@
 
 :host-context(body.dark-mode) .menu-item:hover {
   background: #2b323a;
+}
+
+@media (max-width: 760px) {
+  .main-menu-button-bar {
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .left-buttons {
+    flex: 1 1 0;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .left-buttons button {
+    flex: 1 1 10rem;
+    min-width: 0;
+  }
+
+  .hamburger-wrapper {
+    position: static;
+    align-self: flex-start;
+    padding-right: 0;
+  }
 }
 
 :host-context(body.dark-mode) .main-menu-button-bar .pill.p-button {
