@@ -89,7 +89,7 @@ describe('App', () => {
     }
   });
 
-  it('anchors the hamburger menu to its button and keeps its menu interactive', () => {
+  it('keeps the hamburger menu in the header beside its button and interactive', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
 
@@ -111,7 +111,9 @@ describe('App', () => {
 
     expect(getComputedStyle(wrapper).position).toBe('relative');
     expect(menu.offsetParent).toBe(wrapper);
-    expect(menuRect.top).toBeGreaterThanOrEqual(buttonRect.bottom);
+    expect(menuRect.top).toBeGreaterThanOrEqual(barRect.top);
+    expect(menuRect.bottom).toBeLessThanOrEqual(barRect.bottom + 1);
+    expect(menuRect.right).toBeLessThanOrEqual(buttonRect.left);
     expect(menuRect.right).toBeLessThanOrEqual(barRect.right + 1);
     expect(menu.contains(hit)).toBeTrue();
   });
