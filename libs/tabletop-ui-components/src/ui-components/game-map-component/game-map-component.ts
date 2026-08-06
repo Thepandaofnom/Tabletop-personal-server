@@ -110,6 +110,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   private tokenLayer?: Konva.Layer;
   private mapImage?: Konva.Image;
   private resizeObserver?: ResizeObserver;
+  private stageInitializationTimeout?: ReturnType<typeof setTimeout>;
   private fullscreenControlTimeout?: ReturnType<typeof setTimeout>;
   private isDragging = false;
   private dragStartX = 0;
@@ -246,24 +247,36 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
       if (this.stage) return;
 
       const attemptInit = (attempt = 1) => {
-        const w = container.clientWidth;
-        const h = container.clientHeight;
-        console.log('initStage attempt', attempt, 'container size', w, h);
-        if (h === 0 && attempt <= 10) {
-          // not laid out yet — retry after a short delay
-          setTimeout(() => attemptInit(attempt + 1), 50);
+        const dimensions = this.getStageDimensions();
+        if (!dimensions) {
           return;
         }
 
-        // fallback if still zero
-        const finalW = w || Math.floor(window.innerWidth * 0.8);
-        const finalH = h || Math.floor(window.innerHeight * 0.8) - 48; // approximate header height
+        const { width, height } = dimensions;
+        console.log('initStage attempt', attempt, 'container size', width, height);
+        if ((width === 0 || height === 0) && attempt <= 10) {
+          // not laid out yet — retry after a short delay
+          this.stageInitializationTimeout = setTimeout(() => {
+            this.stageInitializationTimeout = undefined;
+            attemptInit(attempt + 1);
+          }, 50);
+          return;
+        }
 
-        if (h === 0) {
+        if (this.isFullscreen && (width === 0 || height === 0)) {
+          console.warn('Fullscreen map container has no size after initialization retries');
+          return;
+        }
+
+        // Keep the existing non-fullscreen fallback for a container that has not been sized by its parent.
+        const finalW = width || Math.floor(window.innerWidth * 0.8);
+        const finalH = height || Math.floor(window.innerHeight * 0.8) - 48;
+
+        if (height === 0) {
           console.warn('Container height is 0 after retries — setting explicit height fallback', finalH);
           container.style.height = `${finalH}px`;
         }
-        if (w === 0) {
+        if (width === 0) {
           container.style.width = `${finalW}px`;
         }
 
@@ -291,11 +304,12 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
         // Add wheel zoom handler
         container.addEventListener('wheel', (e) => this.onStageWheel(e));
 
-        // observe container resize for dynamic resizing
+        // Observe both elements because fullscreen changes the wrapper's layout box.
         this.resizeObserver = new ResizeObserver(() => this.onContainerResize());
         this.resizeObserver.observe(container);
-
-        window.addEventListener('resize', this.onWindowResize);
+        if (this.fullscreenContainer) {
+          this.resizeObserver.observe(this.fullscreenContainer.nativeElement);
+        }
       };
 
       attemptInit();
@@ -304,33 +318,47 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  private getStageDimensions(): { width: number; height: number } | undefined {
+    if (!this.stageContainer) {
+      return undefined;
+    }
+
+    const container =
+      this.isFullscreen && this.fullscreenContainer
+        ? this.fullscreenContainer.nativeElement
+        : this.stageContainer.nativeElement;
+
+    return {
+      width: container.clientWidth,
+      height: container.clientHeight,
+    };
+  }
+
   private onContainerResize() {
-    if (!this.stage || !this.stageContainer) return;
-    const c = this.stageContainer.nativeElement;
-    this.stage.width(c.clientWidth);
-    this.stage.height(c.clientHeight);
+    if (!this.stage) return;
+
+    const dimensions = this.getStageDimensions();
+    if (!dimensions || dimensions.width === 0 || dimensions.height === 0) {
+      return;
+    }
+
+    this.stage.width(dimensions.width);
+    this.stage.height(dimensions.height);
     this.stage.draw();
   }
 
   private onWindowResize = () => {
-    if (!this.stage || !this.stageContainer) return;
-    const c = this.stageContainer.nativeElement;
-    this.stage.width(c.clientWidth);
-    this.stage.height(c.clientHeight);
-    this.stage.draw();
+    this.onContainerResize();
   };
 
   ngAfterViewInit() {
     // Component content is attached to the DOM — initialize stage
-    setTimeout(() => this.initStage(), 0);
+    this.stageInitializationTimeout = setTimeout(() => {
+      this.stageInitializationTimeout = undefined;
+      this.initStage();
+    }, 0);
 
-    // Set up a ResizeObserver to handle container resize
-    if (this.stageContainer) {
-      const resizeObserver = new ResizeObserver(() => {
-        this.onContainerResize();
-      });
-      resizeObserver.observe(this.stageContainer.nativeElement);
-    }
+    window.addEventListener('resize', this.onWindowResize);
     document.addEventListener('mousemove', this.onDocumentMouseMove);
     document.addEventListener('mouseup', this.onDocumentMouseUp);
     document.addEventListener('fullscreenchange', this.onFullscreenChange);
@@ -1675,6 +1703,10 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
+    if (this.stageInitializationTimeout !== undefined) {
+      clearTimeout(this.stageInitializationTimeout);
+      this.stageInitializationTimeout = undefined;
+    }
     this.clearFullscreenControlHideTimeout();
     document.removeEventListener('fullscreenchange', this.onFullscreenChange);
     document.removeEventListener('mousemove', this.onDocumentMouseMove);
