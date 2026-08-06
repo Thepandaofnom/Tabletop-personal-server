@@ -8,7 +8,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { HttpClientModule } from '@angular/common/http';
 import { apiBaseUrl } from '../../api';
 
 interface ValidationErrors {
@@ -22,7 +21,7 @@ interface ValidationErrors {
 @Component({
   selector: 'new-user-sign-up',
   standalone: true,
-  imports: [DialogModule, ButtonModule, InputTextModule, PasswordModule, ToastModule, CommonModule, FormsModule, HttpClientModule],
+  imports: [DialogModule, ButtonModule, InputTextModule, PasswordModule, ToastModule, CommonModule, FormsModule],
   providers: [MessageService],
   templateUrl: './new-user-sign-up.html',
   styleUrls: ['./new-user-sign-up.css']

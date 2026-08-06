@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpErrorResponse, HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -28,8 +28,7 @@ export interface LoginResponse {
     PasswordModule,
     ToastModule,
     CommonModule,
-    FormsModule,
-    HttpClientModule
+    FormsModule
   ],
   providers: [MessageService],
   templateUrl: './login-modal.html'

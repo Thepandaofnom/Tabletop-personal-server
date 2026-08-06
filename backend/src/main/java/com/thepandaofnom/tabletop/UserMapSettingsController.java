@@ -20,9 +20,9 @@ public class UserMapSettingsController {
     }
 
     @GetMapping("/user/{userId}")
-    public List<UserMapSettings> list(@PathVariable Long userId, HttpSession session) {
+    public List<MapSettingsSaveSummary> list(@PathVariable Long userId, HttpSession session) {
         SessionUser.requireUserId(session, userId);
-        return repo.findByUserIdOrderByUpdatedAtDesc(userId);
+        return repo.findSaveSummariesByUserIdOrderByUpdatedAtDesc(userId);
     }
 
     @GetMapping("/user/{userId}/{saveName}")
