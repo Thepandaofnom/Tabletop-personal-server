@@ -16,42 +16,59 @@
     (pointerleave)="onMapPointerLeave()">
     <div #stageContainer class="game-map-stage">
       <div #konvaContainer class="game-map-konva-container"></div>
-      <button
-        type="button"
-        class="game-map-fullscreen-control"
-        [class.is-visible]="showFullscreenControl"
-        [attr.aria-label]="isFullscreen ? 'Exit fullscreen map view' : 'Enter fullscreen map view'"
-        [attr.aria-pressed]="isFullscreen"
-        (click)="toggleFullscreen($event)">
-        <i [class]="isFullscreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'" aria-hidden="true"></i>
-      </button>
-    </div>
-  </div>
-  <div class="game-map-control-row">
-    <span class="game-map-control-label">Map zoom: {{(zoom * 100).toFixed(0)}}%</span>
-    <input type="range" min="0.1" max="3" step="0.1" [(ngModel)]="zoom" (ngModelChange)="onZoomChange($event * 100)" class="game-map-range">
-    <label class="game-map-check" pTooltip="Scales grid with map image when checked" tooltipPosition="top">
-      <input type="checkbox" [(ngModel)]="scaleGrid">
-      <span>Scale Grid</span>
-    </label>
-  </div>
-  <div *ngIf="!scaleGrid" class="game-map-control-row">
-    <span class="game-map-control-label">Grid zoom: {{(gridZoom * 100).toFixed(0)}}%</span>
-    <input type="range" min="0.1" max="3" step="0.1" [(ngModel)]="gridZoom" (ngModelChange)="onGridZoomChange($event * 100)" class="game-map-range">
-  </div>
-
-  <!-- Grid Line Size Settings -->
-  <div class="game-map-control-row game-map-grid-size-row">
-    <span class="game-map-control-label">Grid Size:</span>
-    <div class="game-map-inline-field">
-      <label>Width:</label>
-      <input type="number" [(ngModel)]="gridCellWidth" (ngModelChange)="onGridSizeChange()" min="1" max="200" />
-      <span>px</span>
-    </div>
-    <div class="game-map-inline-field">
-      <label>Height:</label>
-      <input type="number" [(ngModel)]="gridCellHeight" (ngModelChange)="onGridSizeChange()" min="1" max="200" />
-      <span>px</span>
+      <div class="game-map-control-panel" [class.is-visible]="!isFullscreen || showFullscreenControlPanel">
+        <div class="game-map-control-content">
+          <div class="game-map-control-row">
+            <span class="game-map-control-label">Map zoom: {{(zoom * 100).toFixed(0)}}%</span>
+            <input
+              type="range"
+              min="0.1"
+              max="3"
+              step="0.1"
+              [(ngModel)]="zoom"
+              (ngModelChange)="onZoomChange($event * 100)"
+              class="game-map-range game-map-viewport-range"
+              aria-label="Map zoom">
+            <label class="game-map-check" pTooltip="Scales grid with map image when checked" tooltipPosition="top">
+              <input type="checkbox" [(ngModel)]="scaleGrid">
+              <span>Scale Grid</span>
+            </label>
+          </div>
+          <div *ngIf="!scaleGrid" class="game-map-control-row">
+            <span class="game-map-control-label">Grid zoom: {{(gridZoom * 100).toFixed(0)}}%</span>
+            <input
+              type="range"
+              min="0.1"
+              max="3"
+              step="0.1"
+              [(ngModel)]="gridZoom"
+              (ngModelChange)="onGridZoomChange($event * 100)"
+              class="game-map-range game-map-viewport-range"
+              aria-label="Grid zoom">
+          </div>
+          <div class="game-map-control-row game-map-grid-size-row">
+            <span class="game-map-control-label">Grid Size:</span>
+            <div class="game-map-inline-field">
+              <label>Width:</label>
+              <input type="number" [(ngModel)]="gridCellWidth" (ngModelChange)="onGridSizeChange()" min="1" max="200" />
+              <span>px</span>
+            </div>
+            <div class="game-map-inline-field">
+              <label>Height:</label>
+              <input type="number" [(ngModel)]="gridCellHeight" (ngModelChange)="onGridSizeChange()" min="1" max="200" />
+              <span>px</span>
+            </div>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="game-map-fullscreen-control"
+          [attr.aria-label]="isFullscreen ? 'Exit fullscreen map view' : 'Enter fullscreen map view'"
+          [attr.aria-pressed]="isFullscreen"
+          (click)="toggleFullscreen($event)">
+          <i [class]="isFullscreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'" aria-hidden="true"></i>
+        </button>
+      </div>
     </div>
   </div>
 

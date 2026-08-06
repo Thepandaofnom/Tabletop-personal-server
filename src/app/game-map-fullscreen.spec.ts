@@ -29,16 +29,31 @@ describe('GameMapComponent fullscreen control', () => {
     }
   });
 
-  it('shows the control during map pointer activity, then hides it after three seconds', () => {
+  it('shows the fullscreen control panel during map pointer activity, then hides it after three seconds', () => {
     jasmine.clock().install();
 
     component.onMapPointerMove();
-    expect(component.showFullscreenControl).toBeTrue();
+    expect(component.showFullscreenControlPanel).toBeTrue();
 
     jasmine.clock().tick(3000);
-    expect(component.showFullscreenControl).toBeFalse();
+    expect(component.showFullscreenControlPanel).toBeFalse();
 
     jasmine.clock().uninstall();
+  });
+
+  it('hides the fullscreen control panel until map pointer activity when the browser enters fullscreen', () => {
+    component.showFullscreenControlPanel = true;
+
+    Object.defineProperty(document, 'fullscreenElement', {
+      configurable: true,
+      value: stageContainer,
+    });
+    document.dispatchEvent(new Event('fullscreenchange'));
+    expect(component.isFullscreen).toBeTrue();
+    expect(component.showFullscreenControlPanel).toBeFalse();
+
+    component.onMapPointerMove();
+    expect(component.showFullscreenControlPanel).toBeTrue();
   });
 
   it('updates fullscreen state when the browser enters and exits fullscreen', () => {
