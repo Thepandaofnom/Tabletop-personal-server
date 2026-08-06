@@ -1,4 +1,5 @@
 import { ElementRef } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameMapComponent } from '@tabletop/ui-components';
 import Konva from 'konva';
 
@@ -31,6 +32,7 @@ describe('GameMapComponent fullscreen control', () => {
 
   it('shows the fullscreen control panel during map pointer activity, then hides it after three seconds', () => {
     jasmine.clock().install();
+    component.isFullscreen = true;
 
     component.onMapPointerMove();
     expect(component.showFullscreenControlPanel).toBeTrue();
@@ -248,5 +250,58 @@ describe('GameMapComponent fullscreen control', () => {
     const exitFullscreen = spyOn(document, 'exitFullscreen').and.returnValue(Promise.resolve());
     component.toggleFullscreen(new MouseEvent('click'));
     expect(exitFullscreen).toHaveBeenCalled();
+  });
+});
+
+describe('GameMapComponent control panel rendering', () => {
+  let fixture: ComponentFixture<GameMapComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [GameMapComponent],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(GameMapComponent);
+    spyOn(fixture.componentInstance, 'ngAfterViewInit').and.stub();
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+  });
+
+  it('keeps the map control panel visible and interactive in normal mode', () => {
+    const panel = fixture.nativeElement.querySelector('.game-map-control-panel') as HTMLElement;
+    const styles = getComputedStyle(panel);
+
+    expect(panel).toBeTruthy();
+    expect(panel.classList.contains('is-visible')).toBeTrue();
+    expect(styles.display).toBe('flex');
+    expect(styles.visibility).toBe('visible');
+    expect(styles.opacity).toBe('1');
+    expect(styles.pointerEvents).toBe('auto');
+  });
+
+  it('hides fullscreen controls until pointer activity, then hides them after three seconds', () => {
+    jasmine.clock().install();
+    const component = fixture.componentInstance;
+    const panel = fixture.nativeElement.querySelector('.game-map-control-panel') as HTMLElement;
+
+    try {
+      component.isFullscreen = true;
+      component.showFullscreenControlPanel = false;
+      fixture.detectChanges();
+      expect(panel.classList.contains('is-visible')).toBeFalse();
+
+      component.onMapPointerMove();
+      fixture.detectChanges();
+      expect(panel.classList.contains('is-visible')).toBeTrue();
+
+      jasmine.clock().tick(3000);
+      fixture.detectChanges();
+      expect(panel.classList.contains('is-visible')).toBeFalse();
+    } finally {
+      jasmine.clock().uninstall();
+    }
   });
 });
