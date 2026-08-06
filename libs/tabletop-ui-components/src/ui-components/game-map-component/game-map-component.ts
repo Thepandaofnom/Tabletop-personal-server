@@ -354,13 +354,12 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   }
 
   onMapPointerMove(): void {
+    if (!this.isFullscreen) {
+      return;
+    }
+
     this.showFullscreenControlPanel = true;
     this.scheduleFullscreenControlHide();
-  }
-
-  onMapPointerLeave(): void {
-    this.clearFullscreenControlHideTimeout();
-    this.showFullscreenControlPanel = false;
   }
 
   toggleFullscreen(event: MouseEvent): void {
@@ -385,7 +384,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   private scheduleFullscreenControlHide(): void {
     this.clearFullscreenControlHideTimeout();
     this.fullscreenControlTimeout = setTimeout(() => {
-      this.showFullscreenControlPanel = false;
+      this.hideFullscreenControlPanel();
     }, 3000);
   }
 
@@ -399,9 +398,22 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   private onFullscreenChange = (): void => {
     this.isFullscreen = document.fullscreenElement === this.stageContainer?.nativeElement;
     this.clearFullscreenControlHideTimeout();
-    this.showFullscreenControlPanel = false;
+    this.hideFullscreenControlPanel();
     requestAnimationFrame(() => this.onContainerResize());
   };
+
+  private hideFullscreenControlPanel(): void {
+    this.showFullscreenControlPanel = false;
+
+    const activeElement = document.activeElement;
+    if (
+      this.isFullscreen &&
+      activeElement instanceof HTMLElement &&
+      this.stageContainer?.nativeElement.contains(activeElement)
+    ) {
+      activeElement.blur();
+    }
+  }
 
   private onStageMouseDown(e: Konva.KonvaEventObject<MouseEvent>) {
     if (e.evt.ctrlKey && e.evt.button === 0) {

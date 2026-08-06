@@ -98,14 +98,13 @@
   min-width: 0;
 }
 
-.game-map-stage:fullscreen .game-map-control-panel:not(.is-visible):not(:focus-within) {
+.game-map-stage:fullscreen .game-map-control-panel:not(.is-visible) {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
 
-.game-map-stage:fullscreen .game-map-control-panel.is-visible,
-.game-map-stage:fullscreen .game-map-control-panel:focus-within {
+.game-map-stage:fullscreen .game-map-control-panel.is-visible {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
