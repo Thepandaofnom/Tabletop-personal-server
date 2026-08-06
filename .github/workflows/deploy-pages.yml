@@ -35,4 +35,4 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Deploy the built application
-        run: npm run deploy
+        run: npm run deploy -- --repo "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
