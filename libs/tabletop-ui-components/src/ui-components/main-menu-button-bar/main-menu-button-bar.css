@@ -87,8 +87,9 @@
 
 .hamburger-menu {
   position: absolute;
-  right: 0;
-  top: calc(100% + 8px);
+  right: calc(100% + 0.5rem);
+  top: 50%;
+  transform: translateY(-50%);
   background: #f1e0bc;
   border: 1px solid rgba(122, 93, 52, 0.35);
   padding: 0.25rem;
