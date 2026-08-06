@@ -41,12 +41,24 @@ color: var(--text);
 background: linear-gradient(180deg, #101317 0%, #0b0d10 100%);
 }
 
-html, body, app-root {
+html {
   height: 100%;
+}
+
+body {
+  min-height: 100%;
 }
 
 app-root {
   display: block;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 body {
@@ -61,6 +73,7 @@ body {
 }
 
 .app-navigation {
+  flex: 0 0 auto;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -89,7 +102,15 @@ body.dark-mode .site-header h1 {
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.65);
 }
 
-.main-content { padding: 2rem; min-height: calc(100vh - 64px); }
+.main-content {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 2rem;
+}
+.game-map-view { width: 100%; }
 .dark-mode .main-content { background: var(--bg); color: var(--text); }
 .landing { max-width: 900px; margin: 2rem auto; text-align: center; }
 .lead { color: var(--muted); font-size: 1.125rem; }
