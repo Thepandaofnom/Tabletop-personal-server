@@ -51,7 +51,7 @@ interface SavedMapScene {
 })
 export class GameMapComponent implements OnDestroy, AfterViewInit {
   @ViewChild('stageContainer', { static: false }) stageContainer!: ElementRef<HTMLDivElement>;
-  @ViewChild('fullscreenContainer', { static: false }) fullscreenContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('konvaContainer', { static: false }) konvaContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('menu') menu!: Menu;
 
   showGrid = false;
@@ -241,8 +241,8 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
 
   private initStage() {
     try {
-      if (!this.stageContainer) return;
-      const container = this.stageContainer.nativeElement;
+      if (!this.stageContainer || !this.konvaContainer) return;
+      const container = this.konvaContainer.nativeElement;
       // prevent double init
       if (this.stage) return;
 
@@ -268,17 +268,10 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
           return;
         }
 
-        // Keep the existing non-fullscreen fallback for a container that has not been sized by its parent.
+        // Create the stage with a fallback drawing buffer while the host awaits its first layout.
+        // Do not set fallback dimensions on the host: they would override fullscreen CSS sizing.
         const finalW = width || Math.floor(window.innerWidth * 0.8);
         const finalH = height || Math.floor(window.innerHeight * 0.8) - 48;
-
-        if (height === 0) {
-          console.warn('Container height is 0 after retries — setting explicit height fallback', finalH);
-          container.style.height = `${finalH}px`;
-        }
-        if (width === 0) {
-          container.style.width = `${finalW}px`;
-        }
 
         this.stage = new Konva.Stage({
           container: container,
@@ -304,12 +297,9 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
         // Add wheel zoom handler
         container.addEventListener('wheel', (e) => this.onStageWheel(e));
 
-        // Observe both elements because fullscreen changes the wrapper's layout box.
+        // The stage host is the fullscreen element, so its box is the Konva viewport.
         this.resizeObserver = new ResizeObserver(() => this.onContainerResize());
-        this.resizeObserver.observe(container);
-        if (this.fullscreenContainer) {
-          this.resizeObserver.observe(this.fullscreenContainer.nativeElement);
-        }
+        this.resizeObserver.observe(this.stageContainer.nativeElement);
       };
 
       attemptInit();
@@ -323,16 +313,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
       return undefined;
     }
 
-    const container =
-      this.isFullscreen && this.fullscreenContainer
-        ? this.fullscreenContainer.nativeElement
-        : this.stageContainer.nativeElement;
-
-    if (this.isFullscreen) {
-      const { width, height } = container.getBoundingClientRect();
-      return { width, height };
-    }
-
+    const container = this.stageContainer.nativeElement;
     return {
       width: container.clientWidth,
       height: container.clientHeight,
@@ -385,18 +366,18 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   toggleFullscreen(event: MouseEvent): void {
     event.stopPropagation();
 
-    if (!this.fullscreenContainer) {
+    if (!this.stageContainer) {
       return;
     }
 
-    if (document.fullscreenElement === this.fullscreenContainer.nativeElement) {
+    if (document.fullscreenElement === this.stageContainer.nativeElement) {
       void document.exitFullscreen().catch((error: unknown) => {
         console.error('Failed to exit fullscreen map view', error);
       });
       return;
     }
 
-    void this.fullscreenContainer.nativeElement.requestFullscreen().catch((error: unknown) => {
+    void this.stageContainer.nativeElement.requestFullscreen().catch((error: unknown) => {
       console.error('Failed to enter fullscreen map view', error);
     });
   }
@@ -416,7 +397,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
   }
 
   private onFullscreenChange = (): void => {
-    this.isFullscreen = document.fullscreenElement === this.fullscreenContainer?.nativeElement;
+    this.isFullscreen = document.fullscreenElement === this.stageContainer?.nativeElement;
     requestAnimationFrame(() => this.onContainerResize());
   };
 

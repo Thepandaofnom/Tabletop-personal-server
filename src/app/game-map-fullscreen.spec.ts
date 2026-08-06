@@ -4,13 +4,18 @@ import Konva from 'konva';
 
 describe('GameMapComponent fullscreen control', () => {
   let component: GameMapComponent;
-  let fullscreenContainer: HTMLDivElement;
+  let stageContainer: HTMLDivElement;
+  let stageWrapper: HTMLDivElement;
   let originalFullscreenElement: PropertyDescriptor | undefined;
 
   beforeEach(() => {
     component = new GameMapComponent();
-    fullscreenContainer = document.createElement('div');
-    component.fullscreenContainer = new ElementRef(fullscreenContainer);
+    stageContainer = document.createElement('div');
+    stageContainer.className = 'game-map-stage';
+    stageWrapper = document.createElement('div');
+    stageWrapper.className = 'game-map-stage-wrapper';
+    stageWrapper.append(stageContainer);
+    component.stageContainer = new ElementRef(stageContainer);
     originalFullscreenElement = Object.getOwnPropertyDescriptor(document, 'fullscreenElement');
     component.ngAfterViewInit();
   });
@@ -39,7 +44,7 @@ describe('GameMapComponent fullscreen control', () => {
   it('updates fullscreen state when the browser enters and exits fullscreen', () => {
     Object.defineProperty(document, 'fullscreenElement', {
       configurable: true,
-      value: fullscreenContainer,
+      value: stageContainer,
     });
     document.dispatchEvent(new Event('fullscreenchange'));
     expect(component.isFullscreen).toBeTrue();
@@ -52,19 +57,33 @@ describe('GameMapComponent fullscreen control', () => {
     expect(component.isFullscreen).toBeFalse();
   });
 
-  it('sizes the Konva stage to rendered fullscreen bounds and restores normal sizing', () => {
-    const stageContainer = document.createElement('div');
-    Object.defineProperties(stageContainer, {
-      clientWidth: { configurable: true, value: 800 },
-      clientHeight: { configurable: true, value: 600 },
-    });
+  it('uses the fullscreen game-map-stage viewport box instead of its wrapper', () => {
+    const normalWidth = 800;
+    const normalHeight = 600;
     let fullscreenWidth = 1920;
     let fullscreenHeight = 1080;
-    spyOn(fullscreenContainer, 'getBoundingClientRect').and.callFake(
+    Object.defineProperties(stageContainer, {
+      clientWidth: {
+        configurable: true,
+        get: () => (component.isFullscreen ? fullscreenWidth : normalWidth),
+      },
+      clientHeight: {
+        configurable: true,
+        get: () => (component.isFullscreen ? fullscreenHeight : normalHeight),
+      },
+    });
+    spyOn(stageContainer, 'getBoundingClientRect').and.callFake(
       () =>
         ({
-          width: fullscreenWidth,
-          height: fullscreenHeight,
+          width: component.isFullscreen ? fullscreenWidth : normalWidth,
+          height: component.isFullscreen ? fullscreenHeight : normalHeight,
+        }) as DOMRect,
+    );
+    spyOn(stageWrapper, 'getBoundingClientRect').and.callFake(
+      () =>
+        ({
+          width: fullscreenWidth - 16,
+          height: fullscreenHeight - 16,
         }) as DOMRect,
     );
 
@@ -74,7 +93,6 @@ describe('GameMapComponent fullscreen control', () => {
       draw: jasmine.createSpy('draw'),
       destroy: jasmine.createSpy('destroy'),
     };
-    component.stageContainer = new ElementRef(stageContainer);
     (component as unknown as { stage: typeof stage }).stage = stage;
     spyOn(window, 'requestAnimationFrame').and.callFake((callback: FrameRequestCallback) => {
       callback(0);
@@ -83,9 +101,14 @@ describe('GameMapComponent fullscreen control', () => {
 
     Object.defineProperty(document, 'fullscreenElement', {
       configurable: true,
-      value: fullscreenContainer,
+      value: stageContainer,
     });
     document.dispatchEvent(new Event('fullscreenchange'));
+    expect(stageContainer.className).toBe('game-map-stage');
+    expect(stageContainer.getBoundingClientRect().width).toBe(fullscreenWidth);
+    expect(stageContainer.getBoundingClientRect().height).toBe(fullscreenHeight);
+    expect(stageWrapper.getBoundingClientRect().width).toBe(fullscreenWidth - 16);
+    expect(stageWrapper.getBoundingClientRect().height).toBe(fullscreenHeight - 16);
     expect(stage.width).toHaveBeenCalledWith(1920);
     expect(stage.height).toHaveBeenCalledWith(1080);
 
@@ -100,8 +123,8 @@ describe('GameMapComponent fullscreen control', () => {
       value: null,
     });
     document.dispatchEvent(new Event('fullscreenchange'));
-    expect(stage.width).toHaveBeenCalledWith(800);
-    expect(stage.height).toHaveBeenCalledWith(600);
+    expect(stage.width).toHaveBeenCalledWith(normalWidth);
+    expect(stage.height).toHaveBeenCalledWith(normalHeight);
   });
 
   it('redraws the grid across resized viewport bounds after panning and zooming', () => {
@@ -199,13 +222,13 @@ describe('GameMapComponent fullscreen control', () => {
   });
 
   it('requests and exits fullscreen from the map control', () => {
-    const requestFullscreen = spyOn(fullscreenContainer, 'requestFullscreen').and.returnValue(Promise.resolve());
+    const requestFullscreen = spyOn(stageContainer, 'requestFullscreen').and.returnValue(Promise.resolve());
     component.toggleFullscreen(new MouseEvent('click'));
     expect(requestFullscreen).toHaveBeenCalled();
 
     Object.defineProperty(document, 'fullscreenElement', {
       configurable: true,
-      value: fullscreenContainer,
+      value: stageContainer,
     });
     const exitFullscreen = spyOn(document, 'exitFullscreen').and.returnValue(Promise.resolve());
     component.toggleFullscreen(new MouseEvent('click'));
