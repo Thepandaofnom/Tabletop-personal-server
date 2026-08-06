@@ -12,8 +12,8 @@
   </div>
   <div
     class="game-map-stage-wrapper"
-    (pointermove)="onMapPointerMove()"
-    (pointerleave)="onMapPointerLeave()">
+    (pointerenter)="onMapPointerMove()"
+    (pointermove)="onMapPointerMove()">
     <div #stageContainer class="game-map-stage">
       <div #konvaContainer class="game-map-konva-container"></div>
       <div class="game-map-control-panel" [class.is-visible]="!isFullscreen || showFullscreenControlPanel">
