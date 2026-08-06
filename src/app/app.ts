@@ -20,7 +20,7 @@ interface CharacterSheetTab {
   styleUrls: ['./app.css']
 })
 export class App {
-  protected readonly title = signal('Tabletop');
+  protected readonly title = signal('Digital Tabletop');
   protected diceBagVisible = false;
   protected currentView: MainContentView = 'landing';
   protected darkMode = false;
