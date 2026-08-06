@@ -96,7 +96,7 @@ export class App {
   onOpenCharacterSheetLoadDialog() {
     this.characterSheetLoadDialogVisible = true;
     if (this.currentUserId !== null) {
-      this.http.get<CharacterSheetSaveSummary[]>(`https://tabletop-personal-server-production.up.railway.app/api/character-sheets/user/${this.currentUserId}`).subscribe({
+      this.http.get<CharacterSheetSaveSummary[]>(`${this.apiBaseUrl}/character-sheets/user/${this.currentUserId}`).subscribe({
         next: saves => this.savedCharacterSheets = saves || [],
         error: () => this.savedCharacterSheets = this.getLocalCharacterSheetSaves().map((save, index) => ({ id: index + 1, saveName: save.saveName, sheetType: save.sheetType }))
       });
@@ -106,7 +106,7 @@ export class App {
   onOpenCharacterSheetDeleteDialog() {
     this.characterSheetDeleteDialogVisible = true;
     if (this.currentUserId !== null) {
-      this.http.get<CharacterSheetSaveSummary[]>(`https://tabletop-personal-server-production.up.railway.app/api/character-sheets/user/${this.currentUserId}`).subscribe({
+      this.http.get<CharacterSheetSaveSummary[]>(`${this.apiBaseUrl}/character-sheets/user/${this.currentUserId}`).subscribe({
         next: saves => this.savedCharacterSheets = saves || [],
         error: () => this.savedCharacterSheets = this.getLocalCharacterSheetSaves().map((save, index) => ({ id: index + 1, saveName: save.saveName, sheetType: save.sheetType }))
       });
@@ -123,7 +123,7 @@ export class App {
       });
       return;
     }
-    this.http.post(`https://tabletop-personal-server-production.up.railway.app/api/character-sheets/user/${this.currentUserId}`, {
+    this.http.post(`${this.apiBaseUrl}/character-sheets/user/${this.currentUserId}`, {
       saveName: this.characterSheetSaveName.trim(),
       sheetType: activeTab.sheetType,
       sheetJson: JSON.stringify(activeTab.value)
@@ -147,7 +147,7 @@ export class App {
     if (this.currentUserId === null || !this.selectedCharacterSheetSaveName) {
       return;
     }
-    this.http.get<any>(`https://tabletop-personal-server-production.up.railway.app/api/character-sheets/user/${this.currentUserId}/${encodeURIComponent(this.selectedCharacterSheetSaveName)}`).subscribe({
+    this.http.get<any>(`${this.apiBaseUrl}/character-sheets/user/${this.currentUserId}/${encodeURIComponent(this.selectedCharacterSheetSaveName)}`).subscribe({
       next: record => {
         const activeTab = this.characterSheetTabs.find(tab => tab.id === this.activeCharacterSheetTabId);
         if (activeTab) {
@@ -175,7 +175,7 @@ export class App {
     if (this.currentUserId === null || !this.selectedCharacterSheetSaveName) {
       return;
     }
-    this.http.delete(`https://tabletop-personal-server-production.up.railway.app/api/character-sheets/user/${this.currentUserId}/${encodeURIComponent(this.selectedCharacterSheetSaveName)}`).subscribe({
+    this.http.delete(`${this.apiBaseUrl}/character-sheets/user/${this.currentUserId}/${encodeURIComponent(this.selectedCharacterSheetSaveName)}`).subscribe({
       next: () => {
         this.removeLocalCharacterSheetSave(this.selectedCharacterSheetSaveName);
         this.savedCharacterSheets = this.savedCharacterSheetRecordsWithout(this.selectedCharacterSheetSaveName);
@@ -238,7 +238,12 @@ export class App {
 
   private clearLoginState() { this.loggedIn = false; this.currentUsername = ''; this.currentFirstName = ''; this.currentLastName = ''; this.currentEmail = ''; this.currentUserId = null; }
   private applyBodyTheme(darkMode: boolean) { if (typeof document === 'undefined' || !document.body) return; document.body.classList.toggle('dark-mode', darkMode); }
-  private restoreLoginState() {}
+  private restoreLoginState() {
+    this.http.get<LoginResponse>(`${this.apiBaseUrl}/auth/session`).subscribe({
+      next: response => this.onLoginSuccess(response),
+      error: () => this.clearLoginState()
+    });
+  }
   private persistLocalCharacterSheetSave(sheetType: CharacterSheetType, value: CharacterSheetData, saveName: string) {
     try {
       const existing = this.getLocalCharacterSheetSaves();
