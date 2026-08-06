@@ -1,7 +1,7 @@
-﻿import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { LoginModal } from '../login-modal/login-modal';
+import { LoginModal, LoginResponse } from '../login-modal/login-modal';
 
 @Component({
   selector: 'main-menu-button-bar',
@@ -15,7 +15,7 @@ export class MainMenuButtonBar {
   @Input() loginVisible = false;
   
   @Output() loginVisibleChange = new EventEmitter<boolean>();
-  @Output() loginSuccess = new EventEmitter<{ username: string; token: string }>();
+  @Output() loginSuccess = new EventEmitter<LoginResponse>();
   @Output() openGameMap = new EventEmitter<void>();
   @Output() openDiceBag = new EventEmitter<void>();
   @Output() openCharacterSheets = new EventEmitter<void>();
@@ -56,16 +56,16 @@ export class MainMenuButtonBar {
     this.openDiceBag.emit();
   }
 
+  onLoginModalSuccess(event: LoginResponse) {
+    this.loginSuccess.emit(event);
+  }
+
   onNPCMakerClick() {
     this.openNPCMaker.emit();
   }
 
   onOptionsClick() {
     this.openOptions.emit();
-  }
-
-  onLoginModalSuccess(event: { username: string; token: string }) {
-    this.loginSuccess.emit(event);
   }
 
   get loginVisibleLocal() {

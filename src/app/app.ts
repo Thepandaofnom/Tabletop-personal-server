@@ -1,17 +1,16 @@
-﻿import { Component, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
-import { DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData, CharacterSheetType, GlobalSettingsComponent, NPCMakerComponent } from '@tabletop/ui-components';
+import { apiBaseUrl, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData, CharacterSheetType, GlobalSettingsComponent, NPCMakerComponent } from '@tabletop/ui-components';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 
 interface LoginResponse {
   username: string;
-  token: string;
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -87,10 +86,6 @@ export class App {
     this.currentLastName = event.lastName || '';
     this.currentEmail = event.email || '';
     this.currentUserId = event.id ?? null;
-    if (event.token) {
-      try { localStorage.setItem('jwt', event.token); } catch {}
-      this.currentUserId = this.decodeUserId(event.token) ?? this.currentUserId;
-    }
   }
 
   onOpenCharacterSheetSaveDialog() {
@@ -101,7 +96,7 @@ export class App {
   onOpenCharacterSheetLoadDialog() {
     this.characterSheetLoadDialogVisible = true;
     if (this.currentUserId !== null) {
-      this.http.get<CharacterSheetSaveSummary[]>(`https://tabletop-personal-server-production.up.railway.app/api/character-sheets/user/${this.currentUserId}`).subscribe({
+      this.http.get<CharacterSheetSaveSummary[]>(`${this.apiBaseUrl}/character-sheets/user/${this.currentUserId}`).subscribe({
         next: saves => this.savedCharacterSheets = saves || [],
         error: () => this.savedCharacterSheets = this.getLocalCharacterSheetSaves().map((save, index) => ({ id: index + 1, saveName: save.saveName, sheetType: save.sheetType }))
       });
@@ -111,7 +106,7 @@ export class App {
   onOpenCharacterSheetDeleteDialog() {
     this.characterSheetDeleteDialogVisible = true;
     if (this.currentUserId !== null) {
-      this.http.get<CharacterSheetSaveSummary[]>(`https://tabletop-personal-server-production.up.railway.app/api/character-sheets/user/${this.currentUserId}`).subscribe({
+      this.http.get<CharacterSheetSaveSummary[]>(`${this.apiBaseUrl}/character-sheets/user/${this.currentUserId}`).subscribe({
         next: saves => this.savedCharacterSheets = saves || [],
         error: () => this.savedCharacterSheets = this.getLocalCharacterSheetSaves().map((save, index) => ({ id: index + 1, saveName: save.saveName, sheetType: save.sheetType }))
       });
@@ -128,7 +123,7 @@ export class App {
       });
       return;
     }
-    this.http.post(`https://tabletop-personal-server-production.up.railway.app/api/character-sheets/user/${this.currentUserId}`, {
+    this.http.post(`${this.apiBaseUrl}/character-sheets/user/${this.currentUserId}`, {
       saveName: this.characterSheetSaveName.trim(),
       sheetType: activeTab.sheetType,
       sheetJson: JSON.stringify(activeTab.value)
@@ -152,7 +147,7 @@ export class App {
     if (this.currentUserId === null || !this.selectedCharacterSheetSaveName) {
       return;
     }
-    this.http.get<any>(`https://tabletop-personal-server-production.up.railway.app/api/character-sheets/user/${this.currentUserId}/${encodeURIComponent(this.selectedCharacterSheetSaveName)}`).subscribe({
+    this.http.get<any>(`${this.apiBaseUrl}/character-sheets/user/${this.currentUserId}/${encodeURIComponent(this.selectedCharacterSheetSaveName)}`).subscribe({
       next: record => {
         const activeTab = this.characterSheetTabs.find(tab => tab.id === this.activeCharacterSheetTabId);
         if (activeTab) {
@@ -180,7 +175,7 @@ export class App {
     if (this.currentUserId === null || !this.selectedCharacterSheetSaveName) {
       return;
     }
-    this.http.delete(`https://tabletop-personal-server-production.up.railway.app/api/character-sheets/user/${this.currentUserId}/${encodeURIComponent(this.selectedCharacterSheetSaveName)}`).subscribe({
+    this.http.delete(`${this.apiBaseUrl}/character-sheets/user/${this.currentUserId}/${encodeURIComponent(this.selectedCharacterSheetSaveName)}`).subscribe({
       next: () => {
         this.removeLocalCharacterSheetSave(this.selectedCharacterSheetSaveName);
         this.savedCharacterSheets = this.savedCharacterSheetRecordsWithout(this.selectedCharacterSheetSaveName);
@@ -225,12 +220,10 @@ export class App {
   }
 
   doLogout() {
-    const token = (() => { try { return localStorage.getItem('jwt'); } catch { return null; } })();
-    if (token) {
-      this.http.post<any>('https://tabletop-personal-server-production.up.railway.app/api/auth/logout', {}).subscribe({ next: () => this.clearLoginState(), error: () => this.clearLoginState() });
-    } else {
-      this.clearLoginState();
-    }
+    this.http.post(`${apiBaseUrl}/api/auth/logout`, {}).subscribe({
+      next: () => this.clearLoginState(),
+      error: () => this.clearLoginState()
+    });
   }
 
   onMenuLogin() { this.loginVisible = true; }
@@ -243,26 +236,13 @@ export class App {
   onMenuOptionsClick() { this.currentView = 'global-settings'; }
   onAppThemeChange(darkMode: boolean) { this.darkMode = darkMode; this.applyBodyTheme(this.darkMode); }
 
-  private clearLoginState() { try { localStorage.removeItem('jwt'); } catch {} this.loggedIn = false; this.currentUsername = ''; this.currentFirstName = ''; this.currentLastName = ''; this.currentEmail = ''; this.currentUserId = null; }
+  private clearLoginState() { this.loggedIn = false; this.currentUsername = ''; this.currentFirstName = ''; this.currentLastName = ''; this.currentEmail = ''; this.currentUserId = null; }
   private applyBodyTheme(darkMode: boolean) { if (typeof document === 'undefined' || !document.body) return; document.body.classList.toggle('dark-mode', darkMode); }
-  private decodeUserId(token: string): number | null { try { const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); return typeof payload.id === 'number' ? payload.id : null; } catch { return null; } }
-  private decodeTokenUsername(token: string): string {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-      return typeof payload.username === 'string' ? payload.username : '';
-    } catch {
-      return '';
-    }
-  }
   private restoreLoginState() {
-    let token: string | null = null;
-    try { token = localStorage.getItem('jwt'); } catch { token = null; }
-    if (!token) {
-      return;
-    }
-    this.loggedIn = true;
-    this.currentUserId = this.decodeUserId(token);
-    this.currentUsername = this.decodeTokenUsername(token);
+    this.http.get<LoginResponse>(`${this.apiBaseUrl}/auth/session`).subscribe({
+      next: response => this.onLoginSuccess(response),
+      error: () => this.clearLoginState()
+    });
   }
   private persistLocalCharacterSheetSave(sheetType: CharacterSheetType, value: CharacterSheetData, saveName: string) {
     try {

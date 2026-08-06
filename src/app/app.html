@@ -34,7 +34,7 @@
 
 <main class="main-content" [class.app-dark-theme]="darkMode">
   <div [style.display]="currentView === 'game-map' ? 'block' : 'none'" style="width: 100%; height: 100%;">
-    <game-map-component [apiBaseUrl]="apiBaseUrl"></game-map-component>
+    <game-map-component [apiBaseUrl]="apiBaseUrl" [currentUserId]="currentUserId"></game-map-component>
   </div>
 
   <div *ngIf="currentView === 'global-settings'">
@@ -42,7 +42,7 @@
   </div>
 
   <div *ngIf="currentView === 'npc-maker'">
-    <npc-maker-component></npc-maker-component>
+    <npc-maker-component [currentUserId]="currentUserId"></npc-maker-component>
   </div>
 
   <div *ngIf="currentView === 'character-sheet'" class="character-sheet-tabs">

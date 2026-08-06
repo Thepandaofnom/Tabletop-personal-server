@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { HttpClientModule } from '@angular/common/http';
+import { apiBaseUrl } from '../../api';
 
 interface ValidationErrors {
   firstName: string | null;
@@ -171,7 +172,7 @@ export class NewUserSignUp {
     // Debounce the backend check for uniqueness
     this.checkingUsername = true;
     this.usernameCheckTimeout = setTimeout(() => {
-      this.http.get<{ exists: boolean }>(`https://tabletop-personal-server-production.up.railway.app/api/users/check-username/${encodeURIComponent(this.username)}`)
+      this.http.get<{ exists: boolean }>(`${apiBaseUrl}/api/users/check-username/${encodeURIComponent(this.username)}`)
         .subscribe({
           next: (res) => {
             if (res.exists) {
@@ -258,7 +259,7 @@ export class NewUserSignUp {
       password: this.password
     };
 
-    this.http.post<any>('https://tabletop-personal-server-production.up.railway.app/api/users', payload).subscribe({
+    this.http.post<any>(`${apiBaseUrl}/api/users`, payload).subscribe({
       next: (res) => {
         this.loading = false;
         this.messageService.add({ severity: 'success', summary: 'User created', detail: 'User created successfully' });
