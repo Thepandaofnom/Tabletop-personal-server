@@ -268,17 +268,10 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
           return;
         }
 
-        // Keep the existing non-fullscreen fallback for a container that has not been sized by its parent.
+        // Create the stage with a fallback drawing buffer while the host awaits its first layout.
+        // Do not set fallback dimensions on the host: they would override fullscreen CSS sizing.
         const finalW = width || Math.floor(window.innerWidth * 0.8);
         const finalH = height || Math.floor(window.innerHeight * 0.8) - 48;
-
-        if (height === 0) {
-          console.warn('Container height is 0 after retries — setting explicit height fallback', finalH);
-          container.style.height = `${finalH}px`;
-        }
-        if (width === 0) {
-          container.style.width = `${finalW}px`;
-        }
 
         this.stage = new Konva.Stage({
           container: container,
@@ -323,16 +316,7 @@ export class GameMapComponent implements OnDestroy, AfterViewInit {
       return undefined;
     }
 
-    const container =
-      this.isFullscreen && this.fullscreenContainer
-        ? this.fullscreenContainer.nativeElement
-        : this.stageContainer.nativeElement;
-
-    if (this.isFullscreen) {
-      const { width, height } = container.getBoundingClientRect();
-      return { width, height };
-    }
-
+    const container = this.stageContainer.nativeElement;
     return {
       width: container.clientWidth,
       height: container.clientHeight,
