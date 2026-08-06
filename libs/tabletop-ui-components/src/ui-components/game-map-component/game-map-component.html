@@ -11,20 +11,21 @@
     </div>
   </div>
   <div
-    #fullscreenContainer
     class="game-map-stage-wrapper"
     (pointermove)="onMapPointerMove()"
     (pointerleave)="onMapPointerLeave()">
-    <div #stageContainer class="game-map-stage"></div>
-    <button
-      type="button"
-      class="game-map-fullscreen-control"
-      [class.is-visible]="showFullscreenControl"
-      [attr.aria-label]="isFullscreen ? 'Exit fullscreen map view' : 'Enter fullscreen map view'"
-      [attr.aria-pressed]="isFullscreen"
-      (click)="toggleFullscreen($event)">
-      <i [class]="isFullscreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'" aria-hidden="true"></i>
-    </button>
+    <div #stageContainer class="game-map-stage">
+      <div #konvaContainer class="game-map-konva-container"></div>
+      <button
+        type="button"
+        class="game-map-fullscreen-control"
+        [class.is-visible]="showFullscreenControl"
+        [attr.aria-label]="isFullscreen ? 'Exit fullscreen map view' : 'Enter fullscreen map view'"
+        [attr.aria-pressed]="isFullscreen"
+        (click)="toggleFullscreen($event)">
+        <i [class]="isFullscreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'" aria-hidden="true"></i>
+      </button>
+    </div>
   </div>
   <div class="game-map-control-row">
     <span class="game-map-control-label">Map zoom: {{(zoom * 100).toFixed(0)}}%</span>
