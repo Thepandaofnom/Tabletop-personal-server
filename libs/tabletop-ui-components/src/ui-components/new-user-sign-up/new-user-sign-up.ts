@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { HttpClientModule } from '@angular/common/http';
+import { apiBaseUrl } from '../../api';
 
 @Component({
   selector: 'new-user-sign-up',
@@ -66,7 +67,7 @@ export class NewUserSignUp {
       password: this.password
     };
 
-    this.http.post<any>('https://tabletop-personal-server-production.up.railway.app/api/users', payload).subscribe({
+    this.http.post<any>(`${apiBaseUrl}/api/users`, payload, { withCredentials: true }).subscribe({
       next: (res) => {
         this.loading = false;
         this.messageService.add({ severity: 'success', summary: 'User created', detail: 'User created successfully' });

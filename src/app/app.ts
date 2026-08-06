@@ -1,13 +1,12 @@
-﻿import { Component, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
-import { DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData } from '@tabletop/ui-components';
+import { apiBaseUrl, DiceBagModal, GameMapComponent, NewUserSignUp, MainMenuButtonBar, AccountViewPanel, CharacterSheetEditor, CharacterSheetData } from '@tabletop/ui-components';
 
 interface LoginResponse {
   username: string;
-  token: string;
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -73,34 +72,18 @@ export class App {
   }
 
   doLogout() {
-    const token = (() => { try { return localStorage.getItem('jwt'); } catch { return null; } })();
-    if (token) {
-      this.http.post<any>('https://tabletop-personal-server-production.up.railway.app/api/auth/logout', {}).subscribe({
-        next: () => {
-          try { localStorage.removeItem('jwt'); } catch (e) { console.warn('Failed to remove jwt', e); }
-          this.loggedIn = false;
-          this.currentUsername = '';
-          this.currentFirstName = '';
-          this.currentLastName = '';
-          this.currentEmail = '';
-        },
-        error: () => {
-          try { localStorage.removeItem('jwt'); } catch (e) { console.warn('Failed to remove jwt', e); }
-          this.loggedIn = false;
-          this.currentUsername = '';
-          this.currentFirstName = '';
-          this.currentLastName = '';
-          this.currentEmail = '';
-        }
-      });
-    } else {
-      try { localStorage.removeItem('jwt'); } catch (e) { console.warn('Failed to remove jwt', e); }
-      this.loggedIn = false;
-      this.currentUsername = '';
-      this.currentFirstName = '';
-      this.currentLastName = '';
-      this.currentEmail = '';
-    }
+    this.http.post(`${apiBaseUrl}/api/auth/logout`, {}).subscribe({
+      next: () => this.clearUserSession(),
+      error: () => this.clearUserSession()
+    });
+  }
+
+  private clearUserSession() {
+    this.loggedIn = false;
+    this.currentUsername = '';
+    this.currentFirstName = '';
+    this.currentLastName = '';
+    this.currentEmail = '';
   }
 
   onMenuLogin() { this.loginVisible = true; }
