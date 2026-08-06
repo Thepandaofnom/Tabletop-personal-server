@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { MenuModule } from 'primeng/menu';
 import { Menu } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
@@ -69,11 +68,6 @@ export class CharacterSheetEditor implements OnChanges {
   @Output() sheetTypeChange = new EventEmitter<CharacterSheetType>();
   @Output() valueChange = new EventEmitter<CharacterSheetData>();
   @Output() saveSheet = new EventEmitter<CharacterSheetData>();
-  @Input() userId: number | null = null;
-  @Input() username = '';
-  @Output() openSaveDialog = new EventEmitter<void>();
-  @Output() openLoadDialog = new EventEmitter<void>();
-  @Output() openDeleteDialog = new EventEmitter<void>();
   @ViewChild('dnd50Template', { static: true }) dnd50Template!: TemplateRef<unknown>;
   @ViewChild('dnd35Template', { static: true }) dnd35Template!: TemplateRef<unknown>;
   @ViewChild('gurpsTemplate', { static: true }) gurpsTemplate!: TemplateRef<unknown>;
@@ -84,24 +78,13 @@ export class CharacterSheetEditor implements OnChanges {
   activeTemplate!: TemplateRef<unknown>;
   actionMenuItems: MenuItem[] = [
     { label: 'Download JSON', icon: 'pi pi-download', command: () => this.downloadSheet() },
-    { label: 'Import JSON', icon: 'pi pi-upload', command: () => this.triggerImport() },
-    { label: 'Save', icon: 'pi pi-save', command: () => this.openSaveDialog.emit(), disabled: true },
-    { label: 'Load', icon: 'pi pi-folder-open', command: () => this.openLoadDialog.emit(), disabled: true }
+    { label: 'Import JSON', icon: 'pi pi-upload', command: () => this.triggerImport() }
   ];
-
-  constructor(private http: HttpClient) {}
-
-  get canPersistSheets(): boolean {
-    return this.userId !== null;
-  }
 
   ngOnChanges(): void {
     this.actionMenuItems = [
       { label: 'Download JSON', icon: 'pi pi-download', command: () => this.downloadSheet() },
-      { label: 'Import JSON', icon: 'pi pi-upload', command: () => this.triggerImport() },
-      { label: 'Save', icon: 'pi pi-save', command: () => this.openSaveDialog.emit(), disabled: !this.canPersistSheets },
-      { label: 'Load', icon: 'pi pi-folder-open', command: () => this.openLoadDialog.emit(), disabled: !this.canPersistSheets },
-      { label: 'Delete', icon: 'pi pi-trash', command: () => this.openDeleteDialog.emit(), disabled: !this.canPersistSheets }
+      { label: 'Import JSON', icon: 'pi pi-upload', command: () => this.triggerImport() }
     ];
   }
 
